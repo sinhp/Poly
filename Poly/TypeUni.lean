@@ -76,6 +76,20 @@ protected theorem id_map : ∀ x : P X, P.map id x = x := fun ⟨_, _⟩ => rfl
 protected theorem map_map (f : X → Y) (g : Y → Z) :
     ∀ x : P X, P.map g (P.map f x) = P.map (g ∘ f) x := fun ⟨_, _⟩ => rfl
 
+-- P(1) ≅ P.B
+
+def base : P Unit ≃ P.B where
+  toFun := fun ⟨b, _⟩ => b
+  invFun := fun b => ⟨ _ , sorry⟩
+  left_inv := by aesop
+  right_inv := by aesop
+
+
+
+  -- { toFun := fun ⟨b, _⟩ => b, invFun := fun b => ⟨b, fun _ => ()⟩,
+  --   left_inv := fun ⟨_, _⟩ => rfl, right_inv := fun _ => rfl }
+
+
 
 def polyFunctor : Type v ⥤ Type (max u v) where
   obj X := P X
