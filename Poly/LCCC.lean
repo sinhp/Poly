@@ -8,7 +8,7 @@ import Mathlib.CategoryTheory.Category.Basic
 -- import Mathlib.CategoryTheory.EpiMono
 import Mathlib.CategoryTheory.Limits.Shapes.FiniteProducts
 import Mathlib.CategoryTheory.Limits.Shapes.FiniteLimits
--- import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
+import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
 -- import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
 import Mathlib.CategoryTheory.Adjunction.Limits
@@ -24,7 +24,50 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor
+open CategoryTheory Category Limits Functor Adjunction
+
+variable {C : Type*}[Category C]
+
+def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣ baseChange f :=
+  Adjunction.mkOfHomEquiv {
+    homEquiv := fun x y => {
+      toFun := fun u => {
+        left := by
+          simp
+          fapply pullback.lift
+          · exact u.left
+          · exact x.hom
+          · aesop_cat
+        right := by
+          apply eqToHom
+          aesop
+        w := by simp
+      }
+      invFun := fun v => {
+        left := by
+          simp at*
+          exact v.left ≫ pullback.fst
+        right := by
+          apply eqToHom
+          aesop
+        w := by
+          simp
+          rw [pullback.condition]
+          rw [← Category.assoc]
+          apply eq_whisker
+          simpa using v.w
+      }
+      left_inv := _
+      right_inv := _
+    }
+    homEquiv_naturality_left_symm := _
+    homEquiv_naturality_right := _
+  }
+
+
+
+
+
 
 /-
 There are several equivalent definitions of locally
@@ -33,7 +76,7 @@ cartesian closed categories.
 1. A locally cartesian closed category is a category C such that all
 the slices C/I are cartesian closed categories.
 
-2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal objecr such that each base change functor has a right adjoint, called the pushforward functor.
+2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal object such that each base change functor has a right adjoint, called the pushforward functor.
 
 In this file we prove the equivalence of these conditions.
 -/
@@ -72,11 +115,11 @@ variable (C : Type*) [Category C] [HasFiniteProducts C] [HasPullbacks C]
 
 
 class LocallyCartesianClosed' where
-  pushforwad {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
+  pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
 class LocallyCartesianClosed where
-  pushforwad {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
-  adj : baseChange f ⊣ pushforwad f := by infer_instance
+  pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
+  adj : baseChange f ⊣ pushforward f := by infer_instance
 
 namespace LocallyCartesianClosed
 
@@ -89,23 +132,19 @@ example [HasFiniteWidePullbacks C] {I : C} : HasFiniteLimits (Over I ) := by inf
 
 example [LocallyCartesianClosed C] [HasFiniteWidePullbacks C] : HasFiniteLimits (Over (terminal C)) := by infer_instance
 
-lemma closed_left [LocallyCartesianClosed C]
+#check Adjunction
 
+def cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
+    {I : C} : CartesianClosed (Over I) where
+      closed := fun f => {
+        rightAdj := baseChange f.hom ⋙ pushforward f.hom
+        adj := by
+          have adjcomp : _ :=
+            Adjunction.comp (LocallyCartesianClosed.adj f.hom) _
 
-example [LocallyCartesianClosed C] [HasFiniteWidePullbacks C] :
-    CartesianClosed (Over I) where
-  closed := fun f ↦ {
-    rightAdj := {
-      obj := fun g => {
-        left := (ihom f.left).obj g.left
-        right := _
-        hom := _
+          refine ofNatIsoLeft ?_ ?_
+
       }
-      map := sorry
-    }
-    adj := _
-  }
-
 
 end LocallyCartesianClosed
 
