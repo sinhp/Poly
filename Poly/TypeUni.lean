@@ -15,35 +15,39 @@ open CategoryTheory Category Functor
 # Polynomial functors
 
 We define the notion of one-variable polynomial functors on the category of sets. The locally cartesian closed structure of sets is implicit in all the constructions.
+
+In LCCCs, instead of workin with a type family we shall work with a bundle `p : E → B`.
+
+The bundle corresponding to a `P : Poly` is the projection
+`fst : Σ b : P.B, P.E b → P.B`.
+
 -/
 
 
 universe u v v₁ v₂ v₃
 
 /-- A polynomial functor `P` is given by a type family `B → Type u`.
-Given a type
+`Poly` is the type of polynomial functors is.
 
 Given a polynomial `P` and a type `X` we define a new type `P X`, which is defined as the sigma type `Σ (b : P.B), (P.E b) → X` (mor informally `Σ (b : B), X ^ (E b)`).
 
-
-An element of `P X` is a pair `⟨b, x⟩`, where `b` is a term of the base type `B` and `x : E b → X`. Think of `b` as the shape of the object and `x` as an index to the relevant elements of `X`.
+An element of `P X` is a pair `⟨b, x⟩`, where `b` is a term of the base type `B` and `x : E b → X`.
 -/
-structure PolyFun where
+structure Poly where
   /-- The base type -/
   B : Type u
   /-- The dependent fibres -/
   E : B → Type u
 
+namespace Poly
 
-namespace PolyFun
-
-instance : Inhabited PolyFun :=
+instance : Inhabited Poly :=
   ⟨⟨default, default⟩⟩
 
-variable (P : PolyFun.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
+variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
 -- section
--- variable (P : PolyFun.{u}) (B : Type u) (b : B)
+-- variable (P : Poly.{u}) (B : Type u) (b : B)
 -- scoped notation:50 E "[" b "]" => P.E b
 -- end
 
@@ -52,10 +56,10 @@ variable (P : PolyFun.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 def Obj (X : Type v) :=
   Σ b : P.B, P.E b → X
 
-instance : CoeFun PolyFun.{u} (fun _ => Type v → Type (max u v)) where
+instance : CoeFun Poly.{u} (fun _ => Type v → Type (max u v)) where
   coe := Obj
 
-/-- Applying `P` to a morphism of `Type` -/
+/-- Applying `P` to a morphism in `Type`. -/
 def map (f : X → Y) : P X → P Y :=
   fun ⟨b, x⟩ => ⟨b, f ∘ x⟩
 
@@ -76,22 +80,15 @@ protected theorem id_map : ∀ x : P X, P.map id x = x := fun ⟨_, _⟩ => rfl
 protected theorem map_map (f : X → Y) (g : Y → Z) :
     ∀ x : P X, P.map g (P.map f x) = P.map (g ∘ f) x := fun ⟨_, _⟩ => rfl
 
--- P(1) ≅ P.B
-
-def base : P Unit ≃ P.B where
+/-- Polynomial `P` evaluated at the unit type is isomorphic to the base type of `P` -/
+def baseEquiv : P Unit ≃ P.B where
   toFun := fun ⟨b, _⟩ => b
-  invFun := fun b => ⟨ _ , sorry⟩
-  left_inv := by aesop
-  right_inv := by aesop
+  invFun := fun b => ⟨b , fun _ => () ⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
 
-
-
-  -- { toFun := fun ⟨b, _⟩ => b, invFun := fun b => ⟨b, fun _ => ()⟩,
-  --   left_inv := fun ⟨_, _⟩ => rfl, right_inv := fun _ => rfl }
-
-
-
-def polyFunctor : Type v ⥤ Type (max u v) where
+/-- The associated functor of `P : Poly`. -/
+def functor : Type u ⥤ Type u where
   obj X := P X
   map {X Y} f := P.map f
 
@@ -115,21 +112,47 @@ theorem iget_map [DecidableEq P.B] [Inhabited X] [Inhabited Y] (x : P X)
   cases x
   rfl
 
-end PolyFun
+end Poly
 
 /-
 Composition of polynomial functors.
 -/
-namespace PolyFun
+namespace Poly
 
-/-- Functor composition for polynomial functors -/
-def comp (Q P : PolyFun.{u}) : PolyFun.{u} :=
-  ⟨Σ b₂ : Q.B, Q.E b₂ → P.B, fun z => Σ u : Q.2 z.1, P.2 (z.2 u)⟩
+variable (P Q : Poly.{u})
+
+/-- Functor composition for polynomial functors:
+The polynomial composition of bundles
+`p : E → B`
+`q : F → C`
+is a bundle
+`comp p q : D → A`
+where
+`A := Σ (b : B), E b → C`
+and
+`D := Σ (b : B), Σ (c : E b → C), Σ (e : E b), F (c e)`
+ -/
+def comp : Poly.{u} :=
+  ⟨Σ b₁ : P.B, P.E b₁ → Q.B, fun ⟨b, c⟩ ↦ Σ e : P.E b, Q.E (c e)⟩
 
 /-- Constructor for composition -/
-def comp.mk (Q P : PolyFun.{u}) {X : Type} (x : Q (P X)) : comp Q P X :=
+def comp.mk {X : Type} (x : P (Q X)) : comp P Q X :=
   ⟨⟨x.1, Sigma.fst ∘ x.2⟩, fun z => (x.2 z.1).2 z.2⟩
 
+def comp.functor : Poly.functor (comp P Q) ≅ Poly.functor Q ⋙ Poly.functor P where
+  hom := sorry
+  inv := sorry
+  hom_inv_id := sorry
+  inv_hom_id := sorry
+
+example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
+  sorry
 
 
-end PolyFun
+
+-- def comp.baseEquiv : (comp P Q) Unit ≃ P Q.B := by
+
+
+
+
+end Poly
