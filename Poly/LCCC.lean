@@ -57,17 +57,16 @@ def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣
           apply eq_whisker
           simpa using v.w
       }
-      left_inv := _
-      right_inv := _
-    }
-    homEquiv_naturality_left_symm := _
-    homEquiv_naturality_right := _
+      left_inv := by aesop_cat
+      right_inv := fun v => by
+        apply Over.OverMorphism.ext
+        simp
+        apply pullback.hom_ext
+        aesop_cat
+    }  -- missing goals?
+    homEquiv_naturality_left_symm := by aesop_cat
+    homEquiv_naturality_right := by aesop_cat
   }
-
-
-
-
-
 
 /-
 There are several equivalent definitions of locally
@@ -139,10 +138,15 @@ def cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
       closed := fun f => {
         rightAdj := baseChange f.hom ⋙ pushforward f.hom
         adj := by
-          have adjcomp : _ :=
-            Adjunction.comp (LocallyCartesianClosed.adj f.hom) _
+          have fhom := f.hom
+          simp at fhom
+          have adj1 := hasPullbackOverAdj f.hom
+          have ladj1 := Over.map f.hom
+          simp at ladj1
+          have adj2 := LocallyCartesianClosed.adj fhom
+          have := Adjunction.comp (adj f.left I fhom) (hasPullbackOverAdj f.hom)
 
-          refine ofNatIsoLeft ?_ ?_
+          -- refine ofNatIsoLeft ?_ ?_
 
       }
 
