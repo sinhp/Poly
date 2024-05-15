@@ -14,7 +14,8 @@ As part of this formalization, we also formalize locally cartesian closed catego
 
 - [ ] Polynomial functors as endofunctors of the category of types
   - [x] Definition of univariate polynomials and the associated polynomial functor
-  - [x] Definition of multivariate polynomials and the associated polynomial functor
+  - [ ] Definition of multivariate polynomials and the associated polynomial functor
+  - [x] Monomials 
   - [x] Sums of polynomials
   - [ ] Products of polynomials
   - [x] Composition of polynomials

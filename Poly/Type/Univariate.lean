@@ -44,20 +44,39 @@ namespace Poly
 instance : Inhabited Poly :=
   ⟨⟨default, default⟩⟩
 
+/-- A monomial functor is a polynomial functor with base type `Unit`. -/
+def monomoial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
+
 variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
--- section
--- variable (P : Poly.{u}) (B : Type u) (b : B)
--- scoped notation:50 E "[" b "]" => P.E b
--- end
+def Total :=
+  Σ b : P.B, P.E b
 
 /-- Applying `P` to an object of `Type` -/
 @[coe]
 def Obj (X : Type v) :=
   Σ b : P.B, P.E b → X
 
+instance Total.inhabited [Inhabited P.B] [Inhabited (P.E default)] : Inhabited P.Total :=
+  ⟨⟨default, default⟩⟩
+
 instance : CoeFun Poly.{u} (fun _ => Type v → Type (max u v)) where
   coe := Obj
+
+/-- A monomial functor with exponent `α` evaluated at `X` is isomorphic to `α → X`. -/
+def monomialEquiv (α : Type*) (X) : monomoial α X ≃ (α → X) where
+  toFun := fun ⟨_, f⟩ => f
+  invFun := fun f => ⟨PUnit.unit, f⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
+
+/-- Polynomial `P` evaluated at the type `Unit` is isomorphic to the base type of `P`. -/
+def baseEquiv : P Unit ≃ P.B where
+  toFun := fun ⟨b, _⟩ => b
+  invFun := fun b => ⟨b , fun _ => () ⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
+
 
 /-- Applying `P` to a morphism in `Type`. -/
 def map (f : X → Y) : P X → P Y :=
@@ -73,30 +92,22 @@ theorem fst_map (x : P X) (f : X → Y) : (P.map f x).1 = x.1 := by cases x; rfl
 
 instance Obj.inhabited [Inhabited P.B] [Inhabited X] : Inhabited (P X) :=
   ⟨⟨default, default⟩⟩
+
 @[simp]
 protected theorem id_map : ∀ x : P X, P.map id x = x := fun ⟨_, _⟩ => rfl
 
 @[simp]
-protected theorem map_map (f : X → Y) (g : Y → Z) :
+theorem map_map (f : X → Y) (g : Y → Z) :
     ∀ x : P X, P.map g (P.map f x) = P.map (g ∘ f) x := fun ⟨_, _⟩ => rfl
 
-/-- Polynomial `P` evaluated at the unit type is isomorphic to the base type of `P` -/
-def baseEquiv : P Unit ≃ P.B where
-  toFun := fun ⟨b, _⟩ => b
-  invFun := fun b => ⟨b , fun _ => () ⟩
-  left_inv := by aesop_cat
-  right_inv := by aesop_cat
+
 
 /-- The associated functor of `P : Poly`. -/
 def functor : Type u ⥤ Type u where
   obj X := P X
   map {X Y} f := P.map f
 
-def Total :=
-  Σ b : P.B, P.E b
 
-instance Total.inhabited [Inhabited P.B] [Inhabited (P.E default)] : Inhabited P.Total :=
-  ⟨⟨default, default⟩⟩
 
 variable {P}
 
@@ -114,12 +125,9 @@ theorem iget_map [DecidableEq P.B] [Inhabited X] [Inhabited Y] (x : P X)
 
 end Poly
 
-/-
-Composition of polynomial functors.
--/
-namespace Poly
-
-variable (Q P : Poly.{u})
+/-- Composition of polynomials. -/
+def Poly.comp (Q P : Poly.{u}) : Poly.{u} :=
+  ⟨Σ b : P.B, P.E b → Q.B, fun ⟨b, c⟩ ↦ Σ e : P.E b, Q.E (c e)⟩
 
 /-
 Note to self: The polynomial composition of bundles
@@ -133,15 +141,17 @@ and
 `D := Σ (b : B), Σ (c : E b → C), Σ (e : E b), F (c e)`
 -/
 
-/-- Functor composition for polynomial functors in the diagramatic order.
- -/
-def comp : Poly.{u} :=
-  ⟨Σ b : P.B, P.E b → Q.B, fun ⟨b, c⟩ ↦ Σ e : P.E b, Q.E (c e)⟩
+namespace PolyFunctor
+
+open Poly
+
+variable (P Q : Poly.{u})
 
 /-- Constructor for composition -/
 def comp.mk {X : Type} (x : P (Q X)) : Q.comp P X :=
   ⟨⟨x.1, Sigma.fst ∘ x.2⟩, fun z => (x.2 z.1).2 z.2⟩
 
+/-- Functor composition for polynomial functors in the diagramatic order. -/
 def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P where
   hom := sorry
   inv := sorry
@@ -158,4 +168,4 @@ example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
 
 
 
-end Poly
+end PolyFunctor
