@@ -78,8 +78,7 @@ def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣
 There are several equivalent definitions of locally
 cartesian closed categories.
 
-1. A locally cartesian closed category is a category C such that all
-the slices C/I are cartesian closed categories.
+1. A locally cartesian closed category is a category C with a terminal object such that all the slices C/I are cartesian closed categories.
 
 2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal object such that each base change functor has a right adjoint, called the pushforward functor.
 
@@ -157,7 +156,7 @@ end LocallyCartesianClosed
 
 #check LocallyCartesianClosed
 
--- Every locally cartesian closed category is cartesian closed.
+-- Every locally cartesian closed category with 1 is cartesian closed.
 
 namespace LocallyCartesianClosed
 
@@ -173,7 +172,6 @@ example [LocallyCartesianClosed C] : CartesianClosed C where
 
 
 end LocallyCartesianClosed
-
 
 
 
