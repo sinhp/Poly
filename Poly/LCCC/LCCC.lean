@@ -22,6 +22,13 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
 -- Likely too many imports!
 
+
+/-!
+# Locally cartesian closed categories
+
+-/
+
+
 noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction
@@ -159,8 +166,8 @@ variable {C : Type*} [Category C] [HasTerminal C] [HasFiniteProducts C] [HasPull
 
 example [LocallyCartesianClosed C] : CartesianClosed C where
   closed X := {
-    rightAdj := _
-    adj := _
+    rightAdj := sorry
+    adj := sorry
   }
 
 
