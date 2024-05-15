@@ -12,14 +12,17 @@ The work has been done during the Trimester Program "Prospects of formal mathema
 
 As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
 
-- [ ] Polynomial functors as endofunctors of the category of types
-  - [x] Definition of univariate polynomials and the associated polynomial functor
+- [ ] Polynomial functors as endofunctors on the category of types
+  - [x] Definition of univariate polynomials as a type family
+  - [x] The construction of a bundle map associated to a polynomial 
+  - [x] The construction of associated polynomial functor
   - [ ] Definition of multivariate polynomials and the associated polynomial functor
   - [x] Monomials 
+  - [x] Linear polynomials
   - [x] Sums of polynomials
   - [ ] Products of polynomials
   - [x] Composition of polynomials
-  - [ ] Classifying property of polynomial functors
+  - [ ] The classifying property of polynomial functors
   - [ ] The category `Type [X]` of polynomial functors in one variable
   - [ ] Differential calculus of polynomials
 - [ ] Polynomial functos in locally cartesian closed categories

@@ -44,13 +44,37 @@ namespace Poly
 instance : Inhabited Poly :=
   ⟨⟨default, default⟩⟩
 
-/-- A monomial functor is a polynomial functor with base type `Unit`. -/
+/-- A monomial at `α` is a polynomial with base type `Unit` and and the type family given by the map `fun _ => α : PUnit → Type u`.
+-/
+@[simps!]
 def monomoial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
+
+/-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identiy map `id : α → α`  -/
+@[simps!]
+def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
 
 variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
 def Total :=
   Σ b : P.B, P.E b
+
+def monomialTotal (α : Type*) : Total (monomoial α) ≃ α  where
+  toFun t := t.2
+  invFun a := ⟨PUnit.unit, a⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
+
+def linearTotal (α : Type*) : Total (linear α) ≃ α where
+  toFun t := t.1
+  invFun a := ⟨a, PUnit.unit⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
+
+/-- The bundle associated to a polynomial `P`. -/
+def bundle : Total P → P.B := Sigma.fst
+
+/-- The associated bundle is `α → 1`. -/
+def monomialBundle (α : Type*) : Total (monomoial α) → PUnit := Sigma.fst
 
 /-- Applying `P` to an object of `Type` -/
 @[coe]
@@ -69,6 +93,13 @@ def monomialEquiv (α : Type*) (X) : monomoial α X ≃ (α → X) where
   invFun := fun f => ⟨PUnit.unit, f⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
+
+def linearEquiv (α : Type*) (X) : linear α X ≃ α × X where
+  toFun := fun ⟨a, x⟩ => (a, x PUnit.unit)
+  invFun := fun b => ⟨b, fun _ => PUnit.unit⟩
+  left_inv := by aesop_cat
+  right_inv := by aesop_cat
+
 
 /-- Polynomial `P` evaluated at the type `Unit` is isomorphic to the base type of `P`. -/
 def baseEquiv : P Unit ≃ P.B where
@@ -101,12 +132,10 @@ theorem map_map (f : X → Y) (g : Y → Z) :
     ∀ x : P X, P.map g (P.map f x) = P.map (g ∘ f) x := fun ⟨_, _⟩ => rfl
 
 
-
 /-- The associated functor of `P : Poly`. -/
 def functor : Type u ⥤ Type u where
   obj X := P X
   map {X Y} f := P.map f
-
 
 
 variable {P}
@@ -165,7 +194,7 @@ example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
 
 -- def comp.baseEquiv : (comp P Q) Unit ≃ P Q.B := by
 
-
+-- TODO: classify linear polynomial functors as the ones which preserve colimits.
 
 
 end PolyFunctor
