@@ -15,24 +15,32 @@ noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction
 
-variable {C : Type*} [Category C] [HasPullbacks C] [LocallyCartesianClosed C]
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
 
-namespace LocallyCartesianClosed
+open LocallyCartesianClosed
 
-structure Poly (I O : C) :=
+/-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I` and output variables in `O`. -/
+structure MvPoly (I O : C) :=
   (B E : C)
   (s : E ⟶ I)
   (p : E ⟶ B)
   (t : B ⟶ O)
 
-namespace Poly
+variable (C)
 
-variable {I O : C} (P : Poly I O)
+/-- `P : UvPoly C` is a one-variable polynomial. -/
+structure UvPoly :=
+  (B E : C)
+  (p : E ⟶ B)
 
-#check LocallyCartesianClosed.pushforward
+namespace MvPoly
 
-def functor : Over I ⥤ Over O :=
-  baseChange (P.s) ⋙ (LocallyCartesianClosed.pushforward P.p) ⋙ Over.map (P.t)
+open LocallyCartesianClosed
+
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C] (I O : C)
+
+def functor (P : MvPoly I O) : Over I ⥤ Over O :=
+  baseChange (P.s) ⋙ (pushforward P.p) ⋙ Over.map (P.t)
 
 -- TODO: examples monomials, linear polynomials, 1/1-X, ...
 
@@ -40,6 +48,26 @@ def functor : Over I ⥤ Over O :=
 
 -- TODO (Steve's idea): a subcategory of small maps to be thought of as context extensions in LCCC. These are morphisms for which the pushforward functor has a further right adjoint (maps with tiny fibres).
 
-end Poly
+end MvPoly
 
-end LocallyCartesianClosed
+
+namespace UvPoly
+
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
+
+#check UvPoly
+#check terminal C -- ⊤_ C
+
+def toMvPoly (P : UvPoly C) : MvPoly (⊤_ C) (⊤_ C) :=
+  ⟨P.B, P.E, terminal.from P.E, P.p, terminal.from P.B⟩
+
+#check (toMvPoly _).functor
+
+def functor' (P : UvPoly C) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor (⊤_ C) (⊤_ C) P.toMvPoly
+
+-- TODO: we can use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials.
+
+
+
+
+end UvPoly
