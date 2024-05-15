@@ -30,8 +30,8 @@ variable {C : Type*}[Category C]
 
 def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣ baseChange f :=
   Adjunction.mkOfHomEquiv {
-    homEquiv := fun x y => {
-      toFun := fun u => {
+    homEquiv := fun x y ↦ {
+      toFun := fun u ↦ {
         left := by
           simp
           fapply pullback.lift
@@ -41,9 +41,8 @@ def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣
         right := by
           apply eqToHom
           aesop
-        w := by simp
-      }
-      invFun := fun v => {
+        w := by simp}
+      invFun := fun v ↦ {
         left := by
           simp at*
           exact v.left ≫ pullback.fst
@@ -55,18 +54,18 @@ def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣
           rw [pullback.condition]
           rw [← Category.assoc]
           apply eq_whisker
-          simpa using v.w
-      }
+          simpa using v.w}
       left_inv := by aesop_cat
-      right_inv := fun v => by
-        apply Over.OverMorphism.ext
+      right_inv := fun v ↦ Over.OverMorphism.ext (by
         simp
         apply pullback.hom_ext
-        aesop_cat
-    }  -- missing goals?
+        · aesop_cat
+        · rw [pullback.lift_snd]
+          have vtriangle := v.w
+          simp at vtriangle
+          exact vtriangle.symm)}
     homEquiv_naturality_left_symm := by aesop_cat
-    homEquiv_naturality_right := by aesop_cat
-  }
+    homEquiv_naturality_right := by aesop_cat}
 
 /-
 There are several equivalent definitions of locally
@@ -118,7 +117,7 @@ class LocallyCartesianClosed' where
 
 class LocallyCartesianClosed where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
-  adj : baseChange f ⊣ pushforward f := by infer_instance
+  adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
 
 namespace LocallyCartesianClosed
 
@@ -138,16 +137,13 @@ def cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
       closed := fun f => {
         rightAdj := baseChange f.hom ⋙ pushforward f.hom
         adj := by
-          have fhom := f.hom
-          simp at fhom
-          have adj1 := hasPullbackOverAdj f.hom
-          have ladj1 := Over.map f.hom
-          simp at ladj1
-          have adj2 := LocallyCartesianClosed.adj fhom
-          have := Adjunction.comp (adj f.left I fhom) (hasPullbackOverAdj f.hom)
-
-          -- refine ofNatIsoLeft ?_ ?_
-
+          apply ofNatIsoLeft
+          · apply Adjunction.comp
+            · exact (LocallyCartesianClosed.adj f.hom)
+            · exact (hasPullbackOverAdj f.hom)
+          · apply NatIso.ofComponents
+            · sorry
+            · sorry
       }
 
 end LocallyCartesianClosed
