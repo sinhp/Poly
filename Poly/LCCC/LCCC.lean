@@ -25,9 +25,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
 /-!
 # Locally cartesian closed categories
-
 -/
-
 
 noncomputable section
 
@@ -78,67 +76,32 @@ def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣
 There are several equivalent definitions of locally
 cartesian closed categories.
 
-1. A locally cartesian closed category is a category C with a terminal object such that all the slices C/I are cartesian closed categories.
+1. A locally cartesian closed category is a category C such that all
+the slices `Over I` are cartesian closed categories.
 
-2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal object such that each base change functor has a right adjoint, called the pushforward functor.
+2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks such that each base change functor has a right adjoint, called the pushforward functor.
 
 In this file we prove the equivalence of these conditions.
+
+We also show that a locally cartesian closed category with a terminal object is cartesian closed.
 -/
 
 attribute [local instance] monoidalOfHasFiniteProducts
 
-
-variable {C : Type} [Category C] [HasTerminal C] [HasBinaryProducts C]
-
-#check MonoidalCategory
-#print CartesianClosed
-
-#check monoidalOfHasFiniteProducts
-
-#synth (MonoidalCategory C)
-
-example : MonoidalCategory C := by apply monoidalOfHasFiniteProducts
-
-#check MonoidalClosed
-
-variable (C : Type*) [Category C] [HasFiniteProducts C] [HasPullbacks C]
-
-#check Comma
-
-#check Over
-
-#check CategoryTheory.Limits.pullback
-
-#check baseChange
-
-
-#check IsLeftAdjoint
-
-
-#check Over
-
+variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
 
 class LocallyCartesianClosed' where
   pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
+-- Note (SH): Maybe conveniet to include the fact that lcccs have a terminal object?
+-- Will see if that is needed. For now, we do not include that in the definition.
 class LocallyCartesianClosed where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
 
 namespace LocallyCartesianClosed
 
-example [HasFiniteLimits C] : HasFiniteProducts C := by infer_instance
-
-set_option trace.Meta.synthInstance.instances true in
-example [HasFiniteWidePullbacks C] {I : C} : HasFiniteLimits (Over I ) := by infer_instance
-
-#check Over.hasFiniteLimits
-
-example [LocallyCartesianClosed C] [HasFiniteWidePullbacks C] : HasFiniteLimits (Over (terminal C)) := by infer_instance
-
-#check Adjunction
-
-def cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
+instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
     {I : C} : CartesianClosed (Over I) where
       closed := fun f => {
         rightAdj := baseChange f.hom ⋙ pushforward f.hom
@@ -162,27 +125,14 @@ namespace LocallyCartesianClosed
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasFiniteProducts C] [HasPullbacks C]
 
-
-example [LocallyCartesianClosed C] : CartesianClosed C where
+instance cartesianClosed [LocallyCartesianClosed C] : CartesianClosed C where
   closed X := {
     rightAdj := sorry
     adj := sorry
   }
 
 
-
 end LocallyCartesianClosed
 
 
-
-
--- The slices of a locally cartesian closed category are locally cartesian closed.
-
-#check Over.iteratedSliceEquiv
-
-
-
-#check CartesianClosed
-
--- class LCCC where
---   slice : ∀ I : C, CartesianClosed (Over I)
+-- TODO: The slices of a locally cartesian closed category are locally cartesian closed.
