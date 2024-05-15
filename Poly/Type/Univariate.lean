@@ -16,13 +16,12 @@ open CategoryTheory Category Functor
 
 We define the notion of one-variable polynomial functors on the category of sets. The locally cartesian closed structure of sets is implicit in all the constructions.
 
-In LCCCs, instead of workin with a type family we shall work with a bundle `p : E → B`.
-
 The bundle corresponding to a `P : Poly` is the projection
 `fst : Σ b : P.B, P.E b → P.B`.
 
--/
+In LCCCs, instead of workin with a type family we shall work with a bundle `p : E → B`.
 
+-/
 
 universe u v v₁ v₂ v₃
 
@@ -52,6 +51,10 @@ def monomoial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 /-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identiy map `id : α → α`  -/
 @[simps!]
 def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
+
+@[simps!]
+def sum (P Q : Poly) : Poly :=
+  ⟨P.B ⊕ Q.B, Sum.elim P.E Q.E⟩
 
 variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
@@ -96,10 +99,9 @@ def monomialEquiv (α : Type*) (X) : monomoial α X ≃ (α → X) where
 
 def linearEquiv (α : Type*) (X) : linear α X ≃ α × X where
   toFun := fun ⟨a, x⟩ => (a, x PUnit.unit)
-  invFun := fun b => ⟨b, fun _ => PUnit.unit⟩
+  invFun := fun ⟨a, x⟩  => ⟨a, fun _ => x⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
-
 
 /-- Polynomial `P` evaluated at the type `Unit` is isomorphic to the base type of `P`. -/
 def baseEquiv : P Unit ≃ P.B where
@@ -107,7 +109,6 @@ def baseEquiv : P Unit ≃ P.B where
   invFun := fun b => ⟨b , fun _ => () ⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
-
 
 /-- Applying `P` to a morphism in `Type`. -/
 def map (f : X → Y) : P X → P Y :=
@@ -131,12 +132,10 @@ protected theorem id_map : ∀ x : P X, P.map id x = x := fun ⟨_, _⟩ => rfl
 theorem map_map (f : X → Y) (g : Y → Z) :
     ∀ x : P X, P.map g (P.map f x) = P.map (g ∘ f) x := fun ⟨_, _⟩ => rfl
 
-
 /-- The associated functor of `P : Poly`. -/
 def functor : Type u ⥤ Type u where
   obj X := P X
   map {X Y} f := P.map f
-
 
 variable {P}
 
