@@ -1,6 +1,6 @@
 [Proofs Verified with Lean4 (leanprover/lean4:v4.8.0-rc1)](https://github.com/sinhp/LeanHomotopyFrobenius/blob/master/lean-toolchain)
 
-# Lean4 Formalization Of Fibred Categories
+# Lean4 Formalization Of Polynomial Functors
 
 This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify 
 polynomials. 
