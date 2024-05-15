@@ -12,12 +12,19 @@ The work has been done during the Trimester Program "Prospects of formal mathema
 
 As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
 
-- [] The basic of polynomial functors as endofunctors of the category of types, and their arithmetic (sum, product, composition).
-  - [x] Definition of polynomials and the associated polynomial functors as endofunctors of the category of types
-  - [x] Sums of polynomaials 
+- [ ] Polynomial functors as endofunctors of the category of types
+  - [x] Definition of univariate polynomials and the associated polynomial functor
+  - [x] Definition of multivariate polynomials and the associated polynomial functor
+  - [x] Sums of polynomials
+  - [ ] Products of polynomials
   - [x] Composition of polynomials
-- [] Polynomial functos in locally cartesian closed categories.
-    - [x] Definition of locally cartesian closed category.
+  - [ ] Classifying property of polynomial functors
+  - [ ] The category `Type [X]` of polynomial functors in one variable
+  - [ ] Differential calculus of polynomials
+- [ ] Polynomial functos in locally cartesian closed categories
+    - [x] Definition of locally cartesian closed category
+    - [ ] Beck-Chevalley condition in LCCCs
+    - [ ] Polynomial functors in LCCCs
 
 
 ### Resources 
