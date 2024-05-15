@@ -53,31 +53,60 @@ def monomoial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
 
 @[simps!]
-def sum (P Q : Poly) : Poly :=
+def sum (P : Poly.{u}) (Q : Poly.{u}): Poly :=
   ⟨P.B ⊕ Q.B, Sum.elim P.E Q.E⟩
+
+lemma sum_base {P : Poly.{u}} {Q : Poly.{u}} : (P.sum Q).B = (P.B ⊕ Q.B) := by
+  simp only [sum_B]
+
+lemma sum_fibre_left {P : Poly.{u}} {Q : Poly.{u}} (b : P.B) :
+    (P.sum Q).E (Sum.inl b) = P.E b := by
+  simp [sum_E]
+
+lemma sum_fibre_right {P : Poly.{u}} {Q : Poly.{u}} (b : Q.B) :
+    (P.sum Q).E (Sum.inr b) = Q.E b := by
+  simp [sum_E]
 
 variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
+@[simp]
 def Total :=
   Σ b : P.B, P.E b
 
-def monomialTotal (α : Type*) : Total (monomoial α) ≃ α  where
+@[simps!]
+def monomialTotalEquiv (α : Type*) : Total (monomoial α) ≃ α  where
   toFun t := t.2
   invFun a := ⟨PUnit.unit, a⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
 
-def linearTotal (α : Type*) : Total (linear α) ≃ α where
+@[simps!]
+def linearTotalEquiv (α : Type*) : Total (linear α) ≃ α where
   toFun t := t.1
   invFun a := ⟨a, PUnit.unit⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
 
+@[simps!]
+def sumTotalEquiv (P Q : Poly) : Total (sum P Q) ≃ Total P ⊕ Total Q where
+  toFun := fun ⟨a, e⟩ => match a with
+    | Sum.inl b => Sum.inl ⟨b, e⟩
+    | Sum.inr b => Sum.inr ⟨b, e⟩
+  invFun := fun t => match t with
+    | Sum.inl ⟨b, e⟩ => ⟨Sum.inl b, e⟩
+    | Sum.inr ⟨c, f⟩ => ⟨Sum.inr c, f⟩
+  left_inv := by
+    simp
+    aesop_cat
+  right_inv := by aesop_cat
+
 /-- The bundle associated to a polynomial `P`. -/
 def bundle : Total P → P.B := Sigma.fst
 
-/-- The associated bundle is `α → 1`. -/
-def monomialBundle (α : Type*) : Total (monomoial α) → PUnit := Sigma.fst
+-- TODO: universe issue debugging.
+/- The bundle of the `sum P Q` is the sum of the bundles. -/
+-- theorem sum_bundle_eq : bundle (P.sum Q) = (Sum.map P.bundle Q.bundle) ∘ (sumTotalEquiv P Q) := by
+--   rfl
 
 /-- Applying `P` to an object of `Type` -/
 @[coe]
@@ -109,6 +138,18 @@ def baseEquiv : P Unit ≃ P.B where
   invFun := fun b => ⟨b , fun _ => () ⟩
   left_inv := by aesop_cat
   right_inv := by aesop_cat
+
+def sumEquiv : (P.sum Q) X ≃ P X ⊕ Q X where
+  toFun := fun ⟨b, x⟩ => match b with
+    | Sum.inl b => Sum.inl ⟨b, x⟩
+    | Sum.inr b => Sum.inr ⟨b, x⟩
+  invFun := fun t => match t with
+    | Sum.inl ⟨b, x⟩ => ⟨Sum.inl b, x⟩
+    | Sum.inr ⟨b, x⟩ => ⟨Sum.inr b, x⟩
+  left_inv := by
+    sorry
+  right_inv := by
+    aesop_cat
 
 /-- Applying `P` to a morphism in `Type`. -/
 def map (f : X → Y) : P X → P Y :=
