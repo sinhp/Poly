@@ -34,6 +34,12 @@ variable {I O : C} (P : Poly I O)
 def functor : Over I ⥤ Over O :=
   baseChange (P.s) ⋙ (LocallyCartesianClosed.pushforward P.p) ⋙ Over.map (P.t)
 
+-- TODO: examples monomials, linear polynomials, 1/1-X, ...
+
+-- TODO: basic operations: sum, product, composition, differential
+
+-- TODO (Steve's idea): a subcategory of small maps to be thought of as context extensions in LCCC. These are morphisms for which the pushforward functor has a further right adjoint (maps with tiny fibres).
+
 end Poly
 
 end LocallyCartesianClosed
