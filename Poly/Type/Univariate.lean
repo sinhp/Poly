@@ -119,10 +119,10 @@ Composition of polynomial functors.
 -/
 namespace Poly
 
-variable (P Q : Poly.{u})
+variable (Q P : Poly.{u})
 
-/-- Functor composition for polynomial functors:
-The polynomial composition of bundles
+/-
+Note to self: The polynomial composition of bundles
 `p : E → B`
 `q : F → C`
 is a bundle
@@ -131,15 +131,18 @@ where
 `A := Σ (b : B), E b → C`
 and
 `D := Σ (b : B), Σ (c : E b → C), Σ (e : E b), F (c e)`
+-/
+
+/-- Functor composition for polynomial functors in the diagramatic order.
  -/
 def comp : Poly.{u} :=
-  ⟨Σ b₁ : P.B, P.E b₁ → Q.B, fun ⟨b, c⟩ ↦ Σ e : P.E b, Q.E (c e)⟩
+  ⟨Σ b : P.B, P.E b → Q.B, fun ⟨b, c⟩ ↦ Σ e : P.E b, Q.E (c e)⟩
 
 /-- Constructor for composition -/
-def comp.mk {X : Type} (x : P (Q X)) : comp P Q X :=
+def comp.mk {X : Type} (x : P (Q X)) : Q.comp P X :=
   ⟨⟨x.1, Sigma.fst ∘ x.2⟩, fun z => (x.2 z.1).2 z.2⟩
 
-def comp.functor : Poly.functor (comp P Q) ≅ Poly.functor Q ⋙ Poly.functor P where
+def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P where
   hom := sorry
   inv := sorry
   hom_inv_id := sorry
