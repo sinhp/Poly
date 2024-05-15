@@ -46,7 +46,7 @@ instance : Inhabited Poly :=
 /-- A monomial at `α` is a polynomial with base type `Unit` and and the type family given by the map `fun _ => α : PUnit → Type u`.
 -/
 @[simps!]
-def monomoial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
+def monomial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 
 /-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identiy map `id : α → α`  -/
 @[simps!]
