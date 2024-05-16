@@ -102,18 +102,64 @@ class LocallyCartesianClosed where
 namespace LocallyCartesianClosed
 
 instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullbacks C]
-    {I : C} : CartesianClosed (Over I) where
-      closed := fun f => {
-        rightAdj := baseChange f.hom ⋙ pushforward f.hom
-        adj := by
-          apply ofNatIsoLeft
-          · apply Adjunction.comp
-            · exact (LocallyCartesianClosed.adj f.hom)
-            · exact (hasPullbackOverAdj f.hom)
-          · apply NatIso.ofComponents
-            · sorry
-            · sorry
-      }
+    {I : C} : CartesianClosed (Over I) := by
+      refine .mk _ fun f ↦ .mk f (baseChange f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor ) ?adj ?iso )
+      case functor =>
+        exact (baseChange f.hom ⋙ Over.map f.hom)
+      case adj =>
+        exact ((LocallyCartesianClosed.adj f.hom).comp (hasPullbackOverAdj f.hom))
+      case iso =>
+        fapply NatIso.ofComponents
+        case app =>
+          intro g
+          dsimp
+          let Q := Limits.prodIsProd f g
+          fapply IsLimit.conePointUniqueUpToIso (s := Limits.BinaryFan.mk _ _ ) _ (Q := Q)
+          · fapply Over.homMk
+            · exact pullback.snd
+            · aesop_cat
+          · fapply Over.homMk
+            · exact pullback.fst
+            · exact pullback.condition
+          · fconstructor
+            case lift =>
+              intro s
+              fapply Over.homMk
+              · dsimp
+                refine pullback.lift ?f.h ?f.k ?f.w
+                case f.h =>
+                  exact ((s.π.app ⟨ .right ⟩).left)
+                case f.k =>
+                  exact ((s.π.app ⟨ .left ⟩).left)
+                case f.w =>
+                  aesop_cat
+              · simp
+            case fac =>
+              intros s lr
+              apply Over.OverMorphism.ext
+              sorry
+            case uniq =>
+              intros s t prf
+              apply Over.OverMorphism.ext
+              simp
+              refine (pullback.hom_ext ?h.h₀ ?h.h₁).symm
+              case h.h₀ =>
+                have thisl := prf ⟨ .left⟩
+                have thisr := prf ⟨ .right⟩
+                simp at thisl thisr
+                rw [← thisl]
+                have lthisl := congr_arg CommaMorphism.left thisl
+                have lthisr := congr_arg CommaMorphism.left thisr
+                simp at lthisl lthisr
+                generalize_proofs h1 h2 h3
+                revert h3
+                rw [Over.comp_left]
+                intro h3
+                rw [pullback.lift_fst]
+                exact _root_.id lthisr.symm
+              case h.h₁ =>
+                sorry
+        case naturality => sorry
 
 end LocallyCartesianClosed
 
