@@ -28,10 +28,11 @@ structure MvPoly (I O : C) :=
 
 variable (C)
 
-/-- `P : UvPoly C` is a one-variable polynomial. -/
+/-- `P : UvPoly C` is a polynomial functors in a single variable -/
 structure UvPoly :=
   (B E : C)
   (p : E ⟶ B)
+
 
 namespace MvPoly
 
@@ -39,8 +40,29 @@ open LocallyCartesianClosed
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C] (I O : C)
 
+/-- The identity polynomial functor in many variables. -/
+@[simps!]
+def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, 𝟙 I⟩
+
 def functor (P : MvPoly I O) : Over I ⥤ Over O :=
   baseChange (P.s) ⋙ (pushforward P.p) ⋙ Over.map (P.t)
+
+def apply (P : MvPoly I O) : Over I → Over O := (P.functor).obj
+
+-- def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
+--   hom := by
+--     simp [apply]
+--     simp [functor]
+--     dsimp
+--     exact {
+--       left := _
+--       right := _
+--     }
+--   inv := _
+--   hom_inv_id := _
+--   inv_hom_id := _
+
+
 
 -- TODO: examples monomials, linear polynomials, 1/1-X, ...
 
@@ -55,8 +77,11 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
 
-#check UvPoly
-#check terminal C -- ⊤_ C
+/-- The identity polynomial functor in single variable. -/
+@[simps!]
+def id (X : C) : UvPoly C := ⟨X, X, 𝟙 X⟩
+
+-- Note (SH): We define the functor associated to a single variable polyonimal in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
 
 def toMvPoly (P : UvPoly C) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨P.B, P.E, terminal.from P.E, P.p, terminal.from P.B⟩
@@ -65,9 +90,14 @@ def toMvPoly (P : UvPoly C) : MvPoly (⊤_ C) (⊤_ C) :=
 
 def functor' (P : UvPoly C) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor (⊤_ C) (⊤_ C) P.toMvPoly
 
--- TODO: we can use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials.
+-- Note (SH): we can use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials.
 
+-- Note (SH): Seems like this is missing from mathlib!
+-- Note (SH): maybe isomorphism would be better, although we do prefer equivalence in general.
+-- Note (SH): Isomorphisms of categories in mathlib is isomorphism in the category of cateogories.
+-- Note that if we use this definition, we
+def overTerminalEquivalence : Over (⊤_ C) ≌ C := .mk (F:= sorry) (G:= sorry) (η:= sorry) (ε:= sorry)
 
-
+def functor (P : UvPoly C) : C ⥤ C :=  overTerminalEquivalence.inverse ⋙  P.functor'  ⋙ overTerminalEquivalence.functor
 
 end UvPoly

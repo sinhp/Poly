@@ -16,8 +16,10 @@ import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Closed.Monoidal
 import Mathlib.CategoryTheory.Closed.Cartesian
 import Mathlib.CategoryTheory.Limits.Shapes.WidePullbacks
--- import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
+import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
+import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
 import Mathlib.CategoryTheory.Adjunction.Basic
+import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
 -- Likely too many imports!
@@ -29,7 +31,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction
+open CategoryTheory Category Limits Functor Adjunction Over
 
 variable {C : Type*}[Category C]
 
