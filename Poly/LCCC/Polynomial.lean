@@ -65,7 +65,24 @@ def toMvPoly (P : UvPoly C) : MvPoly (⊤_ C) (⊤_ C) :=
 
 def functor' (P : UvPoly C) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor (⊤_ C) (⊤_ C) P.toMvPoly
 
--- TODO: we can use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials.
+-- Note (SH): we can use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials.
+
+-- Note (SH): Seems like this is missing from mathlib!
+-- Note (SH): maybe isomorphism would be better, although we do prefer equivalence in general.
+def overTerminalEquivalence : Over (⊤_ C) ≌ C where
+  functor := {
+    obj := fun f => f.left
+    map := @fun f g k => k.left
+    map_id := by sorry
+    map_comp := by sorry
+  }
+  inverse := sorry
+  unitIso := sorry
+  counitIso := sorry
+  functor_unitIso_comp := sorry
+
+def functor (P : UvPoly C) : C ⥤ C :=  overTerminalEquivalence.inverse ⋙  P.functor'  ⋙ overTerminalEquivalence.functor
+
 
 
 
