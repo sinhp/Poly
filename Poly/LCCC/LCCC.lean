@@ -35,45 +35,6 @@ open CategoryTheory Category Limits Functor Adjunction Over
 
 variable {C : Type*}[Category C]
 
-def hasPullbackOverAdj [HasPullbacks C] {X Y : C} (f : X ⟶ Y) : Over.map f ⊣ baseChange f :=
-  Adjunction.mkOfHomEquiv {
-    homEquiv := fun x y ↦ {
-      toFun := fun u ↦ {
-        left := by
-          simp
-          fapply pullback.lift
-          · exact u.left
-          · exact x.hom
-          · aesop_cat
-        right := by
-          apply eqToHom
-          aesop
-        w := by simp}
-      invFun := fun v ↦ {
-        left := by
-          simp at*
-          exact v.left ≫ pullback.fst
-        right := by
-          apply eqToHom
-          aesop
-        w := by
-          simp
-          rw [pullback.condition]
-          rw [← Category.assoc]
-          apply eq_whisker
-          simpa using v.w}
-      left_inv := by aesop_cat
-      right_inv := fun v ↦ Over.OverMorphism.ext (by
-        simp
-        apply pullback.hom_ext
-        · aesop_cat
-        · rw [pullback.lift_snd]
-          have vtriangle := v.w
-          simp at vtriangle
-          exact vtriangle.symm)}
-    homEquiv_naturality_left_symm := by aesop_cat
-    homEquiv_naturality_right := by aesop_cat}
-
 /-
 There are several equivalent definitions of locally
 cartesian closed categories.
@@ -109,7 +70,7 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
       case functor =>
         exact (baseChange f.hom ⋙ Over.map f.hom)
       case adj =>
-        exact ((LocallyCartesianClosed.adj f.hom).comp (hasPullbackOverAdj f.hom))
+        exact ((LocallyCartesianClosed.adj f.hom).comp (Over.mapAdjunction f.hom))
       case iso =>
         fapply NatIso.ofComponents
         case app =>
@@ -139,29 +100,31 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
             case fac =>
               intros s lr
               apply Over.OverMorphism.ext
+              have thing := s.π.app lr
+              simp at thing
+              have := thing.w
               sorry
             case uniq =>
               intros s t prf
               apply Over.OverMorphism.ext
               simp
-              refine (pullback.hom_ext ?h.h₀ ?h.h₁).symm
+              refine (pullback.hom_ext ?h.h₀ ?h.h₁)
               case h.h₀ =>
-                have thisl := prf ⟨ .left⟩
-                have thisr := prf ⟨ .right⟩
-                simp at thisl thisr
-                rw [← thisl]
-                have lthisl := congr_arg CommaMorphism.left thisl
-                have lthisr := congr_arg CommaMorphism.left thisr
-                simp at lthisl lthisr
-                generalize_proofs h1 h2 h3
-                revert h3
-                rw [Over.comp_left]
-                intro h3
+                -- have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
+                have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
+                simp at thisr
+                rw [thisr]
                 rw [pullback.lift_fst]
-                exact _root_.id lthisr.symm
               case h.h₁ =>
-                sorry
-        case naturality => sorry
+                have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
+                simp at thisl
+                rw [thisl]
+                rw [pullback.lift_snd]
+        case naturality =>
+          intros x y u
+          apply Over.OverMorphism.ext
+          simp
+          sorry
 
 end LocallyCartesianClosed
 
