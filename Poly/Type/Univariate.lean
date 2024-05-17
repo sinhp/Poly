@@ -74,7 +74,7 @@ def Total :=
   Σ b : P.B, P.E b
 
 @[simps!]
-def monomialTotalEquiv (α : Type*) : Total (monomoial α) ≃ α  where
+def monomialTotalEquiv (α : Type*) : Total (monomial α) ≃ α  where
   toFun t := t.2
   invFun a := ⟨PUnit.unit, a⟩
   left_inv := by aesop_cat
@@ -120,7 +120,7 @@ instance : CoeFun Poly.{u} (fun _ => Type v → Type (max u v)) where
   coe := Obj
 
 /-- A monomial functor with exponent `α` evaluated at `X` is isomorphic to `α → X`. -/
-def monomialEquiv (α : Type*) (X) : monomoial α X ≃ (α → X) where
+def monomialEquiv (α : Type*) (X) : monomial α X ≃ (α → X) where
   toFun := fun ⟨_, f⟩ => f
   invFun := fun f => ⟨PUnit.unit, f⟩
   left_inv := by aesop_cat
@@ -226,6 +226,18 @@ def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P
   inv := sorry
   hom_inv_id := sorry
   inv_hom_id := sorry
+
+-- where
+--   hom := {
+--     app := fun X => fun ⟨b,e⟩  => {
+--       fst := _
+--       snd := _
+--     }
+--     naturality := sorry
+--   }
+--   inv :=
+--   hom_inv_id := sorry
+--   inv_hom_id := sorry
 
 example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
   sorry

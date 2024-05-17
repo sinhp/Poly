@@ -5,6 +5,13 @@ Authors: Sina Hazratpour
 -/
 
 import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.CategoryTheory.Monad.Products
+
+import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
+import Mathlib.CategoryTheory.Adjunction.Over
+
+import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+-- import Mathlib.CategoryTheory.Category.Limit
 import Poly.LCCC.LCCC
 
 /-!
@@ -13,7 +20,7 @@ import Poly.LCCC.LCCC
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction
+open CategoryTheory Category Limits Functor Adjunction Over
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
 
@@ -48,6 +55,11 @@ def functor (P : MvPoly I O) : Over I ⥤ Over O :=
   baseChange (P.s) ⋙ (pushforward P.p) ⋙ Over.map (P.t)
 
 def apply (P : MvPoly I O) : Over I → Over O := (P.functor).obj
+
+#check apply
+
+
+#check forgetAdjStar
 
 -- def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
 --   hom := by
