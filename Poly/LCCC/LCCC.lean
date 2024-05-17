@@ -99,11 +99,14 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
               · simp
             case fac =>
               intros s lr
-              apply Over.OverMorphism.ext
-              have thing := s.π.app lr
-              simp at thing
-              have := thing.w
-              sorry
+              simp
+              match lr with
+              | ⟨ .left⟩  =>
+                apply Over.OverMorphism.ext
+                simp
+              | ⟨ .right⟩ =>
+                apply Over.OverMorphism.ext
+                simp
             case uniq =>
               intros s t prf
               apply Over.OverMorphism.ext
@@ -122,9 +125,37 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
                 rw [pullback.lift_snd]
         case naturality =>
           intros x y u
-          apply Over.OverMorphism.ext
           simp
-          sorry
+          apply Fan.IsLimit.hom_ext
+          case hc =>
+            apply limit.isLimit
+          case h =>
+            intro lr
+            match lr with
+            | .left  =>
+              have := prod.map_fst (𝟙 f) u
+              have thing := Fan.proj (limit.cone (pair f y)) WalkingPair.left
+              have samething := prod.fst (X := f) (Y := y)
+              dsimp at thing
+              dsimp
+              conv =>
+                rhs
+                rw [assoc]
+              unfold Fan.proj
+              simp [prod.map_fst (𝟙 f) u]
+              simp [limit.cone_π, BinaryFan.fst]
+
+
+              have obv : thing = samething := rfl
+
+
+
+              rw [this]
+
+              apply Over.OverMorphism.ext
+              simp
+
+            | .right => sorry
 
 end LocallyCartesianClosed
 
