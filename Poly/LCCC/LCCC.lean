@@ -5,25 +5,22 @@ Authors: Sina Hazratpour
 -/
 
 import Mathlib.CategoryTheory.Category.Basic
--- import Mathlib.CategoryTheory.EpiMono
-import Mathlib.CategoryTheory.Limits.Shapes.FiniteProducts
-import Mathlib.CategoryTheory.Limits.Shapes.FiniteLimits
-import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
--- import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
-import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
-import Mathlib.CategoryTheory.Adjunction.Limits
-import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Closed.Monoidal
 import Mathlib.CategoryTheory.Closed.Cartesian
-import Mathlib.CategoryTheory.Limits.Shapes.WidePullbacks
-import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
-import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
-import Mathlib.CategoryTheory.Adjunction.Basic
-import Mathlib.CategoryTheory.Adjunction.Over
+import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+import Mathlib.CategoryTheory.Adjunction.Over
 
--- Likely too many imports!
-
+-- All the imports below are transitively imported by the above import.
+-- import Mathlib.CategoryTheory.Adjunction.Basic
+-- import Mathlib.CategoryTheory.Limits.Shapes.FiniteProducts
+-- import Mathlib.CategoryTheory.Limits.Shapes.FiniteLimits
+-- import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
+-- import Mathlib.CategoryTheory.Limits.Shapes.WidePullbacks
+-- import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
+-- import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
+-- import Mathlib.CategoryTheory.Limits.Preserves.Shapes.BinaryProducts
+-- import Mathlib.CategoryTheory.Adjunction.Limits
 
 /-!
 # Locally cartesian closed categories
@@ -143,38 +140,33 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
                 rw [assoc]
               unfold Fan.proj
               simp [prod.map_fst (𝟙 f) u]
-              simp [limit.cone_π, BinaryFan.fst]
-
-
-              have obv : thing = samething := rfl
-
-
-
-              rw [this]
-
-              apply Over.OverMorphism.ext
-              simp
-
+              --simp [limit.cone_π, BinaryFan.fst]
+              --have obv : thing = samething := rfl
+              --rw [this]
+              -- apply Over.OverMorphism.ext
+            --   simp
+              sorry -- (SH: tmp `sorry` to make it error-free for `build` to succeed.)
             | .right => sorry
 
-end LocallyCartesianClosed
 
-#check LocallyCartesianClosed
-
--- Every locally cartesian closed category with 1 is cartesian closed.
-
-namespace LocallyCartesianClosed
-
-variable {C : Type*} [Category C] [HasTerminal C] [HasFiniteProducts C] [HasPullbacks C]
-
-instance cartesianClosed [LocallyCartesianClosed C] : CartesianClosed C where
+-- Every locally cartesian closed category with a terminal object is cartesian closed.
+-- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
+instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LocallyCartesianClosed C] [HasTerminal C] : CartesianClosed C where
   closed X := {
     rightAdj := sorry
     adj := sorry
   }
 
+-- TODO (SH): The slices of a locally cartesian closed category are locally cartesian closed.
+
+--TODO (SH): We need to prove some basic facts about pushforwards.
+
+namespace Pushforward
+
+variable [LocallyCartesianClosed C]
+
+def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) := sorry
+
+end Pushforward
 
 end LocallyCartesianClosed
-
-
--- TODO: The slices of a locally cartesian closed category are locally cartesian closed.

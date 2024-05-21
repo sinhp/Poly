@@ -47,6 +47,12 @@ open LocallyCartesianClosed
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C] (I O : C)
 
+section
+variable {B : Type} {E : B → Type}
+#check Σ (b : B), E b
+
+end
+
 /-- The identity polynomial functor in many variables. -/
 @[simps!]
 def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, 𝟙 I⟩
@@ -56,23 +62,23 @@ def functor (P : MvPoly I O) : Over I ⥤ Over O :=
 
 def apply (P : MvPoly I O) : Over I → Over O := (P.functor).obj
 
-#check apply
-
-
 #check forgetAdjStar
 
--- def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
---   hom := by
---     simp [apply]
---     simp [functor]
---     dsimp
---     exact {
---       left := _
---       right := _
---     }
---   inv := _
---   hom_inv_id := _
---   inv_hom_id := _
+def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
+  hom := by
+    simp [apply]
+    simp [functor]
+    dsimp
+    exact {
+      left := by
+        dsimp
+        sorry
+      right := sorry
+      w := sorry
+    }
+  inv := _
+  hom_inv_id := _
+  inv_hom_id := _
 
 
 
