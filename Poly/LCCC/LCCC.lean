@@ -50,6 +50,77 @@ attribute [local instance] monoidalOfHasFiniteProducts
 
 variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
 
+instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+  fapply NatIso.ofComponents
+  case app =>
+    intro x
+    dsimp
+    let Q := Limits.prodIsProd f x
+    fapply IsLimit.conePointUniqueUpToIso (s := Limits.BinaryFan.mk _ _ ) _ (Q := Q)
+    · fapply Over.homMk
+      · exact pullback.snd
+      · aesop_cat
+    · fapply Over.homMk
+      · exact pullback.fst
+      · exact pullback.condition
+    · fconstructor
+      case lift =>
+        intro s
+        fapply Over.homMk
+        · dsimp
+          refine pullback.lift ?f.h ?f.k ?f.w
+          case f.h =>
+            exact ((s.π.app ⟨ .right ⟩).left)
+          case f.k =>
+            exact ((s.π.app ⟨ .left ⟩).left)
+          case f.w =>
+            aesop_cat
+        · simp
+      case fac =>
+        intros s lr
+        simp
+        match lr with
+        | ⟨ .left⟩  =>
+          apply Over.OverMorphism.ext
+          simp
+        | ⟨ .right⟩ =>
+          apply Over.OverMorphism.ext
+          simp
+      case uniq =>
+        intros s t prf
+        apply Over.OverMorphism.ext
+        dsimp
+        refine (pullback.hom_ext ?h.h₀ ?h.h₁)
+        case h.h₀ =>
+          have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
+          simp at thisr
+          rw [thisr]
+          rw [pullback.lift_fst]
+        case h.h₁ =>
+          have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
+          simp at thisl
+          rw [thisl]
+          rw [pullback.lift_snd]
+  case naturality =>
+    intros x y u
+    simp
+    apply Fan.IsLimit.hom_ext
+    case hc =>
+      apply limit.isLimit
+    case h =>
+      intro lr
+      match lr with
+      | .left  =>
+        let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
+        rw [projeq]
+        -- ER: I'd like to just "rw [assoc]"" here but this times out.
+        rw [Category.assoc _ (prod.map (𝟙 f) u) prod.fst]
+        have prodmapfst := prod.map_fst (𝟙 f) u
+        rw [prod.map_fst (𝟙 f) u]
+        -- ER: The above rewrite also times out.
+        sorry
+      | .right => sorry
+
 class LocallyCartesianClosed' where
   pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
@@ -58,6 +129,7 @@ class LocallyCartesianClosed' where
 class LocallyCartesianClosed where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
+
 
 namespace LocallyCartesianClosed
 
@@ -130,22 +202,17 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
             intro lr
             match lr with
             | .left  =>
+              let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
+              rw [projeq]
               have := prod.map_fst (𝟙 f) u
-              have thing := Fan.proj (limit.cone (pair f y)) WalkingPair.left
-              have samething := prod.fst (X := f) (Y := y)
-              dsimp at thing
-              dsimp
-              conv =>
-                rhs
-                rw [assoc]
-              unfold Fan.proj
-              simp [prod.map_fst (𝟙 f) u]
-              --simp [limit.cone_π, BinaryFan.fst]
-              --have obv : thing = samething := rfl
-              --rw [this]
+              -- rw [Category.assoc ((Over.map f.hom).map ((baseChange f.hom).map u)) _ prod.fst]
+              rw [Category.assoc _ (prod.map (𝟙 f) u) prod.fst]
+              rw [prod.map_fst (𝟙 f) u]
+
               -- apply Over.OverMorphism.ext
-            --   simp
-              sorry -- (SH: tmp `sorry` to make it error-free for `build` to succeed.)
+              -- simp
+              -- apply?
+              sorry
             | .right => sorry
 
 
