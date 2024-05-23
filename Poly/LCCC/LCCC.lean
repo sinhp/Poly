@@ -50,6 +50,59 @@ attribute [local instance] monoidalOfHasFiniteProducts
 
 variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
 
+def pbleg1 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
+
+def pbleg2 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x := by
+  fapply Over.homMk
+  · exact pullback.fst
+  · simp
+    rw [pullback.condition]
+
+def pblimit {I : C} (f x : Over I) : IsLimit (BinaryFan.mk (pbleg1 _ f x) (pbleg2 _ f x))
+  := by
+    fconstructor
+    case lift =>
+      intro s
+      fapply Over.homMk
+      · dsimp
+        refine pullback.lift ?f.h ?f.k ?f.w
+        case f.h =>
+          exact ((s.π.app ⟨ .right ⟩).left)
+        case f.k =>
+          exact ((s.π.app ⟨ .left ⟩).left)
+        case f.w =>
+          aesop_cat
+      · simp
+    case fac =>
+      intros s lr
+      simp
+      match lr with
+      | ⟨ .left⟩ =>
+        apply Over.OverMorphism.ext
+        simp
+        unfold pbleg1
+        simp
+      | ⟨ .right⟩ =>
+        apply Over.OverMorphism.ext
+        simp
+        unfold pbleg2
+        simp
+    case uniq =>
+      intros s t prf
+      apply Over.OverMorphism.ext
+      dsimp
+      refine (pullback.hom_ext ?h.h₀ ?h.h₁)
+      case h.h₀ =>
+        have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
+        dsimp at thisr
+        rw [pullback.lift_fst]
+        exact thisr
+      case h.h₁ =>
+        have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
+        dsimp at thisl
+        rw [pullback.lift_snd]
+        exact thisl
+
 instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app =>
@@ -59,48 +112,11 @@ instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.
     fapply IsLimit.conePointUniqueUpToIso (s := Limits.BinaryFan.mk _ _ ) _ (Q := Q)
     · fapply Over.homMk
       · exact pullback.snd
-      · aesop_cat
+      · exact rfl
     · fapply Over.homMk
       · exact pullback.fst
       · exact pullback.condition
-    · fconstructor
-      case lift =>
-        intro s
-        fapply Over.homMk
-        · dsimp
-          refine pullback.lift ?f.h ?f.k ?f.w
-          case f.h =>
-            exact ((s.π.app ⟨ .right ⟩).left)
-          case f.k =>
-            exact ((s.π.app ⟨ .left ⟩).left)
-          case f.w =>
-            aesop_cat
-        · simp
-      case fac =>
-        intros s lr
-        simp
-        match lr with
-        | ⟨ .left⟩  =>
-          apply Over.OverMorphism.ext
-          simp
-        | ⟨ .right⟩ =>
-          apply Over.OverMorphism.ext
-          simp
-      case uniq =>
-        intros s t prf
-        apply Over.OverMorphism.ext
-        dsimp
-        refine (pullback.hom_ext ?h.h₀ ?h.h₁)
-        case h.h₀ =>
-          have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
-          simp at thisr
-          rw [thisr]
-          rw [pullback.lift_fst]
-        case h.h₁ =>
-          have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
-          simp at thisl
-          rw [thisl]
-          rw [pullback.lift_snd]
+    · exact (pblimit _ f x)
   case naturality =>
     intros x y u
     simp
@@ -113,13 +129,38 @@ instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.
       | .left  =>
         let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
         rw [projeq]
-        -- ER: I'd like to just "rw [assoc]"" here but this times out.
-        rw [Category.assoc _ (prod.map (𝟙 f) u) prod.fst]
-        have prodmapfst := prod.map_fst (𝟙 f) u
-        rw [prod.map_fst (𝟙 f) u]
-        -- ER: The above rewrite also times out.
-        sorry
-      | .right => sorry
+        simp_rw [assoc]
+        simp_rw [prod.map_fst (𝟙 f) u]
+        simp
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+        simp at commutelimitconex
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.left⟩
+        simp at commutelimitconey
+        rw [commutelimitconex , commutelimitconey]
+        apply OverMorphism.ext
+        · simp
+          unfold pullback.map
+          unfold pbleg1
+          simp
+      | .right =>
+        let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.right) = (prod.snd (X := f) (Y := y)) := rfl
+        rw [projeq]
+        simp_rw [assoc]
+        simp_rw [prod.map_snd (𝟙 f) u]
+        simp
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+        simp at commutelimitconex
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
+        simp at commutelimitconey
+        rw [commutelimitconey]
+        rw [← assoc]
+        rw [commutelimitconex]
+        apply OverMorphism.ext
+        · simp
+          unfold pullback.map
+          unfold pbleg2
+          simp
+
 
 class LocallyCartesianClosed' where
   pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
@@ -141,80 +182,7 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
       case adj =>
         exact ((LocallyCartesianClosed.adj f.hom).comp (Over.mapAdjunction f.hom))
       case iso =>
-        fapply NatIso.ofComponents
-        case app =>
-          intro g
-          dsimp
-          let Q := Limits.prodIsProd f g
-          fapply IsLimit.conePointUniqueUpToIso (s := Limits.BinaryFan.mk _ _ ) _ (Q := Q)
-          · fapply Over.homMk
-            · exact pullback.snd
-            · aesop_cat
-          · fapply Over.homMk
-            · exact pullback.fst
-            · exact pullback.condition
-          · fconstructor
-            case lift =>
-              intro s
-              fapply Over.homMk
-              · dsimp
-                refine pullback.lift ?f.h ?f.k ?f.w
-                case f.h =>
-                  exact ((s.π.app ⟨ .right ⟩).left)
-                case f.k =>
-                  exact ((s.π.app ⟨ .left ⟩).left)
-                case f.w =>
-                  aesop_cat
-              · simp
-            case fac =>
-              intros s lr
-              simp
-              match lr with
-              | ⟨ .left⟩  =>
-                apply Over.OverMorphism.ext
-                simp
-              | ⟨ .right⟩ =>
-                apply Over.OverMorphism.ext
-                simp
-            case uniq =>
-              intros s t prf
-              apply Over.OverMorphism.ext
-              simp
-              refine (pullback.hom_ext ?h.h₀ ?h.h₁)
-              case h.h₀ =>
-                -- have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
-                have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
-                simp at thisr
-                rw [thisr]
-                rw [pullback.lift_fst]
-              case h.h₁ =>
-                have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
-                simp at thisl
-                rw [thisl]
-                rw [pullback.lift_snd]
-        case naturality =>
-          intros x y u
-          simp
-          apply Fan.IsLimit.hom_ext
-          case hc =>
-            apply limit.isLimit
-          case h =>
-            intro lr
-            match lr with
-            | .left  =>
-              let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
-              rw [projeq]
-              have := prod.map_fst (𝟙 f) u
-              -- rw [Category.assoc ((Over.map f.hom).map ((baseChange f.hom).map u)) _ prod.fst]
-              rw [Category.assoc _ (prod.map (𝟙 f) u) prod.fst]
-              rw [prod.map_fst (𝟙 f) u]
-
-              -- apply Over.OverMorphism.ext
-              -- simp
-              -- apply?
-              sorry
-            | .right => sorry
-
+        apply helper
 
 -- Every locally cartesian closed category with a terminal object is cartesian closed.
 -- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
