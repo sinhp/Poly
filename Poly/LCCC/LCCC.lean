@@ -50,15 +50,17 @@ attribute [local instance] monoidalOfHasFiniteProducts
 
 variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
 
-def pbleg1 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
+-- def pbleg1 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
 
-def pbleg2 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x := by
-  fapply Over.homMk
-  · exact pullback.fst
-  · simp
-    rw [pullback.condition]
+-- def pbleg2 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
+-- Over.homMk (pullback.fst) (by simp [pullback.condition])
 
-def pblimit {I : C} (f x : Over I) : IsLimit (BinaryFan.mk (pbleg1 _ f x) (pbleg2 _ f x))
+def pullbackCompositionIsBinaryProduct {I : C} (f x : Over I)
+:
+let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
+let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
+Over.homMk (pullback.fst) (by simp [pullback.condition])
+IsLimit (BinaryFan.mk (pbleg1) (pbleg2))
   := by
     fconstructor
     case lift =>
@@ -74,36 +76,19 @@ def pblimit {I : C} (f x : Over I) : IsLimit (BinaryFan.mk (pbleg1 _ f x) (pbleg
           aesop_cat
       · simp
     case fac =>
-      intros s lr
-      simp
-      match lr with
-      | ⟨ .left⟩ =>
-        apply Over.OverMorphism.ext
-        simp
-        unfold pbleg1
-        simp
-      | ⟨ .right⟩ =>
-        apply Over.OverMorphism.ext
-        simp
-        unfold pbleg2
-        simp
+      rintro s ⟨⟨l⟩|⟨r⟩⟩
+      iterate {apply Over.OverMorphism.ext; simp}
     case uniq =>
-      intros s t prf
+      intro s m prf
       apply Over.OverMorphism.ext
       dsimp
       refine (pullback.hom_ext ?h.h₀ ?h.h₁)
       case h.h₀ =>
-        have thisr := congr_arg CommaMorphism.left (prf ⟨ .right⟩)
-        dsimp at thisr
-        rw [pullback.lift_fst]
-        exact thisr
+        simpa [pullback.lift_fst] using (congr_arg CommaMorphism.left (prf ⟨ .right⟩))
       case h.h₁ =>
-        have thisl := congr_arg CommaMorphism.left (prf ⟨ .left⟩)
-        dsimp at thisl
-        rw [pullback.lift_snd]
-        exact thisl
+        simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
 
-instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app =>
     intro x
@@ -116,7 +101,7 @@ instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.
     · fapply Over.homMk
       · exact pullback.fst
       · exact pullback.condition
-    · exact (pblimit _ f x)
+    · exact (pullbackCompositionIsBinaryProduct _ f x)
   case naturality =>
     intros x y u
     simp
@@ -132,34 +117,34 @@ instance helper [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.
         simp_rw [assoc]
         simp_rw [prod.map_fst (𝟙 f) u]
         simp
-        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
         simp at commutelimitconex
-        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.left⟩
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.left⟩
         simp at commutelimitconey
         rw [commutelimitconex , commutelimitconey]
         apply OverMorphism.ext
         · simp
-          unfold pullback.map
-          unfold pbleg1
-          simp
+          --unfold pullback.map
+          --unfold pbleg1
+          --simp
       | .right =>
         let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.right) = (prod.snd (X := f) (Y := y)) := rfl
         rw [projeq]
         simp_rw [assoc]
         simp_rw [prod.map_snd (𝟙 f) u]
         simp
-        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
         simp at commutelimitconex
-        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pblimit _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
         simp at commutelimitconey
         rw [commutelimitconey]
         rw [← assoc]
         rw [commutelimitconex]
         apply OverMorphism.ext
         · simp
-          unfold pullback.map
-          unfold pbleg2
-          simp
+          --unfold pullback.map
+          --unfold pbleg2
+          --simp
 
 
 class LocallyCartesianClosed' where
@@ -182,7 +167,7 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
       case adj =>
         exact ((LocallyCartesianClosed.adj f.hom).comp (Over.mapAdjunction f.hom))
       case iso =>
-        apply helper
+        apply NatIsoOfBaseChangeComposition
 
 -- Every locally cartesian closed category with a terminal object is cartesian closed.
 -- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
