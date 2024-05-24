@@ -92,16 +92,7 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
   fapply NatIso.ofComponents
   case app =>
     intro x
-    dsimp
-    let Q := Limits.prodIsProd f x
-    fapply IsLimit.conePointUniqueUpToIso (s := Limits.BinaryFan.mk _ _ ) _ (Q := Q)
-    · fapply Over.homMk
-      · exact pullback.snd
-      · exact rfl
-    · fapply Over.homMk
-      · exact pullback.fst
-      · exact pullback.condition
-    · exact (pullbackCompositionIsBinaryProduct _ f x)
+    fapply IsLimit.conePointUniqueUpToIso  (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x)
   case naturality =>
     intros x y u
     simp
@@ -114,8 +105,7 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
       | .left  =>
         let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
         rw [projeq]
-        simp_rw [assoc]
-        simp_rw [prod.map_fst (𝟙 f) u]
+        simp_rw [assoc, prod.map_fst (𝟙 f) u]
         simp
         have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
         simp at commutelimitconex
@@ -124,14 +114,10 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         rw [commutelimitconex , commutelimitconey]
         apply OverMorphism.ext
         · simp
-          --unfold pullback.map
-          --unfold pbleg1
-          --simp
       | .right =>
         let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.right) = (prod.snd (X := f) (Y := y)) := rfl
         rw [projeq]
-        simp_rw [assoc]
-        simp_rw [prod.map_snd (𝟙 f) u]
+        simp_rw [assoc, prod.map_snd (𝟙 f) u]
         simp
         have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
         simp at commutelimitconex
@@ -142,15 +128,11 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         rw [commutelimitconex]
         apply OverMorphism.ext
         · simp
-          --unfold pullback.map
-          --unfold pbleg2
-          --simp
-
 
 class LocallyCartesianClosed' where
   pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
--- Note (SH): Maybe conveniet to include the fact that lcccs have a terminal object?
+-- Note (SH): Maybe convenient to include the fact that lcccs have a terminal object?
 -- Will see if that is needed. For now, we do not include that in the definition.
 class LocallyCartesianClosed where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
@@ -185,7 +167,12 @@ namespace Pushforward
 
 variable [LocallyCartesianClosed C]
 
-def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) := sorry
+-- ER: Move this to a different namespace that assumes only that basechange exists.
+-- ER: We might prefer to reverse directions in the statement but this simplified the proof.
+def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
+
+def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
+  asIso ((transferNatTransSelf (LocallyCartesianClosed.adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
 
 end Pushforward
 
