@@ -153,11 +153,9 @@ instance cartesianClosedOfOver [LocallyCartesianClosed C] [HasFiniteWidePullback
 
 -- Every locally cartesian closed category with a terminal object is cartesian closed.
 -- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
-instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LocallyCartesianClosed C] [HasTerminal C] : CartesianClosed C where
-  closed X := {
-    rightAdj := sorry
-    adj := sorry
-  }
+instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LocallyCartesianClosed C] [HasTerminal C] : CartesianClosed C := by sorry
+  -- refine cartesianClosedOfEquiv (C := ?_) ?_
+  -- ER: It would be nice to use the equivalence between C/1 and C here.
 
 -- TODO (SH): The slices of a locally cartesian closed category are locally cartesian closed.
 
@@ -174,6 +172,51 @@ def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((t
 def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
   asIso ((transferNatTransSelf (LocallyCartesianClosed.adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
 
+#check HasTerminal
+#check IsEquivalence
+#check Functor
+
+def HasTerminalSliceProjection [HasTerminal C] : (Over (terminal C)) ⥤ C := Over.forget (terminal C)
+
+def HasTerminalSliceEquivalence [HasTerminal C] : (Over (terminal C)) ≌ C where
+  functor := Over.forget (terminal C)
+  inverse := {
+    obj := fun X => Over.mk (IsTerminal.from _ X)
+    map := fun f => Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
+    map_id := fun X => OverMorphism.ext (of_eq_true (eq_self (𝟙 X)))
+    map_comp := fun f g => OverMorphism.ext (of_eq_true (eq_self (f ≫ g)))
+  }
+  unitIso := {
+    hom := {
+      app := fun X =>
+        Over.homMk (𝟙 X.left) (IsTerminal.hom_ext terminalIsTerminal _ _)
+      naturality := fun X Y f => by
+        fapply OverMorphism.ext
+        fapply IsTerminal.hom_ext
+        simp
+        -- exact terminalIsTerminal
+        sorry -- I think I'm proving the wrong thing
+    }
+    inv := {
+      app := sorry
+    }
+  }
+  counitIso := _
+
 end Pushforward
 
 end LocallyCartesianClosed
+
+universe v u
+
+variable {C : Type u} [Category.{v} C] (X : C) (h : IsTerminal X)
+
+@[simps]
+def toOverTerminal : C ⥤ Over X where
+  obj Y := Over.mk (h.from _)
+  map f := Over.homMk f
+
+def equivOverTerminal : C ≌ Over X :=
+  CategoryTheory.Equivalence.mk (toOverTerminal X h) (Over.forget _)
+    (NatIso.ofComponents (fun X => Iso.refl _))
+    (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
