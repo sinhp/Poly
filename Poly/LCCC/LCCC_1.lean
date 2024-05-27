@@ -86,7 +86,7 @@ def pullbackCompositionIsBinaryProduct {I : C} (f x : Over I) :
     case h.h₁ =>
       simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
 
-def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+def NatIsoOfBaseChangeComposition' [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app =>
     intro x
@@ -106,6 +106,7 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         simp_rw [assoc, prod.map_fst, comp_id]
         have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
         simp at commutelimitconex
+        --simp [commutelimitconex]
         have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨WalkingPair.left⟩
         simp at commutelimitconey
         rw [commutelimitconey, commutelimitconex]
@@ -123,6 +124,53 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         rw [commutelimitconey, ← assoc, commutelimitconex]
         apply OverMorphism.ext
         simp
+
+#check IsLimit.conePointUniqueUpToIso_hom_comp
+
+def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
+    (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+  fapply NatIso.ofComponents
+  case app =>
+    intro x
+    fapply IsLimit.conePointUniqueUpToIso (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x)
+  case naturality =>
+    intros x y u
+    simp
+    apply Fan.IsLimit.hom_ext (limit.isLimit _)
+    rintro ⟨ ⟨ ⟩ | ⟨ ⟩ ⟩ -- TODO : does `rintro` too much unfolding compared to `case`?
+    · apply OverMorphism.ext
+      simp
+
+
+    · sorry
+
+
+      have projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
+      rw [projeq]
+      --simp_rw [prod.map_fst (𝟙 f) u]
+      --simp
+      have commutelimitconex :=
+        IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+      simp at commutelimitconex
+      have commutelimitconey :=
+        IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.left⟩
+      simp at commutelimitconey
+      rw [commutelimitconex, commutelimitconey]
+      apply OverMorphism.ext
+      simp
+    · let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.right) = (prod.snd (X := f) (Y := y)) := rfl
+      rw [projeq]
+      simp_rw [assoc, prod.map_snd (𝟙 f) u]
+      simp
+      have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+      simp at commutelimitconex
+      have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
+      simp at commutelimitconey
+      rw [commutelimitconey]
+      rw [← assoc]
+      rw [commutelimitconex]
+      apply OverMorphism.ext
+      · simp
 
 
 class LexLocallyCartesianClosed [HasFiniteWidePullbacks C] where
@@ -148,6 +196,8 @@ Given `f : A ⟶ B` in `C/B`, the iterated slice `(C/B)/f` is isomorphic to
 `C/A`, and so `f* : C/B ⥤ (C/B)/f` is 'the same thing' as pulling back
 morphisms along `f`.
 -/
+
+
 namespace LexStableColimLocallyCartesianClosed
 
 instance cartesianClosedOfOver [LexStableColimLocallyCartesianClosed C] [HasFiniteWidePullbacks C]
@@ -201,42 +251,14 @@ instance cartesianClosed' [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexS
 
 namespace Pushforward
 
-variable [LexStableColimLocallyCartesianClosed C]
+variable [LocallyCartesianClosed C]
 
 -- ER: Move this to a different namespace that assumes only that basechange exists.
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
 def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
 def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
-  asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
-
-
-def HasTerminalSliceProjection [HasTerminal C] : (Over (terminal C)) ⥤ C := Over.forget (terminal C)
-
-def HasTerminalSliceEquivalence [HasTerminal C] : (Over (terminal C)) ≌ C where
-  functor := Over.forget (terminal C)
-  inverse := {
-    obj := fun X => Over.mk (IsTerminal.from _ X)
-    map := fun f => Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
-    map_id := fun X => OverMorphism.ext (of_eq_true (eq_self (𝟙 X)))
-    map_comp := fun f g => OverMorphism.ext (of_eq_true (eq_self (f ≫ g)))
-  }
-  unitIso := {
-    hom := {
-      app := fun X =>
-        Over.homMk (𝟙 X.left) (IsTerminal.hom_ext terminalIsTerminal _ _)
-      naturality := fun X Y f => by
-        fapply OverMorphism.ext
-        fapply IsTerminal.hom_ext
-        simp
-        -- exact terminalIsTerminal
-        sorry -- I think I'm proving the wrong thing
-    }
-    inv := {
-      app := sorry
-    }
-  }
-  counitIso := _
+  asIso ((transferNatTransSelf (LocallyCartesianClosed.adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
 
 end Pushforward
 
@@ -247,19 +269,4 @@ If `C` is locally cartesian closed and has
 reflexive coequalizers, then every morphism factors into a regular epic
 and monic.
 -/
-
-end LexStableColimLocallyCartesianClosed
-
-universe v u
-
-variable {C : Type u} [Category.{v} C] (X : C) (h : IsTerminal X)
-
-@[simps]
-def toOverTerminal : C ⥤ Over X where
-  obj Y := Over.mk (h.from _)
-  map f := Over.homMk f
-
-def equivOverTerminal : C ≌ Over X :=
-  CategoryTheory.Equivalence.mk (toOverTerminal X h) (Over.forget _)
-    (NatIso.ofComponents (fun X => Iso.refl _))
-    (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
+end LocallyCartesianClosed
