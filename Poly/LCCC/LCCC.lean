@@ -30,7 +30,9 @@ noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction Over
 
-variable {C : Type*}[Category C]
+universe v u
+
+variable {C : Type u} [Category.{v} C]
 
 /-
 There are several equivalent definitions of locally
@@ -183,37 +185,6 @@ def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((t
 def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
   asIso ((transferNatTransSelf (LocallyCartesianClosed.adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
 
-#check HasTerminal
-#check IsEquivalence
-#check Functor
-
-def HasTerminalSliceProjection [HasTerminal C] : (Over (terminal C)) ⥤ C := Over.forget (terminal C)
-
-def HasTerminalSliceEquivalence [HasTerminal C] : (Over (terminal C)) ≌ C where
-  functor := Over.forget (terminal C)
-  inverse := {
-    obj := fun X => Over.mk (IsTerminal.from _ X)
-    map := fun f => Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
-    map_id := fun X => OverMorphism.ext (of_eq_true (eq_self (𝟙 X)))
-    map_comp := fun f g => OverMorphism.ext (of_eq_true (eq_self (f ≫ g)))
-  }
-  unitIso := {
-    hom := {
-      app := fun X =>
-        Over.homMk (𝟙 X.left) (IsTerminal.hom_ext terminalIsTerminal _ _)
-      naturality := fun X Y f => by
-        fapply OverMorphism.ext
-        fapply IsTerminal.hom_ext
-        simp
-        -- exact terminalIsTerminal
-        sorry -- I think I'm proving the wrong thing
-    }
-    inv := {
-      app := sorry
-    }
-  }
-  counitIso := _
-
 end Pushforward
 
 
@@ -225,16 +196,32 @@ and monic.
 -/
 end LocallyCartesianClosed
 
-universe v u
-
-variable {C : Type u} [Category.{v} C] (X : C) (h : IsTerminal X)
+variable (T : C) (h : IsTerminal T)
 
 @[simps]
-def toOverTerminal : C ⥤ Over X where
+def toOverTerminal : C ⥤ Over T where
   obj Y := Over.mk (h.from _)
   map f := Over.homMk f
 
-def equivOverTerminal : C ≌ Over X :=
-  CategoryTheory.Equivalence.mk (toOverTerminal X h) (Over.forget _)
+def equivOverTerminal : C ≌ Over T :=
+  CategoryTheory.Equivalence.mk (toOverTerminal _ T h) (Over.forget _)
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
+
+def HasTerminalSlicePromotion [HasTerminal C] : C ⥤ (Over (terminal C)) where
+  obj Y := Over.mk (terminal.from Y)
+  map f := Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
+
+def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := by
+  apply CategoryTheory.Equivalence.mk (HasTerminalSlicePromotion C) (Over.forget (terminal C))
+  · fapply NatIso.ofComponents
+    · exact (fun Y ↦ Iso.refl _)
+    · sorry
+  · fapply NatIso.ofComponents
+    · intro Y
+      fapply Over.isoMk
+      · apply Iso.refl _
+      · simp
+        apply IsTerminal.hom_ext
+        exact terminalIsTerminal
+    · sorry
