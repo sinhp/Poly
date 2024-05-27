@@ -129,14 +129,25 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         apply OverMorphism.ext
         · simp
 
-class LocallyCartesianClosed' where
-  pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
-
 -- Note (SH): Maybe convenient to include the fact that lcccs have a terminal object?
 -- Will see if that is needed. For now, we do not include that in the definition.
 class LocallyCartesianClosed where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
+
+class LocallyCartesianClosed₂ [HasFiniteWidePullbacks C] where
+  over_cc : Π (I : C), CartesianClosed (Over I)
+
+class LocallyCartesianClosed₃ where
+  pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
+
+
+/-
+Relating `LocallyCartesianClosed'` and `LocallyCartesianClosed`
+Given `f : A ⟶ B` in `C/B`, the iterated slice `(C/B)/f` is isomorphic to
+`C/A`, and so `f* : C/B ⥤ (C/B)/f` is 'the same thing' as pulling back
+morphisms along `f`.
+-/
 
 
 namespace LocallyCartesianClosed
@@ -176,4 +187,11 @@ def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
 
 end Pushforward
 
+
+/- SH: TODO
+Every LCCC with reflexive coequalizers is a regular category.
+If `C` is locally cartesian closed and has
+reflexive coequalizers, then every morphism factors into a regular epic
+and monic.
+-/
 end LocallyCartesianClosed
