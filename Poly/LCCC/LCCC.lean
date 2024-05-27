@@ -225,9 +225,10 @@ end LexStableColimLocallyCartesianClosed
 
 variable (T : C) (h : IsTerminal T)
 
+-- Proof by Markus Himmel (with commentary by Dagur Asgeirsson)
 @[simps]
 def toOverTerminal : C ⥤ Over T where
-  obj Y := Over.mk (h.from _)
+  obj X := Over.mk (h.from _)
   map f := Over.homMk f
 
 def equivOverTerminal : C ≌ Over T :=
@@ -235,20 +236,20 @@ def equivOverTerminal : C ≌ Over T :=
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
 
+-- Improvements to my version with help from the above, but of course their version is better.
+@[simps]
 def HasTerminalSlicePromotion [HasTerminal C] : C ⥤ (Over (terminal C)) where
-  obj Y := Over.mk (terminal.from Y)
+  obj X := Over.mk (terminal.from X)
   map f := Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
 
 def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := by
   apply CategoryTheory.Equivalence.mk (HasTerminalSlicePromotion C) (Over.forget (terminal C))
+    (NatIso.ofComponents (fun X => Iso.refl _))
   · fapply NatIso.ofComponents
-    · exact (fun Y ↦ Iso.refl _)
-    · sorry
-  · fapply NatIso.ofComponents
-    · intro Y
+    · intro X
       fapply Over.isoMk
       · apply Iso.refl _
       · simp
         apply IsTerminal.hom_ext
         exact terminalIsTerminal
-    · sorry
+    · aesop_cat
