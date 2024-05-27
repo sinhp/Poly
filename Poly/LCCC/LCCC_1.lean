@@ -30,9 +30,7 @@ noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction Over
 
-universe v u
-
-variable {C : Type u} [Category.{v} C]
+variable {C : Type*}[Category C]
 
 /-
 There are several equivalent definitions of locally
@@ -88,7 +86,7 @@ def pullbackCompositionIsBinaryProduct {I : C} (f x : Over I) :
     case h.h₁ =>
       simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
 
-def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+def NatIsoOfBaseChangeComposition' [HasFiniteWidePullbacks C] {I : C} (f : Over I) : (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app =>
     intro x
@@ -108,6 +106,7 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         simp_rw [assoc, prod.map_fst, comp_id]
         have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
         simp at commutelimitconex
+        --simp [commutelimitconex]
         have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨WalkingPair.left⟩
         simp at commutelimitconey
         rw [commutelimitconey, commutelimitconex]
@@ -125,6 +124,53 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         rw [commutelimitconey, ← assoc, commutelimitconex]
         apply OverMorphism.ext
         simp
+
+#check IsLimit.conePointUniqueUpToIso_hom_comp
+
+def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
+    (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
+  fapply NatIso.ofComponents
+  case app =>
+    intro x
+    fapply IsLimit.conePointUniqueUpToIso (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x)
+  case naturality =>
+    intros x y u
+    simp
+    apply Fan.IsLimit.hom_ext (limit.isLimit _)
+    rintro ⟨ ⟨ ⟩ | ⟨ ⟩ ⟩ -- TODO : does `rintro` too much unfolding compared to `case`?
+    · apply OverMorphism.ext
+      simp
+
+
+    · sorry
+
+
+      have projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
+      rw [projeq]
+      --simp_rw [prod.map_fst (𝟙 f) u]
+      --simp
+      have commutelimitconex :=
+        IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+      simp at commutelimitconex
+      have commutelimitconey :=
+        IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.left⟩
+      simp at commutelimitconey
+      rw [commutelimitconex, commutelimitconey]
+      apply OverMorphism.ext
+      simp
+    · let projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.right) = (prod.snd (X := f) (Y := y)) := rfl
+      rw [projeq]
+      simp_rw [assoc, prod.map_snd (𝟙 f) u]
+      simp
+      have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+      simp at commutelimitconex
+      have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
+      simp at commutelimitconey
+      rw [commutelimitconey]
+      rw [← assoc]
+      rw [commutelimitconex]
+      apply OverMorphism.ext
+      · simp
 
 
 class LexLocallyCartesianClosed [HasFiniteWidePullbacks C] where
@@ -150,6 +196,8 @@ Given `f : A ⟶ B` in `C/B`, the iterated slice `(C/B)/f` is isomorphic to
 `C/A`, and so `f* : C/B ⥤ (C/B)/f` is 'the same thing' as pulling back
 morphisms along `f`.
 -/
+
+
 namespace LexStableColimLocallyCartesianClosed
 
 instance cartesianClosedOfOver [LexStableColimLocallyCartesianClosed C] [HasFiniteWidePullbacks C]
@@ -203,14 +251,14 @@ instance cartesianClosed' [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexS
 
 namespace Pushforward
 
-variable [LexStableColimLocallyCartesianClosed C]
+variable [LocallyCartesianClosed C]
 
 -- ER: Move this to a different namespace that assumes only that basechange exists.
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
 def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
 def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
-  asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
+  asIso ((transferNatTransSelf (LocallyCartesianClosed.adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
 
 end Pushforward
 
@@ -221,34 +269,4 @@ If `C` is locally cartesian closed and has
 reflexive coequalizers, then every morphism factors into a regular epic
 and monic.
 -/
-end LexStableColimLocallyCartesianClosed
-
-variable (T : C) (h : IsTerminal T)
-
-@[simps]
-def toOverTerminal : C ⥤ Over T where
-  obj Y := Over.mk (h.from _)
-  map f := Over.homMk f
-
-def equivOverTerminal : C ≌ Over T :=
-  CategoryTheory.Equivalence.mk (toOverTerminal _ T h) (Over.forget _)
-    (NatIso.ofComponents (fun X => Iso.refl _))
-    (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
-
-def HasTerminalSlicePromotion [HasTerminal C] : C ⥤ (Over (terminal C)) where
-  obj Y := Over.mk (terminal.from Y)
-  map f := Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
-
-def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := by
-  apply CategoryTheory.Equivalence.mk (HasTerminalSlicePromotion C) (Over.forget (terminal C))
-  · fapply NatIso.ofComponents
-    · exact (fun Y ↦ Iso.refl _)
-    · sorry
-  · fapply NatIso.ofComponents
-    · intro Y
-      fapply Over.isoMk
-      · apply Iso.refl _
-      · simp
-        apply IsTerminal.hom_ext
-        exact terminalIsTerminal
-    · sorry
+end LocallyCartesianClosed
