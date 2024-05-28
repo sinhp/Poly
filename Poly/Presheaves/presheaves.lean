@@ -17,6 +17,7 @@ import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Yoneda
+import Mathlib.CategoryTheory.Closed.Types
 
 -- All the imports below are transitively imported by the above import.
 -- import Mathlib.CategoryTheory.Adjunction.Basic
@@ -42,4 +43,6 @@ open CategoryTheory Category Limits Functor Adjunction Over
 
 universe v u
 
-variable {C : Type u} [Category.{v} C]
+variable {C : Type*} [SmallCategory C]
+
+#check CartesianClosed (C ⥤ Type*)[smallcategory C]
