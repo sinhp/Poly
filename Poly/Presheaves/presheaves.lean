@@ -39,12 +39,26 @@ import Mathlib.CategoryTheory.Closed.Types
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction Over
+open CategoryTheory Category Limits Functor Adjunction Over Opposite
 
-universe v u
+universe v u u₁
 
-variable {C : Type*} [SmallCategory C]
+variable {C : Type u} [SmallCategory C]
 
 /- the category of presheaves on a small category is cartesian closed -/
 
-#check CartesianClosed (Cᵒᵖ ⥤ Type*)
+#check CartesianClosed (Cᵒᵖ ⥤ Type u)
+
+section Elements
+
+variable (X : Cᵒᵖ ⥤ Type u)
+
+def elementsOf (X : Cᵒᵖ ⥤ Type u) : Type u := Σ (c : C), X.obj (op c)
+
+instance categoryOfElements (X : Cᵒᵖ ⥤ Type u) : Category (elementsOf (X : Cᵒᵖ ⥤ Type u)) where
+  Hom a b := sorry
+  id := sorry
+  comp := sorry
+  id_comp := sorry
+  comp_id := sorry
+  assoc := sorry
