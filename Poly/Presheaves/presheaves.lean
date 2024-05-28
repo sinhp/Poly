@@ -18,6 +18,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Yoneda
 import Mathlib.CategoryTheory.Closed.Types
+import Mathlib.CategoryTheory.Elements
 
 -- All the imports below are transitively imported by the above import.
 -- import Mathlib.CategoryTheory.Adjunction.Basic
@@ -39,11 +40,11 @@ import Mathlib.CategoryTheory.Closed.Types
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction Over Opposite
+open CategoryTheory Functor Adjunction Over Opposite
 
-universe v u u₁
+universe w v u
 
-variable {C : Type u} [SmallCategory C]
+variable {C : Type u} [Category.{v} C]
 
 /- the category of presheaves on a small category is cartesian closed -/
 
@@ -51,14 +52,19 @@ variable {C : Type u} [SmallCategory C]
 
 section Elements
 
-variable (X : Cᵒᵖ ⥤ Type u)
+-- variable (X : Cᵒᵖ ⥤ Type u)
 
-def elementsOf (X : Cᵒᵖ ⥤ Type u) : Type u := Σ (c : C), X.obj (op c)
+def Functor.OpElements {X : Cᵒᵖ ⥤ Type w} :=
+  Σ c : Cᵒᵖ, X.obj c
 
-instance categoryOfElements (X : Cᵒᵖ ⥤ Type u) : Category (elementsOf (X : Cᵒᵖ ⥤ Type u)) where
-  Hom a b := sorry
-  id := sorry
-  comp := sorry
-  id_comp := sorry
-  comp_id := sorry
-  assoc := sorry
+lemma Functor.OpElements.ext {X : Cᵒᵖ ⥤ Type w} (x y : OpElements) (h₁ : x.fst = y.fst) (h₂ : X.map (eqToHom h₁) x.snd = y.snd) : x = y := by
+cases x
+cases y
+cases h₁
+simp [eqToHom_refl, FunctorToTypes.map_id_apply] at h₂
+simp [h₂]
+
+instance categoryOfOpElements (X : Cᵒᵖ ⥤ Type w) : Category.{v} (X.Elements) where
+  Hom a b := { f : a.1 ⟶ b.1 // (X.map f) a.2 = b.2 }
+  id a := ⟨𝟙 a.1, by aesop_cat⟩
+  comp {X Y Z} f g := ⟨f.val ≫ g.val, by simp [f.2, g.2]⟩
