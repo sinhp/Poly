@@ -45,4 +45,6 @@ universe v u
 
 variable {C : Type*} [SmallCategory C]
 
-#check CartesianClosed (C ⥤ Type*)[smallcategory C]
+/- the category of presheaves on a small category is cartesian closed -/
+
+#check CartesianClosed (Cᵒᵖ ⥤ Type*)
