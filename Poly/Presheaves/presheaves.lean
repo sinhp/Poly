@@ -15,53 +15,91 @@ import Mathlib.CategoryTheory.Closed.Cartesian
 import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.Elements
 import Mathlib.CategoryTheory.Opposites
 import Mathlib.CategoryTheory.Yoneda
 import Mathlib.CategoryTheory.Closed.Types
 import Mathlib.CategoryTheory.Elements
+--import Mathlib.CategoryTheory.Comma.StructuredArrow
 
 /-!
-# Presheaves
+# Presheaves are a CCC
+The category of presheaves on a small category is cartesian closed
 -/
 
 noncomputable section
 
 open CategoryTheory Functor Adjunction Over Opposite
 
-universe u v w
+universe w v u
 
 variable {C : Type u} [Category.{u} C]
 
-/- the category of presheaves on a small category is cartesian closed -/
-
 #check CartesianClosed (Cᵒᵖ ⥤ Type u)
 
-/-!
-# Category of Elements
-The Category of Elements of a contravariant functor
+/- Question: how can we define the notation Psh(C) in place of (Cᵒᵖ ⥤ Type u) ?
 -/
+
+
+/-!
+# The dual category of elements
+The category of elements of a *contravariant* functor P : Cᵒᵖ ⥤ Type is the opposite of the category of elements of the opposite functor Pᵒᵖ : C ⥤ Typeᵒᵖ.
+
+Given a functor `P : Cᵒᵖ ⥤ Type`, an object of
+`P.OpElements` is a pair `(X : C, x : P.obj X)`.
+A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C`, so `P.map f` takes `y` to `x`.
+
+P.OpElements is equivalent to the comma category Yoneda/P.
+-/
+
 noncomputable section Elements
 
--- variable {C : Type u} [Category.{u} C]
+variable {C : Type u} [Category.{v} C]
 
-/- The category of elements of a contravariant functor X : Cᵒᵖ ⥤ Type is the opposite of the category of elements of the opposite functor Xᵒᵖ : C ⥤ Typeᵒᵖ. -/
+/--
+The type of objects for the category of elements of a functor `P : Cᵒᵖ ⥤ Type` is a pair `(X : C, x : P.obj X)`.
+-/
 
-def Functor.OpElements {X : Cᵒᵖ ⥤ Type u} :=
-(Functor.Elements X)ᵒᵖ --  Σ c : Cᵒᵖ, X.obj c
+def Functor.OpElements (P : Cᵒᵖ ⥤ Type w) :=
+(Functor.Elements P)ᵒᵖ --  Σ X : Cᵒᵖ, P.obj X
 
-lemma Functor.OpElements.ext {X : Cᵒᵖ ⥤ Type u} (x y : OpElements) (h₁ : (unop x).fst = (unop y).fst)
-  (h₂ : X.map (eqToHom h₁)
-    (unop x).snd = (unop y).snd) : x = y := by
-sorry
+lemma Functor.OpElements.ext {P : Cᵒᵖ ⥤ Type w} (x y : P.Elements) (h₁ : x.fst = y.fst)
+  (h₂ : P.map (eqToHom h₁)
+    x.snd = y.snd) : x = y := by
+    cases x
+    cases y
+    cases h₁
+    simp only [eqToHom_refl, FunctorToTypes.map_id_apply] at h₂
+    simp [h₂]
 
-instance categoryOfOpElements (X : Cᵒᵖ ⥤ Type u) : Category.{u} (X.Elements) where
-  Hom a b := { f : a.1 ⟶ b.1 // (X.map f) a.2 = b.2 }
-  id a := ⟨𝟙 a.1, by aesop_cat⟩
+/--
+The category structure on `P.OpElements`, for `P : Cᵒᵖ ⥤ Type`.
+A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C`, so `F.map f` takes `y` to `x`.
+ -/
+
+ instance categoryOfOpElements (P : Cᵒᵖ ⥤ Type w) : Category.{v} (OpElements P) where
+  Hom p q := { f : (unop p).1 ⟶ (unop q).1 // (unop q).2 = P.map f (unop p).2 }
+  id p := ⟨𝟙 (unop p).1, by aesop_cat⟩
   comp {X Y Z} f g := ⟨f.val ≫ g.val, by simp [f.2, g.2]⟩
 
+namespace CategoryTheory
+namespace CategoryOfElements
 
-/- use this to transfer CCC across an equivalence
+/-- The equivalence `P.OpElements ≅ (yoneda, P)` given by the Yoneda lemma. -/
+
+/- there's still a mismatch here, since (Functor.Elements P)ᵒᵖ should be the same as (Functor.OpElements P), but apparently isn't definitionally equal-/
+
+def costructuredArrowYonedaEquivalenceOp (P : Cᵒᵖ ⥤ Type v) :
+    (Functor.Elements P)ᵒᵖ ≌ CostructuredArrow yoneda P :=
+  Equivalence.mk (toCostructuredArrow P) (fromCostructuredArrow P).rightOp
+    (NatIso.op (eqToIso (from_toCostructuredArrow_eq P))) (eqToIso <| to_fromCostructuredArrow_eq P)
+
+/-
+next: show that Psh(C)/P = (Yoneda, P) = Psh(OpElements P)
+-/
+
+
+/- then we'll use the following to transfer CCC across the equivalence
+
 variable {D : Type u₂} [Category.{v} D]
 
 copied from: mathlib4/Mathlib/CategoryTheory/Closed
