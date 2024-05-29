@@ -52,11 +52,6 @@ attribute [local instance] monoidalOfHasFiniteProducts
 
 variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
 
--- def pbleg1 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
-
--- def pbleg2 {I : C} (f x : Over I) : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
--- Over.homMk (pullback.fst) (by simp [pullback.condition])
-
 def pullbackCompositionIsBinaryProduct {I : C} (f x : Over I) :
     let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
     let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
@@ -164,6 +159,53 @@ instance cartesianClosedOfOver [LexStableColimLocallyCartesianClosed C] [HasFini
 
 instance [LexStableColimLocallyCartesianClosed C] [HasFiniteWidePullbacks C] : LexLocallyCartesianClosed C where
   over_cc (I : C) := by infer_instance
+
+namespace LexLocallyCartesianClosed
+
+-- Defining the pushforward functor from the hypothesis that C is LexLocallyCartesianClosed.
+def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
+  (f : X ⟶ Y) :
+  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
+  (Over.mk (𝟙 Y)) ⟶ ((exp (Over.mk f)).obj (Over.mk f)) := by
+      let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+      exact CartesianClosed.curry prod.fst
+
+def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
+  (f : X ⟶ Y) (x : Over X) :
+  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
+  ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶ ((exp (Over.mk f)).obj (Over.mk f)) := by
+    let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+    apply ((exp (Over.mk f)).map)
+    fapply Over.homMk
+    · exact x.hom
+    · simp
+
+def pushforwardObj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x : Over X) : Over Y := pullback (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x)
+
+def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
+  (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') :
+  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
+  ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶
+  ((exp (Over.mk f)).obj ((Over.map f).obj x')) := by
+    let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+    exact ((exp (Over.mk f)).map ((Over.map f).map u))
+
+def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') : (pushforwardObj _ f x) ⟶ (pushforwardObj _ f x') := by
+  let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+  refine pullback.map (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x) (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map _ f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f)) ?_ ?_
+  · unfold pushforwardCospanLeg1
+    simp
+  · unfold pushforwardCospanLeg2
+    unfold pushforwardCospanLeg2Map
+    simp
+    rw [← (exp (Over.mk f)).map_comp]
+    apply congrArg ((exp (Over.mk f)).map)
+    apply OverMorphism.ext
+    simp
+
+
+
+
 
 -- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexStableColimLocallyCartesianClosed C`.
 instance [LexStableColimLocallyCartesianClosed C] :
