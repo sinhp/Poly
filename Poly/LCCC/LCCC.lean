@@ -203,9 +203,22 @@ def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
     apply OverMorphism.ext
     simp
 
-
-
-
+def pushforwardFunctor [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : (Over X) ⥤ (Over Y) where
+  obj x := pushforwardObj _ f x
+  map u := pushforwardMap _ f _ _ u
+  map_id x := by
+    apply pullback.hom_ext
+    · unfold pushforwardMap
+      simp
+    · unfold pushforwardMap pushforwardCospanLeg2Map
+      simp
+  map_comp := by
+    intros x y z u v
+    apply pullback.hom_ext
+    · unfold pushforwardMap
+      simp
+    · unfold pushforwardMap pushforwardCospanLeg2Map
+      simp
 
 -- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexStableColimLocallyCartesianClosed C`.
 instance [LexStableColimLocallyCartesianClosed C] :
