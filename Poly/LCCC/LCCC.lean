@@ -225,36 +225,20 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
             refine iso.hom ≫ ?newgoal
             exact (Over.map f).map u
           · simp
-
-
             apply (CartesianClosed.uncurry_injective (A := Over.mk f))
             rw [CartesianClosed.uncurry_natural_left]
-
             unfold pushforwardCospanLeg1
             rw [CartesianClosed.uncurry_curry]
-
-            simp
-            unfold pushforwardCospanLeg2
-
+            simp [pushforwardCospanLeg2]
             rw [CartesianClosed.uncurry_natural_right]
-
             rw [CartesianClosed.uncurry_curry]
             simp
-            have uw := u.w
-            have conj1 : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)).left = ((baseChange f).obj y).hom := by aesop_cat
-            have conj2 : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)) = homMk (((baseChange f).obj y).left) rfl := sorry
-
-
-
-
-
-
-
-            unfold pullbackCompositionIsBinaryProduct
-
-            rw [CartesianClosed.curry_natural_right , CartesianClosed.uncurry_natural_left]
-            simp
-
+            have conj : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)) =
+              (homMk ((baseChange f).obj y).hom : (Over.map f).obj ((baseChange f).obj y) ⟶ Over.mk f) :=
+              OverMorphism.ext (by aesop_cat)
+            rw [conj]
+            exact (IsLimit.conePointUniqueUpToIso_hom_comp (prodIsProd (Over.mk f) y)
+              (pullbackCompositionIsBinaryProduct C (Over.mk f) y) ⟨WalkingPair.left⟩).symm
         invFun := sorry
         left_inv := sorry
         right_inv := sorry }
