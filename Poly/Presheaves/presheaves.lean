@@ -35,7 +35,8 @@ variable {C : Type*} [Category C]
 
 /- Question: how can we define the notation Psh C in place of (Cᵒᵖ ⥤ Type u) ? -/
 /- Answer: -/
-def Psh (C : Type*) [Category C] := Cᵒᵖ ⥤ Type
+/- Note (SH): In general `abbrev` works better with `simp` and istance inference. Another alternative is to use `notation`. -/
+abbrev Psh (C : Type*) [Category C] := Cᵒᵖ ⥤ Type
 /- Alternative: `notation "Psh" "(" C ")" => Cᵒᵖ ⥤ Type` -/
 
 /-!
