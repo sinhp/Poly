@@ -42,11 +42,11 @@ variable {C : Type u} [Category.{u} C]
 
 /-!
 # The dual category of elements
-The category of elements of a *contravariant* functor P : Cᵒᵖ ⥤ Type is the opposite of the category of elements of the opposite functor Pᵒᵖ : C ⥤ Typeᵒᵖ.
+The category of elements of a contravariant functor P : Cᵒᵖ ⥤ Type is the opposite of the category of elements of the covariant functor P : Cᵒᵖ ⥤ Type.
 
 Given a functor `P : Cᵒᵖ ⥤ Type`, an object of
 `P.OpElements` is a pair `(X : C, x : P.obj X)`.
-A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C`, so `P.map f` takes `y` to `x`.
+A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C` for which `P.map f` takes `y` back to `x`.
 
 P.OpElements is equivalent to the comma category Yoneda/P.
 -/
@@ -56,11 +56,11 @@ noncomputable section Elements
 variable {C : Type u} [Category.{v} C]
 
 /--
-The type of objects for the category of elements of a functor `P : Cᵒᵖ ⥤ Type` is a pair `(X : C, x : P.obj X)`.
+The type of objects for the category of elements of a functor `P : Cᵒᵖ ⥤ Type` is the type of pairs `(X : Cᵒᵖ, x : P.obj X)`.
 -/
 
 def Functor.OpElements (P : Cᵒᵖ ⥤ Type w) :=
-(Functor.Elements P)ᵒᵖ --  Σ X : Cᵒᵖ, P.obj X
+(Functor.Elements P) --  Σ X : Cᵒᵖ, P.obj X
 
 lemma Functor.OpElements.ext {P : Cᵒᵖ ⥤ Type w} (x y : P.Elements) (h₁ : x.fst = y.fst)
   (h₂ : P.map (eqToHom h₁)
@@ -77,9 +77,9 @@ A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C`, so `F.map f` 
  -/
 
  instance categoryOfOpElements (P : Cᵒᵖ ⥤ Type w) : Category.{v} (OpElements P) where
-  Hom p q := { f : (unop p).1 ⟶ (unop q).1 // (unop q).2 = P.map f (unop p).2 }
-  id p := ⟨𝟙 (unop p).1, by aesop_cat⟩
-  comp {X Y Z} f g := ⟨f.val ≫ g.val, by simp [f.2, g.2]⟩
+  Hom p q := { f : q.1 ⟶ p.1 // p.2 = P.map f q.2 }
+  id p := ⟨𝟙 p.1, by aesop_cat⟩
+  comp {X Y Z} f g := ⟨g.val ≫ f.val, by simp [f.2, g.2]⟩
 
 namespace CategoryTheory
 namespace CategoryOfElements
@@ -93,12 +93,12 @@ def costructuredArrowYonedaEquivalenceOp (P : Cᵒᵖ ⥤ Type v) :
   Equivalence.mk (toCostructuredArrow P) (fromCostructuredArrow P).rightOp
     (NatIso.op (eqToIso (from_toCostructuredArrow_eq P))) (eqToIso <| to_fromCostructuredArrow_eq P)
 
+
 /-
-next: show that Psh(C)/P = (Yoneda, P) = Psh(OpElements P)
--/
-
-
-/- then we'll use the following to transfer CCC across the equivalence
+next: - show that OpElements P ≃ (Yoneda, P) implies Psh(OpElements P) ≃ Psh(Yoneda, P)
+  - show that Psh(C)/P ≃ Psh(Yoneda, P).
+  - infer that Psh(C)/P ≃ Psh(OpElements P)
+  - then use the following to transfer CCC across the equivalence
 
 variable {D : Type u₂} [Category.{v} D]
 
