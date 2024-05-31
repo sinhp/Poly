@@ -125,9 +125,12 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
 class LexLocallyCartesianClosed [HasFiniteWidePullbacks C] where
   over_cc : Π (I : C), CartesianClosed (Over I)
 
+attribute [instance] LexLocallyCartesianClosed.over_cc
+
 class LexStableColimLocallyCartesianClosed [HasTerminal C] where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
+
 
 -- Note (SH): Maybe convenient to include the fact that lcccs have a terminal object?
 -- Will see if that is needed. For now, we do not include that in the definition.
@@ -165,33 +168,20 @@ namespace LexLocallyCartesianClosed
 -- Defining the pushforward functor from the hypothesis that C is LexLocallyCartesianClosed.
 def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
   (f : X ⟶ Y) :
-  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
-  (Over.mk (𝟙 Y)) ⟶ ((exp (Over.mk f)).obj (Over.mk f)) := by
-      let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
-      exact CartesianClosed.curry prod.fst
+  (Over.mk (𝟙 Y)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) := CartesianClosed.curry prod.fst
 
 def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
   (f : X ⟶ Y) (x : Over X) :
-  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
-  ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶ ((exp (Over.mk f)).obj (Over.mk f)) := by
-    let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
-    apply ((exp (Over.mk f)).map)
-    fapply Over.homMk
-    · exact x.hom
-    · simp
+  ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) := (((exp (Over.mk f)).map) (Over.homMk x.hom))
 
 def pushforwardObj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x : Over X) : Over Y := pullback (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x)
 
 def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
   (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') :
-  let ccoverY := (LexLocallyCartesianClosed.over_cc Y)
   ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶
-  ((exp (Over.mk f)).obj ((Over.map f).obj x')) := by
-    let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
-    exact ((exp (Over.mk f)).map ((Over.map f).map u))
+  ((exp (Over.mk f)).obj ((Over.map f).obj x')) := ((exp (Over.mk f)).map ((Over.map f).map u))
 
 def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') : (pushforwardObj _ f x) ⟶ (pushforwardObj _ f x') := by
-  let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
   refine pullback.map (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x) (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map _ f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f)) ?_ ?_
   · unfold pushforwardCospanLeg1
     simp
@@ -199,10 +189,10 @@ def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
     unfold pushforwardCospanLeg2Map
     simp
     rw [← (exp (Over.mk f)).map_comp]
-    apply congrArg ((exp (Over.mk f)).map)
-    apply OverMorphism.ext
+    congr
     simp
 
+-- variable (C) in
 def pushforwardFunctor [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : (Over X) ⥤ (Over Y) where
   obj x := pushforwardObj _ f x
   map u := pushforwardMap _ f _ _ u
@@ -228,18 +218,43 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
           fapply pullback.lift
           · have idterm := mkIdTerminal (X := Y)
             exact idterm.from y
-          · let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
-            refine CartesianClosed.curry ?k.a
+          · refine CartesianClosed.curry ?k.a
             let iso := IsLimit.conePointUniqueUpToIso (Limits.prodIsProd (Over.mk f) y) (pullbackCompositionIsBinaryProduct _ (Over.mk f) y)
             simp at iso
             let isomap := iso.hom
             refine iso.hom ≫ ?newgoal
             exact (Over.map f).map u
-          · let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+          · simp
+
+
             apply (CartesianClosed.uncurry_injective (A := Over.mk f))
-            simp
             rw [CartesianClosed.uncurry_natural_left]
-            sorry
+
+            unfold pushforwardCospanLeg1
+            rw [CartesianClosed.uncurry_curry]
+
+            simp
+            unfold pushforwardCospanLeg2
+
+            rw [CartesianClosed.uncurry_natural_right]
+
+            rw [CartesianClosed.uncurry_curry]
+            simp
+            have uw := u.w
+            have conj1 : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)).left = ((baseChange f).obj y).hom := by aesop_cat
+            have conj2 : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)) = homMk (((baseChange f).obj y).left) rfl := sorry
+
+
+
+
+
+
+
+            unfold pullbackCompositionIsBinaryProduct
+
+            rw [CartesianClosed.curry_natural_right , CartesianClosed.uncurry_natural_left]
+            simp
+
         invFun := sorry
         left_inv := sorry
         right_inv := sorry }
