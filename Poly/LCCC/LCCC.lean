@@ -220,6 +220,32 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] 
     · unfold pushforwardMap pushforwardCospanLeg2Map
       simp
 
+def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : baseChange f ⊣ pushforwardFunctor _ f :=
+  mkOfHomEquiv {
+    homEquiv := fun y x =>
+      { toFun := by
+          intro u
+          fapply pullback.lift
+          · have idterm := mkIdTerminal (X := Y)
+            exact idterm.from y
+          · let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+            refine CartesianClosed.curry ?k.a
+            let iso := IsLimit.conePointUniqueUpToIso (Limits.prodIsProd (Over.mk f) y) (pullbackCompositionIsBinaryProduct _ (Over.mk f) y)
+            simp at iso
+            let isomap := iso.hom
+            refine iso.hom ≫ ?newgoal
+            exact (Over.map f).map u
+          · let fexp := (LexLocallyCartesianClosed.over_cc Y).closed (Over.mk f)
+            apply (CartesianClosed.uncurry_injective (A := Over.mk f))
+            simp
+            rw [CartesianClosed.uncurry_natural_left]
+            sorry
+        invFun := sorry
+        left_inv := sorry
+        right_inv := sorry }
+  }
+
+
 -- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexStableColimLocallyCartesianClosed C`.
 instance [LexStableColimLocallyCartesianClosed C] :
     haveI : HasFiniteWidePullbacks C := by sorry -- TODO: figure out how we can inline an instance.
@@ -276,7 +302,7 @@ If `C` is locally cartesian closed and has
 reflexive coequalizers, then every morphism factors into a regular epic
 and monic.
 -/
-end LexStableColimLocallyCartesianClosed
+end LexLocallyCartesianClosed
 
 variable (T : C) (h : IsTerminal T)
 
