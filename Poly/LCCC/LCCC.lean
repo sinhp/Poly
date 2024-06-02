@@ -50,9 +50,7 @@ We also show that a locally cartesian closed category with a terminal object is 
 
 attribute [local instance] monoidalOfHasFiniteProducts
 
-variable (C : Type*) [Category C] [HasTerminal C] [HasPullbacks C]
-
-def pullbackCompositionIsBinaryProduct {I : C} (f x : Over I) :
+def pullbackCompositionIsBinaryProduct [HasPullbacks C] {I : C} (f x : Over I) :
     let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
     let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
     Over.homMk (pullback.fst) (by simp [pullback.condition])
@@ -87,7 +85,7 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
   fapply NatIso.ofComponents
   case app =>
     intro x
-    fapply IsLimit.conePointUniqueUpToIso  (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x)
+    fapply IsLimit.conePointUniqueUpToIso  (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x)
   case naturality =>
     intros x y u
     simp
@@ -101,9 +99,9 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         have projeq : (Fan.proj (limit.cone (pair f y)) WalkingPair.left) = (prod.fst (X := f) (Y := y)) := rfl
         rw [projeq]
         simp_rw [assoc, prod.map_fst, comp_id]
-        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
         simp at commutelimitconex
-        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨WalkingPair.left⟩
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f y) (Limits.prodIsProd f y) ⟨WalkingPair.left⟩
         simp at commutelimitconey
         rw [commutelimitconey, commutelimitconex]
         apply OverMorphism.ext
@@ -113,21 +111,22 @@ def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I
         rw [projeq]
         simp_rw [assoc, prod.map_snd]
         simp
-        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+        have commutelimitconex := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
         simp at commutelimitconex
-        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct _ f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
+        have commutelimitconey := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f y) (Limits.prodIsProd f y) ⟨ WalkingPair.right⟩
         simp at commutelimitconey
         rw [commutelimitconey, ← assoc, commutelimitconex]
         apply OverMorphism.ext
         simp
 
+variable (C : Type u) [Category.{v} C]
 
 class LexLocallyCartesianClosed [HasFiniteWidePullbacks C] where
   over_cc : Π (I : C), CartesianClosed (Over I)
 
 attribute [instance] LexLocallyCartesianClosed.over_cc
 
-class LexStableColimLocallyCartesianClosed [HasTerminal C] where
+class LexStableColimLocallyCartesianClosed [HasFiniteWidePullbacks C] where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
 
@@ -135,11 +134,11 @@ class LexStableColimLocallyCartesianClosed [HasTerminal C] where
 -- Note (SH): Maybe convenient to include the fact that lcccs have a terminal object?
 -- Will see if that is needed. For now, we do not include that in the definition.
 -- this is the general definition of a locally cartesian closed category where we do not assume a terminal object in `C`.
-class StableColimLocallyCartesianClosed where
+class StableColimLocallyCartesianClosed [HasPullbacks C] where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
 
-class StableColimLocallyCartesianClosed' where
+class StableColimLocallyCartesianClosed' [HasPullbacks C] where
   pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
 /-
@@ -150,8 +149,8 @@ morphisms along `f`.
 -/
 namespace LexStableColimLocallyCartesianClosed
 
-instance cartesianClosedOfOver [LexStableColimLocallyCartesianClosed C] [HasFiniteWidePullbacks C]
-    {I : C} : CartesianClosed (Over I) := by
+instance cartesianClosedOfOver
+[HasFiniteWidePullbacks C] [LexStableColimLocallyCartesianClosed C] {I : C} : CartesianClosed (Over I) := by
       refine .mk _ fun f ↦ .mk f (baseChange f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor ) ?adj ?iso )
       case functor =>
         exact (baseChange f.hom ⋙ Over.map f.hom)
@@ -160,10 +159,12 @@ instance cartesianClosedOfOver [LexStableColimLocallyCartesianClosed C] [HasFini
       case iso =>
         apply NatIsoOfBaseChangeComposition
 
-instance [LexStableColimLocallyCartesianClosed C] [HasFiniteWidePullbacks C] : LexLocallyCartesianClosed C where
+instance [HasFiniteWidePullbacks C][LexStableColimLocallyCartesianClosed C]  : LexLocallyCartesianClosed C where
   over_cc (I : C) := by infer_instance
 
 namespace LexLocallyCartesianClosed
+
+variable {C : Type u} [Category.{v} C]
 
 -- Defining the pushforward functor from the hypothesis that C is LexLocallyCartesianClosed.
 def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
@@ -174,15 +175,15 @@ def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed 
   (f : X ⟶ Y) (x : Over X) :
   ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) := (((exp (Over.mk f)).map) (Over.homMk x.hom))
 
-def pushforwardObj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x : Over X) : Over Y := pullback (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x)
+def pushforwardObj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x : Over X) : Over Y := pullback (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x)
 
 def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
   (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') :
   ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶
   ((exp (Over.mk f)).obj ((Over.map f).obj x')) := ((exp (Over.mk f)).map ((Over.map f).map u))
 
-def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') : (pushforwardObj _ f x) ⟶ (pushforwardObj _ f x') := by
-  refine pullback.map (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x) (pushforwardCospanLeg1 _ f) (pushforwardCospanLeg2 _ f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map _ f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f)) ?_ ?_
+def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') : (pushforwardObj f x) ⟶ (pushforwardObj f x') := by
+  refine pullback.map (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x) (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f)) ?_ ?_
   · unfold pushforwardCospanLeg1
     simp
   · unfold pushforwardCospanLeg2
@@ -194,8 +195,8 @@ def pushforwardMap [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
 
 -- variable (C) in
 def pushforwardFunctor [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : (Over X) ⥤ (Over Y) where
-  obj x := pushforwardObj _ f x
-  map u := pushforwardMap _ f _ _ u
+  obj x := pushforwardObj f x
+  map u := pushforwardMap f _ _ u
   map_id x := by
     apply pullback.hom_ext
     · unfold pushforwardMap
@@ -210,7 +211,7 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] 
     · unfold pushforwardMap pushforwardCospanLeg2Map
       simp
 
-def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : baseChange f ⊣ pushforwardFunctor _ f :=
+def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) : baseChange f ⊣ pushforwardFunctor f :=
   mkOfHomEquiv {
     homEquiv := fun y x =>
       { toFun := by
@@ -219,7 +220,7 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
           · have idterm := mkIdTerminal (X := Y)
             exact idterm.from y
           · refine CartesianClosed.curry ?k.a
-            let iso := IsLimit.conePointUniqueUpToIso (Limits.prodIsProd (Over.mk f) y) (pullbackCompositionIsBinaryProduct _ (Over.mk f) y)
+            let iso := IsLimit.conePointUniqueUpToIso (Limits.prodIsProd (Over.mk f) y) (pullbackCompositionIsBinaryProduct (Over.mk f) y)
             simp at iso
             let isomap := iso.hom
             refine iso.hom ≫ ?newgoal
@@ -238,7 +239,7 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
               OverMorphism.ext (by aesop_cat)
             rw [conj]
             exact (IsLimit.conePointUniqueUpToIso_hom_comp (prodIsProd (Over.mk f) y)
-              (pullbackCompositionIsBinaryProduct C (Over.mk f) y) ⟨WalkingPair.left⟩).symm
+              (pullbackCompositionIsBinaryProduct (Over.mk f) y) ⟨WalkingPair.left⟩).symm
         invFun := sorry
         left_inv := sorry
         right_inv := sorry }
@@ -246,10 +247,11 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
 
 
 -- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexStableColimLocallyCartesianClosed C`.
-instance [LexStableColimLocallyCartesianClosed C] :
-    haveI : HasFiniteWidePullbacks C := by sorry -- TODO: figure out how we can inline an instance.
-    LexLocallyCartesianClosed C where
-  over_cc I := by infer_instance
+-- ER: commented out below because I now assume `HasFiniteWidePullbacks C` in the definition of `LexStableColimLocallyCartesianClosed C`
+-- instance [LexStableColimLocallyCartesianClosed C] :
+--     haveI : HasFiniteWidePullbacks C := by sorry -- TODO: figure out how we can inline an instance.
+--     LexLocallyCartesianClosed C where
+--   over_cc I := by infer_instance
 
 #check hasBinaryProducts_of_hasTerminal_and_pullbacks
 
@@ -283,14 +285,14 @@ instance cartesianClosed' [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexS
 
 namespace Pushforward
 
-variable [LexStableColimLocallyCartesianClosed C]
+variable [HasFiniteWidePullbacks C] [LexStableColimLocallyCartesianClosed C]
 
 -- ER: Move this to a different namespace that assumes only that basechange exists.
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
 def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
 def idIso (X : C) :  (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
-  asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso _ X).hom)
+  asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
 
 end Pushforward
 
