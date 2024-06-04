@@ -185,7 +185,8 @@ def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D
   MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
 
-def pshOverCCC {P : Psh C} : CartesianClosed (Over P) :=
+def pshOverCCC (P : Psh C) : CartesianClosed (Over P) :=
   cartesianClosedOfEquiv pshElementsOpIsOverPsh
 
-def allPshOverCCC {C : Type*} [Category C] : ∀ (P : Psh C) , CartesianClosed (Over P) := sorry
+def allPshOverCCC : ∀(P : Psh C), CartesianClosed (Over P) :=
+fun (P : Psh C) => pshOverCCC (P : Psh C)
