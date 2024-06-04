@@ -93,6 +93,8 @@ The category structure on `P.OpElements`, for `P : Cᵒᵖ ⥤ Type`.  A morphis
     rfl
     apply g.2⟩
 
+abbrev OpElements (P : Psh C) := (Elements P)ᵒᵖ
+
 --namespace CategoryTheory
 namespace CategoryOfElements
 namespace Equivalence
@@ -106,54 +108,48 @@ def costructuredArrowYonedaEquivalenceOp (P : Psh C) :
   Equivalence.mk (toCostructuredArrow P) (fromCostructuredArrow P).rightOp
     (NatIso.op (eqToIso (from_toCostructuredArrow_eq P))) (eqToIso <| to_fromCostructuredArrow_eq P)
 
-def equivOpEquiv (C D : Type*)[Category C][Category D] : (C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := sorry
+def equivOp (C D : Type*)[Category C][Category D] : (C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := sorry
 
-def equivSym (C D : Type*)[Category C][Category D] : (C ≌ D) → (D ≌ C) := symm
+def equivSymm (C D : Type*)[Category C][Category D] : (C ≌ D) → (D ≌ C) := symm
 
-def presheavesEquivalent {C D : Type*} [Category C][Category D] :
+def equivTrans (C D E : Type*)[Category C][Category D][Category E] (d : C ≌ D) (e : D ≌ E) :
+    (C ≌ E) := trans d e
+
+def equivPsh {C D : Type*} [Category C][Category D] :
   (C ≌ D) → (Psh C ≌ Psh D) := by
   intro e
   apply congrLeft
-  apply equivOpEquiv
+  apply equivOp
   apply e
 
-def pshOnCostArrowYonIsPshOnElementsOp (P : Psh C) :
+def pshElementsOpIsPshCostArrowYon (P : Psh C) :
   Psh (Elements P)ᵒᵖ ≌ Psh (CostructuredArrow yoneda P) := by
-  apply presheavesEquivalent
+  apply equivPsh
   apply costructuredArrowYonedaEquivalenceOp
 
-def pshOnElementsOpIsPshOnCostArrow {P : Psh C} :
-  Psh (CostructuredArrow yoneda P) ≌ Psh ((Elements P)ᵒᵖ) := by
-  symm
-  exact pshOnCostArrowYonIsPshOnElementsOp P
+def pshCostArrowYonIsPshElementsOp {P : Psh C} :
+  Psh (CostructuredArrow yoneda P) ≌ Psh ((Elements P)ᵒᵖ) :=
+  symm (pshElementsOpIsPshCostArrowYon P)
 
 /-!
 # 3. The slice category
 The slice category (Psh C)/P  is called the "over category" in MathLib and written "Over P".
 -/
 
-def presheavesOverIsPresheavesOnCostructuredArrow {P : Psh C} :
+def overPshIsPshCostArrowYon {P : Psh C} :
   Over P ≌ Psh (CostructuredArrow yoneda P) := overEquivPresheafCostructuredArrow P
 
-def presheavesOverIsPresheavesOnOpElements {P : Psh C} :
-  Over P ≌ Psh ((Elements P)ᵒᵖ) := sorry
-  -- apply presheavesOverIsPresheavesOnCostructuredArrow
+def overPshIsPshElementsOp {P : Psh C} :
+  Over P ≌ Psh ((Elements P)ᵒᵖ) :=
+  trans overPshIsPshCostArrowYon pshCostArrowYonIsPshElementsOp
 
+def overPshIsPshOpElements{P : Psh C} :
+  Over P ≌ Psh (OpElements P) :=
+  trans overPshIsPshCostArrowYon pshCostArrowYonIsPshElementsOp
 
-/- we now have OpElements P ≃ (Yoneda, P).
+/-
+We now have that (Psh C)/P ≃ Psh(OpElements P).
 Next:
-  - that implies Psh(OpElements P) ≃ Psh(Yoneda, P)
-  - show that Psh C/P ≃ Psh(Yoneda, P).
-  this is in  Mathlib.CategoryTheory.Comma.Presheaf as
-
-  def CategoryTheory.overEquivPresheafCostructuredArrow {C : Type u}  [CategoryTheory.Category.{v, u}    C] (A : CategoryTheory.Functor Cᵒᵖ (Type v)) :
-  CategoryTheory.Over A ≌ CategoryTheory.Functor
-  (CategoryTheory.CostructuredArrow CategoryTheory.yoneda A)ᵒᵖ (Type v)
-
-If A : Cᵒᵖ ⥤ Type v is a presheaf, then we have an equivalence between presheaves lying over A and the category of presheaves on CostructuredArrow yoneda A. There is a quasicommutative triangle involving this equivalence, see CostructuredArrow.toOverCompOverEquivPresheafCostructuredArrow.
-
-Next:
-  - infer that Psh C/P ≃ Psh(OpElements P)
   - then use the following to transfer CCC across the equivalence
 
 variable {D : Type u₂} [Category.{v} D]
@@ -185,6 +181,8 @@ along the `prodComparison` isomorphism.
 def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D :=
   MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 #align category_theory.cartesian_closed_of_equiv CategoryTheory.cartesianClosedOfEquiv
+
+CategoryTheory.Types ?
 
 end Functor
 
