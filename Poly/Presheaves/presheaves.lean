@@ -187,3 +187,5 @@ def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D
 
 def pshOverCCC {P : Psh C} : CartesianClosed (Over P) :=
   cartesianClosedOfEquiv pshElementsOpIsOverPsh
+
+def allPshOverCCC {C : Type*} [Category C] : ∀ (P : Psh C) , CartesianClosed (Over P) := sorry
