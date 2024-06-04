@@ -31,6 +31,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
     - [ ] Polynomial functors in LCCCs
 - [ ] The LCCC structure on presheaves of types
   - [ ] Polynomial endofunctors on presheaves of types
+  - [ ] CwFs as cocontinuous polynomials
 
 
 ### Resources 
