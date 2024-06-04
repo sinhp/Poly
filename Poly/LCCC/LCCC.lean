@@ -32,7 +32,19 @@ open CategoryTheory Category Limits Functor Adjunction Over
 
 universe v u
 
-variable {C : Type u} [Category.{v} C]
+variable {C D : Type u} [Category.{v} C] [Category.{v} D]
+
+
+-- Some adjunction stuff that is here temporarily
+
+
+theorem homEquiv_naturality_left_square {F : C ⥤ D} {G : D ⥤ C} {adj : F ⊣ G} {X' X : C} {Y Y' : D} (f : X' ⟶ X) (g : F.obj X ⟶ Y') (h : F.obj X' ⟶ Y) (k : Y ⟶ Y') (w : F.map f ≫ g = h ≫ k) : f ≫ (adj.homEquiv X Y') g = (adj.homEquiv X' Y) h ≫ G.map k := by
+  rw [← homEquiv_naturality_left, ← homEquiv_naturality_right]
+  exact congrArg (adj.homEquiv X' Y') w
+
+theorem homEquiv_naturality_right_square {F : C ⥤ D} {G : D ⥤ C} {adj : F ⊣ G} {X' X : C} {Y Y' : D} (f : X' ⟶ X) (g : X ⟶ G.obj Y') (h : X' ⟶ G.obj Y) (k : Y ⟶ Y') (w : f ≫ g = h ≫ G.map k) : F.map f ≫ (adj.homEquiv X Y').symm g = (adj.homEquiv X' Y).symm h ≫ k := by
+  rw [← homEquiv_naturality_left_symm, ← homEquiv_naturality_right_symm]
+  exact congrArg (adj.homEquiv X' Y').symm w
 
 /-
 There are several equivalent definitions of locally
@@ -175,7 +187,9 @@ def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed 
   (f : X ⟶ Y) (x : Over X) :
   ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) := (((exp (Over.mk f)).map) (Over.homMk x.hom))
 
+@[simps]
 def pushforwardObj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C} (f : X ⟶ Y) (x : Over X) : Over Y := pullback (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x)
+
 
 def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
   (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') :
@@ -240,11 +254,60 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y
             rw [conj]
             exact (IsLimit.conePointUniqueUpToIso_hom_comp (prodIsProd (Over.mk f) y)
               (pullbackCompositionIsBinaryProduct (Over.mk f) y) ⟨WalkingPair.left⟩).symm
-        invFun := sorry
+        invFun := by
+          intro v
+          let obj := pullback (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x)
+          let path : pullback.fst ≫ (pushforwardCospanLeg1 f) = pullback.snd ≫ (pushforwardCospanLeg2 f x) := pullback.condition
+          let wpath := v ≫= path
+          rw [← assoc] at wpath
+          rw [← assoc] at wpath
+          unfold pushforwardCospanLeg2 at wpath
+          unfold pushforwardCospanLeg1 at wpath
+          let cwpath := homEquiv_naturality_right_square (F := MonoidalCategory.tensorLeft (Over.mk f)) (adj := exp.adjunction (Over.mk f)) _ _ _ _ wpath
+          unfold CartesianClosed.curry at cwpath
+          simp only [MonoidalCategory.tensorLeft_obj, monoidalOfHasFiniteProducts.tensorObj,
+            prod.functor_obj_obj, MonoidalCategory.tensorLeft_map,
+            monoidalOfHasFiniteProducts.whiskerLeft, Equiv.symm_apply_apply, prod.map_fst,
+            comp_id] at cwpath
+          let cwpathleft := congr_arg CommaMorphism.left cwpath
+          fapply homMk
+          · let vcompcurried := (CartesianClosed.uncurry (v ≫ pullback.snd)).left
+            let iso := ((IsLimit.conePointUniqueUpToIso (pullbackCompositionIsBinaryProduct (Over.mk f) y) (Limits.prodIsProd (Over.mk f) y)).hom).left
+            exact (iso ≫ vcompcurried)
+          · unfold CartesianClosed.uncurry
+            dsimp
+            change _ = ((((exp.adjunction (Over.mk f)).homEquiv y ((Over.map f).obj x)).symm (v ≫ pullback.snd)).left ≫ x.hom) at cwpathleft
+            rw [← cwpathleft] -- This should work
+            sorry
         left_inv := sorry
         right_inv := sorry }
   }
 
+
+def pushforwardObjUP [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed C] {X Y : C}
+    (f : X ⟶ Y) (x : Over X) (y : Over Y) (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
+    (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x))
+    : (baseChange f).obj y ⟶ x := by
+  unfold pushforwardCospanLeg2 at w
+  unfold pushforwardCospanLeg1 at w
+  let cw := homEquiv_naturality_right_square (F := MonoidalCategory.tensorLeft (Over.mk f)) (adj := exp.adjunction (Over.mk f)) _ _ _ _ w
+  unfold CartesianClosed.curry at cw
+  simp only [MonoidalCategory.tensorLeft_obj, monoidalOfHasFiniteProducts.tensorObj,
+    MonoidalCategory.tensorLeft_map, monoidalOfHasFiniteProducts.whiskerLeft, prod.functor_obj_obj,
+    Equiv.symm_apply_apply, prod.map_fst, comp_id] at cw
+  let cwleft := congr_arg CommaMorphism.left cw
+  fapply homMk
+  · let vc := (CartesianClosed.uncurry v).left
+    let iso := ((IsLimit.conePointUniqueUpToIso (pullbackCompositionIsBinaryProduct (Over.mk f) y) (Limits.prodIsProd (Over.mk f) y)).hom).left
+    exact (iso ≫ vc)
+  · unfold CartesianClosed.uncurry
+    dsimp at cwleft
+    -- rw [← cwleft]
+    let limeq := IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct (Over.mk f) y) (prodIsProd (Over.mk f) y) ⟨WalkingPair.left⟩
+    let limeqleft := congr_arg CommaMorphism.left limeq
+    simp at limeqleft
+    rw [cwleft, ← assoc] at limeqleft
+    exact limeqleft
 
 -- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexStableColimLocallyCartesianClosed C`.
 -- ER: commented out below because I now assume `HasFiniteWidePullbacks C` in the definition of `LexStableColimLocallyCartesianClosed C`
