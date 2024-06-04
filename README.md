@@ -25,10 +25,13 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [ ] The classifying property of polynomial functors
   - [ ] The category `Type [X]` of polynomial functors in one variable
   - [ ] Differential calculus of polynomials
-- [ ] Polynomial functos in locally cartesian closed categories
+- [ ] Polynomial functors in locally cartesian closed categories
     - [x] Definition of locally cartesian closed category
     - [ ] Beck-Chevalley condition in LCCCs
     - [ ] Polynomial functors in LCCCs
+- [ ] The LCCC structure on presheaves of types
+  - [ ] Polynomial endofunctors on presheaves of types
+  - [ ] CwFs as cocontinuous polynomials
 
 
 ### Resources 
