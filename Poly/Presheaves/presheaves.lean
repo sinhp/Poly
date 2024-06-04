@@ -102,6 +102,7 @@ The category structure on `P.OpElements`, for `P : Cᵒᵖ ⥤ Type`.  A morphis
 --abbrev OpElements (P : Psh C) := (Elements P)ᵒᵖ
 --namespace CategoryTheory
 -/
+
 namespace CategoryOfElements
 namespace Equivalence
 
@@ -162,8 +163,6 @@ def overPshIsCovPshElements {P : Psh C} :
   Over P ≌ ((Elements P) ⥤ Type*) := sorry
 -/
 
-def pshElCCC {P : Psh C} : CartesianClosed (Over P) := cartesianClosedOfEquiv pshElementsOpIsOverPsh
-
 /-
 The following two are used for the OpElements, but that doesn't seem to work:
 
@@ -176,20 +175,15 @@ def overPshIsPshOpElements {P : Psh C} :
   trans overPshIsPshElementsOp pshElementsOpIsPshOpElements
 -/
 
-
-/-
-Now that have (Psh C)/P ≃ Psh((Elements P)ᵒᵖ), use the following to transfer CCC across the equivalence
-
-copied from: mathlib4/Mathlib/CategoryTheory/Closed/Cartesian.lean
-
-variable {D : Type u₂} [Category.{v} D]
-variable [HasFiniteProducts D]
-
-Transport the property of being cartesian closed across an equivalence of categories.
-
-Note we didn't require any coherence between the choice of finite products here, since we transport
-along the `prodComparison` isomorphism.
+/-!
+# 4. The slice category Psh(C)/P is a CCC
+-/
+/-!
+Now that we have (Psh C)/P ≃ Psh((Elements P)ᵒᵖ), use the following to transfer CCC across the equivalence, from: mathlib4/Mathlib/CategoryTheory/Closed/Cartesian.lean
 
 def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D :=
   MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
-  -/
+-/
+
+def pshOverCCC {P : Psh C} : CartesianClosed (Over P) :=
+  cartesianClosedOfEquiv pshElementsOpIsOverPsh
