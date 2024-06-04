@@ -58,7 +58,7 @@ Given a functor `P : Cᵒᵖ ⥤ Type`, an object of
 `P.OpElements` is a pair `(X : C, x : P.obj X)`.
 A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C` for which `P.map f` takes `y` back to `x`.
 
-P.OpElements is equivalent to the comma category Yoneda/P.
+We show that (OpElements P) is equivalent to the comma category Yoneda/P.
 -/
 
 noncomputable section Elements
@@ -98,10 +98,9 @@ abbrev OpElements (P : Psh C) := (Elements P)ᵒᵖ
 --namespace CategoryTheory
 namespace CategoryOfElements
 namespace Equivalence
-
-/-- The equivalence `P.OpElements ≌ (yoneda, P)` given by the Yoneda lemma. -/
-
-/- there's still an apparent mismatch here, since the category (Functor.Elements P)ᵒᵖ should be the same as (Functor.OpElements P), but it apparently isn't definitionally equal-/
+/--
+The equivalence `P.OpElements ≌ (yoneda, P)` given by the Yoneda lemma.
+-/
 
 def costructuredArrowYonedaEquivalenceOp (P : Psh C) :
     (Elements P)ᵒᵖ ≌ CostructuredArrow yoneda P :=
