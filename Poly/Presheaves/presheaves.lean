@@ -1,5 +1,5 @@
 /-
-This file shows that the category of presheaves on a (small) cat C is LCC as follows:
+The category of presheaves on a (small) cat C is an LCCC:
 (1) the category of presheaves on a (small) cat C is a CCC.
 (2) the category of elements of a presheaf P the comma category (yoneda, P)
 (3) the slice of presheaves over P is presheaves on (yoneda, P).
