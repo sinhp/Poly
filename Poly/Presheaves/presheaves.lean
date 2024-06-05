@@ -1,13 +1,10 @@
 /-
-The plan for this file is to show that the category of presheaves on a (small) cat C is LCC, as follows:
-(1) define the category of presheaves on a (small) cat C and show it is a CCC.
-  [* apparently this has already been done *]
-(2) the slice category over any presheaf is presheaves on its category of elements,
-  [* the category of elements is already done, but not the equivalence *]
-(3) infer that every slice of presheaves is a CCC,
-  [* by transferring CCC across the foregoing equivalence *]
-(4) use the results from the LCCC development to infer that presheaves is LCC.
-  [* since every slice category is CC *]
+This file shows that the category of presheaves on a (small) cat C is LCC as follows:
+(1) the category of presheaves on a (small) cat C is a CCC.
+(2) the category of elements of a presheaf P the comma category (yoneda, P)
+(3) the slice of presheaves over P is presheaves on (yoneda, P).
+(4) so every slice is a CCC by (1).
+(5) use the results on LCCCs to infer that presheaves is LCC.
 -/
 
 import Mathlib.CategoryTheory.Closed.Types
@@ -119,3 +116,8 @@ def pshOverCCC (P : Psh C) : CartesianClosed (Over P) :=
 
 def allPshOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
   fun P => (pshOverCCC P)
+
+/-!
+# 5. Presheaves is an LCCC
+Use results on locally cartesian closed categories.
+-/
