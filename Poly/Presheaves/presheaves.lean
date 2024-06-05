@@ -38,34 +38,38 @@ The category of presheaves on a small category is cartesian closed
 noncomputable section
 open Category Limits Functor Adjunction Over Opposite Equivalence
 
-abbrev Psh (C : Type*) [Category C] := Cᵒᵖ ⥤ Type*
-
-/- Note (SH): In general `abbrev` works better with `simp` and istance inference. Another alternative is to use `notation`:
+@[simp]
+abbrev Psh (C : Type*) [SmallCategory C] := Cᵒᵖ ⥤ Type*
+/- Note (SH): In general `abbrev` works better with `simp` and instance inference. Another alternative is to use `notation`:
 `notation "Psh" "(" C ")" => Cᵒᵖ ⥤ Type` -/
 
+/- Using:
 instance {C : Type v₁} [SmallCategory C] : CartesianClosed (C ⥤ Type v₁) :=
   CartesianClosed.mk _
     (fun F => by
       letI := FunctorCategory.prodPreservesColimits F
       have := isLeftAdjointOfPreservesColimits (prod.functor.obj F)
       exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
+-/
 
-instance {C : Type v₁} [SmallCategory C] : CartesianClosed (Psh C) :=
+def diagCCC (C : Type v₁) [SmallCategory C] : CartesianClosed (C ⥤ Type v₁) :=
   CartesianClosed.mk _
     (fun F => by
       letI := FunctorCategory.prodPreservesColimits F
       have := isLeftAdjointOfPreservesColimits (prod.functor.obj F)
       exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
+
+def pshCCC {C : Type v₁} [SmallCategory C] : CartesianClosed (Psh C) :=
+  diagCCC (Cᵒᵖ)
+
 /-!
 # 2. The (dual) category of elements
 The category of elements of a *contravariant* functor P : Cᵒᵖ ⥤ Type is the opposite of the category of elements of the covariant functor P : Cᵒᵖ ⥤ Type.
 The difference is seen in the projection OpEl(P) ⥤ C , versus El(P) ⥤ Cᵒᵖ.
 
-Given a functor `P : Cᵒᵖ ⥤ Type`, an object of
-`P.OpElements` is a pair `(X : C, x : P.obj X)`.
-A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C` for which `P.map f` takes `y` back to `x`.
+Given a functor `P : Cᵒᵖ ⥤ Type`, an object of `P.OpElements` is a pair `(X : C, x : P.obj X)`. A morphism `(X, x) ⟶ (Y, y)` is a morphism `f : X ⟶ Y` in `C` for which `P.map f` takes `y` back to `x`.
 
-We show that (Elements P)ᵒᵖ is equivalent to the comma category Yoneda/P.
+We show that (OpElements P) = (Elements P)ᵒᵖ is equivalent to the comma category (yoneda, P).
 -/
 
 --noncomputable section Elements
@@ -105,6 +109,7 @@ The category structure on `P.OpElements`, for `P : Cᵒᵖ ⥤ Type`.  A morphis
 
 namespace CategoryOfElements
 namespace Equivalence
+namespace Functor
 
 --def elementsOpIsOpElements {P : Psh C} : (Elements P)ᵒᵖ ≌ (OpElements P) := sorry
 
@@ -117,12 +122,18 @@ def costructuredArrowYonedaEquivalenceOp (P : Psh C) :
   Equivalence.mk (toCostructuredArrow P) (fromCostructuredArrow P).rightOp
     (NatIso.op (eqToIso (from_toCostructuredArrow_eq P))) (eqToIso <| to_fromCostructuredArrow_eq P)
 
-def equivOp (C D : Type*)[Category C][Category D] : (C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := sorry
+def equivOp (C D : Type*)[Category C][Category D] :
+(C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := by
+  intro e
+  apply Equivalence.mk
+  · sorry
+  · sorry
+  · exact Functor.op (e.functor)
+  · exact Functor.op (e.inverse)
 
 def equivSymm (C D : Type*)[Category C][Category D] : (C ≌ D) → (D ≌ C) := symm
 
-def equivTrans {C D E : Type*}[Category C][Category D][Category E] (d : C ≌ D) (e : D ≌ E) :
-    (C ≌ E) := trans d e
+def equivTrans {C D E : Type*}[Category C][Category D][Category E] (d : C ≌ D) (e : D ≌ E) : (C ≌ E) := trans d e
 
 def equivPsh {C D : Type*} [Category C][Category D] :
   (C ≌ D) → (Psh C ≌ Psh D) := by
@@ -177,16 +188,13 @@ def overPshIsPshOpElements {P : Psh C} :
 
 /-!
 # 4. The slice category Psh(C)/P is a CCC
--/
-/-!
-Now that we have (Psh C)/P ≃ Psh((Elements P)ᵒᵖ), use the following to transfer CCC across the equivalence, from: mathlib4/Mathlib/CategoryTheory/Closed/Cartesian.lean
+We can transfer CCC across the equivalence (Psh C)/P ≃ Psh((Elements P)ᵒᵖ) using the following from: mathlib4/Mathlib/CategoryTheory/Closed/Cartesian.lean
 
-def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D :=
-  MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
+def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D := MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
 
 def pshOverCCC (P : Psh C) : CartesianClosed (Over P) :=
   cartesianClosedOfEquiv pshElementsOpIsOverPsh
 
-def allPshOverCCC : ∀(P : Psh C), CartesianClosed (Over P) :=
-fun (P : Psh C) => pshOverCCC (P : Psh C)
+def allPshOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
+fun P => (pshOverCCC P)
