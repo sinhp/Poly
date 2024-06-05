@@ -40,16 +40,7 @@ open Category Limits Functor Adjunction Over Opposite Equivalence
 
 @[simp]
 abbrev Psh (C : Type*) [SmallCategory C] := Cᵒᵖ ⥤ Type*
-/- Note (SH): In general `abbrev` works better with `simp` and instance inference. Another alternative is to use `notation`:
-`notation "Psh" "(" C ")" => Cᵒᵖ ⥤ Type` -/
-
-/- Using:
-instance {C : Type v₁} [SmallCategory C] : CartesianClosed (C ⥤ Type v₁) :=
-  CartesianClosed.mk _
-    (fun F => by
-      letI := FunctorCategory.prodPreservesColimits F
-      have := isLeftAdjointOfPreservesColimits (prod.functor.obj F)
-      exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
+/- Note (SH): In general `abbrev` works better with `simp` and instance inference. Another alternative is to use `notation`: `notation "Psh" "(" C ")" => Cᵒᵖ ⥤ Type`
 -/
 
 def diagCCC (C : Type v₁) [SmallCategory C] : CartesianClosed (C ⥤ Type v₁) :=
@@ -125,11 +116,7 @@ def costructuredArrowYonedaEquivalenceOp (P : Psh C) :
 def equivOp (C D : Type*)[Category C][Category D] :
 (C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := by
   intro e
-  apply Equivalence.mk
-  · sorry
-  · sorry
-  · exact Functor.op (e.functor)
-  · exact Functor.op (e.inverse)
+  exact op e
 
 def equivSymm (C D : Type*)[Category C][Category D] : (C ≌ D) → (D ≌ C) := symm
 
