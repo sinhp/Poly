@@ -477,8 +477,8 @@ instance cartesianClosed' [HasFiniteWidePullbacks C] [LexLocallyCartesianClosed 
 -- Might be useful to have products as pullbacks over terminal.
 -- TODO: figure out a way to not include `HasFiniteProducts C`, this is perhaps related to the fact that there is not instance of `HasFiniteProducts C` from `HasTerminal C` and `HasFiniteWidePullbacks C`.
 instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexStableColimLocallyCartesianClosed C] :
-    CartesianClosed C := by
-  sorry
+    CartesianClosed C :=
+  cartesianClosedOfEquiv (equivOverTerminal C (terminal C) terminalIsTerminal).symm
 
 -- TODO (SH): The slices of a locally cartesian closed category are locally cartesian closed.
 
