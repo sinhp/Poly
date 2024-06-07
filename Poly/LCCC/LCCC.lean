@@ -483,3 +483,35 @@ instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexSt
 -- TODO (SH): The slices of a locally cartesian closed category are locally cartesian closed.
 
 --TODO (SH): We need to prove some basic facts about pushforwards.
+
+namespace LCC
+
+-- ER What is the difference between a class and a structure?
+class lexLCC (C : Type u) [Category.{v} C] [HasFiniteWidePullbacks C] where
+  over_cc : Π (I : C), CartesianClosed (Over I)
+  pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
+  adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
+
+-- ER I think the variable lexStableColimitLCC C is still in play here. How do I turn this off? With a section?
+def mkOfOverCC [HasFiniteWidePullbacks C][LexLocallyCartesianClosed C] : lexLCC C where
+  over_cc := LexLocallyCartesianClosed.over_cc
+  pushforward := LexLocallyCartesianClosed.pushforwardFunctor
+  adj := LexLocallyCartesianClosed.pushforwardAdj
+
+def mkOfPushforwardAdj  [HasFiniteWidePullbacks C][LexStableColimLocallyCartesianClosed C] : lexLCC C where
+  over_cc := by
+    apply LexStableColimLocallyCartesianClosed.cartesianClosedOfOver
+    -- ER should be able to simplify this.
+  pushforward := pushforward
+  adj := adj
+
+end LCC
+namespace BeckChevalley
+
+
+end BeckChevalley
+
+
+
+
+-- variable [HasFiniteWidePullbacks C] [lexLCC C]
