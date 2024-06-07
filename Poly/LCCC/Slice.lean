@@ -6,6 +6,7 @@ Authors: Emily Riehl
 
 import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.CategoryTheory.Functor.Category
+import Mathlib.CategoryTheory.EqToHom
 
 /-!
 # Slice categories from scratch
@@ -68,42 +69,13 @@ def compFunctor {X Y : C} (f : X ⟶ Y) : (Slice X) ⥤ (Slice Y) where
     w := by rw [← assoc, u.w]
   }
 
-structure UnpackedSliceFunctor (D) [Category D] (X) where
-  dom : D → C
-  hom (a) : dom a ⟶ X
-  map {a b : D} : (a ⟶ b) → (dom a ⟶ dom b)
-
-def unpackSliceFunctor {D} [Category D] {X : C} (F : D ⥤ Slice X) : UnpackedSliceFunctor D X where
-  dom := fun x => (F.obj x).dom
-  hom := fun x => (F.obj x).hom
-  map := fun f => (F.map f).1
-
-theorem unpackSliceFunctor.inj {D} [Category D] {X : C} {F G : D ⥤ Slice X}
-    (eq : unpackSliceFunctor F = unpackSliceFunctor G) : F = G :=
-  let f (F : D ⥤ Slice X) : { F : UnpackedSliceFunctor D X //
-    (∀ {x x' : D} (u : x ⟶ x'), F.map u ≫ F.hom x' = F.hom x) ∧
-    (∀ X, F.map (𝟙 X) = 𝟙 (F.dom X)) ∧
-    (∀ {a b c} (f : a ⟶ b) (g : b ⟶ c), F.map (f ≫ g) = F.map f ≫ F.map g) } :=
-  ⟨unpackSliceFunctor F,
-    fun u => (F.map u).2,
-    fun X => (SliceMorphism.ext_iff ..).1 (F.map_id X),
-    fun f g => (SliceMorphism.ext_iff ..).1 (F.map_comp f g)⟩
-  let g F : D ⥤ Slice X := {
-    obj := fun x => ⟨F.1.dom x, F.1.hom x⟩
-    map := fun x => ⟨F.1.map x, F.2.1 x⟩
-    map_id := fun x => (SliceMorphism.ext_iff ..).2 (F.2.2.1 x)
-    map_comp := fun f g => (SliceMorphism.ext_iff ..).2 (F.2.2.2 f g)
-  }
-  (show Function.LeftInverse g f from fun _ => rfl).injective (Subtype.ext eq)
-
 theorem compFunctorial.comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     compFunctor f ⋙ compFunctor g = compFunctor (f ≫ g) := by
-  apply unpackSliceFunctor.inj
-  dsimp [unpackSliceFunctor]
-  congr 1; ext x
-  dsimp [compFunctor]
-  rw [assoc]
-
+  dsimp [sliceCategory, Functor.comp, compFunctor]
+  congr! 4
+  · rw [assoc]
+  · subst_vars
+    congr! 3 <;> rw [assoc]
 
   -- show ({obj := {..}, ..} : Comma _ _ ⥤ Comma _ _ ) = {..}
   -- congr 2
