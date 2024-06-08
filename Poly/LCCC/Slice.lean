@@ -6,6 +6,7 @@ Authors: Emily Riehl
 
 import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.CategoryTheory.Functor.Category
+import Mathlib.CategoryTheory.EqToHom
 
 /-!
 # Slice categories from scratch
@@ -70,23 +71,11 @@ def compFunctor {X Y : C} (f : X ⟶ Y) : (Slice X) ⥤ (Slice Y) where
 
 theorem compFunctorial.comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     compFunctor f ⋙ compFunctor g = compFunctor (f ≫ g) := by
-  show ({..} : Slice _ ⥤ Slice _) = {..}
-  congr
-  · refine funext ?e_toPrefunctor.h.e_5.h.h
-    intro x
-    show ({.. } : Slice _) = {..}
-    congr 1
-    unfold compFunctor
-    dsimp
-    rw [assoc]
-  · unfold compFunctor
-
-    refine Function.hfunext rfl ?e_toPrefunctor.h.e_6.h
-    intro x x' prf
-    refine Function.hfunext rfl ?e_toPrefunctor.h.e_6.h.h
-    intro y y' prf'
-
-
+  dsimp [sliceCategory, Functor.comp, compFunctor]
+  congr! 4
+  · rw [assoc]
+  · subst_vars
+    congr! 3 <;> rw [assoc]
 
   -- show ({obj := {..}, ..} : Comma _ _ ⥤ Comma _ _ ) = {..}
   -- congr 2
