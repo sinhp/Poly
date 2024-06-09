@@ -10,6 +10,7 @@ import Mathlib.CategoryTheory.Closed.Cartesian
 import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
+import Mathlib.CategoryTheory.IsConnected
 import Mathlib.Tactic.ApplyFun
 
 -- All the imports below are transitively imported by the above import.
@@ -29,7 +30,7 @@ import Mathlib.Tactic.ApplyFun
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction Over
+open CategoryTheory Category Limits Functor Adjunction Over IsConnected
 
 universe v u
 
@@ -129,29 +130,29 @@ def pullbackCompositionIsBinaryProduct [HasPullbacks C] {I : C} (f x : Over I) :
     case h.h₁ =>
       simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
 
-def Iso [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
+def OverProdIso [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
     (Over.map f.hom).obj ((baseChange f.hom).obj x) ≅ Limits.prod f x := by
   apply IsLimit.conePointUniqueUpToIso (pullbackCompositionIsBinaryProduct f x) (prodIsProd f x)
 
-def Iso.symm [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
+def OverProdIso.symm [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
     Limits.prod f x ≅ (Over.map f.hom).obj ((baseChange f.hom).obj x) := by
   apply IsLimit.conePointUniqueUpToIso (prodIsProd f x) (pullbackCompositionIsBinaryProduct f x)
 
 @[simp]
-theorem IsoLeftInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
-    (Iso f x).hom ≫ (Iso.symm f x).hom = 𝟙 _ :=
-  by exact (Iso.hom_comp_eq_id (Iso f x)).mpr rfl
+theorem OverProdIsoLeftInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
+    (OverProdIso f x).hom ≫ (OverProdIso.symm f x).hom = 𝟙 _ :=
+  by exact (Iso.hom_comp_eq_id (OverProdIso f x)).mpr rfl
 
 @[simp]
-theorem IsoRightInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
-    (Iso.symm f x).hom ≫ (Iso f x).hom = 𝟙 _ :=
-  by exact (Iso.hom_comp_eq_id (Iso.symm f x)).mpr rfl
+theorem OverProdIsoRightInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
+    (OverProdIso.symm f x).hom ≫ (OverProdIso f x).hom = 𝟙 _ :=
+  by exact (Iso.hom_comp_eq_id (OverProdIso.symm f x)).mpr rfl
 
 @[simp]
 theorem Triangle_fst [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
     let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
-    (Iso f x).hom ≫ prod.fst = pbleg1 :=
+    (OverProdIso f x).hom ≫ prod.fst = pbleg1 :=
   IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
 
 @[simp]
@@ -159,14 +160,14 @@ theorem Triangle_snd [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
     let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
     Over.homMk (pullback.fst) (by simp [pullback.condition])
-    (Iso f x).hom ≫ prod.snd = pbleg2 :=
+    (OverProdIso f x).hom ≫ prod.snd = pbleg2 :=
   IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
 
 @[simp]
 theorem Triangle.symm_fst [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
     let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
-    (Iso.symm f x).hom ≫ pbleg1 = prod.fst :=
+    (OverProdIso.symm f x).hom ≫ pbleg1 = prod.fst :=
   IsLimit.conePointUniqueUpToIso_hom_comp (Limits.prodIsProd f x)
   (pullbackCompositionIsBinaryProduct f x) ⟨ WalkingPair.left⟩
 
@@ -175,31 +176,33 @@ theorem Triangle.symm_snd [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
     let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
     Over.homMk (pullback.fst) (by simp [pullback.condition])
-    (Iso.symm f x).hom ≫ pbleg2 = prod.snd :=
+    (OverProdIso.symm f x).hom ≫ pbleg2 = prod.snd :=
   IsLimit.conePointUniqueUpToIso_hom_comp (Limits.prodIsProd f x)
   (pullbackCompositionIsBinaryProduct f x) ⟨ WalkingPair.right⟩
 
-end OverBinaryProduct
-
 attribute [local instance] monoidalOfHasFiniteProducts
-def NatIsoOfBaseChangeComposition [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
+def NatOverProdIso [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
     (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app =>
     intro x
-    exact OverBinaryProduct.Iso f x
+    exact OverProdIso f x
   case naturality =>
     intros x y u
     simp
     ext1
     · simp_rw [assoc, prod.map_fst, comp_id]
-      rw [OverBinaryProduct.Triangle_fst, OverBinaryProduct.Triangle_fst]
+      rw [Triangle_fst, Triangle_fst]
       ext
       simp
     · simp_rw [assoc, prod.map_snd]
-      rw [OverBinaryProduct.Triangle_snd, ← assoc, OverBinaryProduct.Triangle_snd]
+      rw [Triangle_snd, ← assoc, Triangle_snd]
       ext
       simp
+
+
+end OverBinaryProduct
+open OverBinaryProduct
 
 /-
 Relating `StableColimLocallyCartesianClosed` and `LexOverCC`
@@ -218,7 +221,7 @@ instance cartesianClosedOfOver
   case adj =>
     exact ((adj f.hom).comp (Over.mapAdjunction f.hom))
   case iso =>
-    apply NatIsoOfBaseChangeComposition
+    apply NatOverProdIso
 
 instance [HasFiniteWidePullbacks C][LexPushforwardAdj C] :
     LexOverCC C where
@@ -286,7 +289,7 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X
 def PushforwardObjToLeg [HasFiniteWidePullbacks C] [LexOverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y) (u : (baseChange f).obj y ⟶ x) :
     y ⟶ Over.mk f ⟹ (Over.map f).obj x :=
-  CartesianClosed.curry ((OverBinaryProduct.Iso.symm (Over.mk f) y).hom ≫ (Over.map f).map u)
+  CartesianClosed.curry ((OverProdIso.symm (Over.mk f) y).hom ≫ (Over.map f).map u)
 
 -- The transpose of u : f^* y ⟶ x.
 def PushforwardObjTo [HasFiniteWidePullbacks C] [LexOverCC C]
@@ -303,9 +306,10 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [LexOverCC C]
     (homMk ((baseChange f).obj y).hom : (Over.map f).obj ((baseChange f).obj y) ⟶ Over.mk f) :=
       OverMorphism.ext (by aesop_cat)
   rw [conj]
-  exact (OverBinaryProduct.Triangle.symm_fst (Over.mk f) y).symm
+  exact (Triangle.symm_fst (Over.mk f) y).symm
 
 -- It's slightly easier to construct the transposed map f^*y ⟶ x from a cone over the pushforward cospan.
+attribute [local instance] monoidalOfHasFiniteProducts
 def PushforwardObjUP [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
     (f : X ⟶ Y) (x : Over X) (y : Over Y) (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
     (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x)) :
@@ -318,13 +322,13 @@ def PushforwardObjUP [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
   apply_fun CommaMorphism.left at cw
   fapply homMk
   · let vc := (CartesianClosed.uncurry v).left
-    let iso := (OverBinaryProduct.Iso (Over.mk f) y).hom.left
+    let iso := (OverProdIso (Over.mk f) y).hom.left
     exact (iso ≫ vc)
   · unfold CartesianClosed.uncurry
     dsimp at cw
     simp
     rw [← cw]
-    have limeq := OverBinaryProduct.Triangle_fst (Over.mk f) y
+    have limeq := Triangle_fst (Over.mk f) y
     apply_fun CommaMorphism.left at limeq
     simpa using limeq
 
@@ -340,7 +344,7 @@ def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [LexOverCC C]
   ext
   simp
   rw [← assoc]
-  have iso := OverBinaryProduct.IsoRightInv (Over.mk f) y
+  have iso := OverProdIsoRightInv (Over.mk f) y
   apply_fun (Over.forget Y).map at iso
   rw [(Over.forget Y).map_id, (Over.forget Y).map_comp] at iso
   simp at iso
@@ -365,7 +369,7 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶
           ext
           simp
           rw [← assoc]
-          have iso := OverBinaryProduct.IsoLeftInv (Over.mk f) y
+          have iso := OverProdIsoLeftInv (Over.mk f) y
           apply_fun (Over.forget Y).map at iso
           rw [(Over.forget Y).map_id, (Over.forget Y).map_comp] at iso
           simp at iso
@@ -388,8 +392,8 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶
       ext
       simp
       rw [← assoc _ _ (CartesianClosed.uncurry (v ≫ pullback.snd)).left]
-      have natiso := (NatIsoOfBaseChangeComposition (Over.mk f)).hom.naturality h
-      unfold NatIsoOfBaseChangeComposition at natiso
+      have natiso := (NatOverProdIso (Over.mk f)).hom.naturality h
+      unfold NatOverProdIso at natiso
       apply_fun CommaMorphism.left at natiso
       simp at natiso
       rw [natiso]
@@ -416,12 +420,11 @@ instance [HasFiniteWidePullbacks C] [LexOverCC C] :
   adj f := pushforwardAdj f
 
 end LexOverCC
--- namespace Pushforward
 
-variable [HasFiniteWidePullbacks C] [LexPushforwardAdj C]
-
-
+-- Is there a better way to open both a namespace and a section?
+section LexPushforwardAdjSection
 namespace LexPushforwardAdj
+variable [HasFiniteWidePullbacks C] [LexPushforwardAdj C]
 
 -- ER: Move this to a different namespace that assumes only that basechange exists.
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
@@ -440,6 +443,9 @@ and monic.
 -/
 
 end LexPushforwardAdj
+end LexPushforwardAdjSection
+
+
 
 -- Proof by Markus Himmel (with commentary by Dagur Asgeirsson)
 @[simps]
@@ -479,8 +485,6 @@ def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := 
 
 #check hasBinaryProducts_of_hasTerminal_and_pullbacks
 
-attribute [local instance] monoidalOfHasFiniteProducts
-
 -- Every locally cartesian closed category with a terminal object is cartesian closed.
 -- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
 -- instance cartesianClosed  [HasPullbacks C] [LocallyCartesianClosed C] [HasTerminal C] :
@@ -505,14 +509,14 @@ instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexPu
     CartesianClosed C :=
   cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
 
--- TODO (SH): The slices of a locally cartesian closed category are locally cartesian closed.
-
 --TODO (SH): We need to prove some basic facts about pushforwards.
 
 open LexOverCC
 open LexPushforwardAdj
 
--- ER I think the variable lexStableColimitLCC C is still in play here. How do I turn this off? With a section?
+namespace LexLCC
+
+-- The main theorems
 instance mkOfOverCC [HasFiniteWidePullbacks C][LexOverCC C] : lexLCC C where
   over_cc := LexOverCC.over_cc
   pushforward := pushforwardFunctor
@@ -524,6 +528,41 @@ instance mkOfPushforwardAdj [HasFiniteWidePullbacks C][LexPushforwardAdj C] : le
     -- ER should be able to simplify this.
   pushforward := LexPushforwardAdj.pushforward
   adj := LexPushforwardAdj.adj
+
+-- Are nested namespaces a thing?
+
+end LexLCC
+namespace Limits
+
+instance WidePullbackShapeIsConnected (J : Type) :
+    IsConnected (WidePullbackShape J) := by infer_instance
+
+end Limits
+namespace Over
+
+instance OverFiniteWidePullbacks [HasFiniteWidePullbacks C] (I : C) :
+    HasFiniteWidePullbacks (Over I) := by
+  exact hasFiniteWidePullbacks_of_hasFiniteLimits (Over I)
+
+end Over
+
+namespace LexLCC
+
+instance OverLCC [HasFiniteWidePullbacks C][LexOverCC C] (I : C) : lexLCC (Over I) := by
+  have lem : Π (f : Over I), CartesianClosed (Over f) :=
+    fun f ↦ cartesianClosedOfEquiv (C := Over (f.left))
+      f.iteratedSliceEquiv.symm
+  have check : LexOverCC (Over I) := {
+    over_cc := lem
+  }
+  apply mkOfOverCC
+
+end LexLCC
+
+--
+
+-- The slices of a locally cartesian closed category are locally cartesian closed.
+
 
 namespace BeckChevalley
 
