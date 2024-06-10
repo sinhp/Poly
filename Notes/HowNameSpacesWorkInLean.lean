@@ -1,3 +1,5 @@
+def bar : Nat := 3
+
 namespace Foo
 
 def bar : Nat := 0
@@ -7,11 +9,17 @@ def baz : Nat := 1
 end Foo
 
 
--- #check bar -- fails because `bar` is not in the root namespace
+-- #check baz -- fails because `baz` is not in the root namespace
 
 section annonymous1
 
+#check bar
+
 #check Foo.bar
+
+#eval bar -- evaluates to 3
+
+#eval Foo.bar -- evaluates to 0
 
 #check Foo.baz
 
@@ -23,7 +31,15 @@ section annonymous1
 
 open Foo
 
-#check bar
+#check bar -- this is `Foo.bar`
+
+#check _root_.bar -- this is the root `bar` defined in the first line of this file outside the namespace `Foo`.
+
+-- #eval bar -- ambiguous, possible interpretations  ` _root_.bar : Nat` and ` Foo.bar : Nat`.
+
+#eval _root_.bar -- evaluates to 3
+
+#eval Foo.bar -- evaluates to 0
 
 #check baz
 
@@ -53,7 +69,7 @@ open Foo hiding bar
 
 #check baz -- works
 
-#check Foo.Odd.val
+
 
 
 end annonymous3
