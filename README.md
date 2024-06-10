@@ -68,6 +68,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 
 > 10. Steve Awodey, Natural models of homotopy type theory, Mathematical Structures in Computer Science, 28 2 (2016) 241-286, arXiv:1406.3219.
 
+> 11. Sean K. Moss and Tamara von Glehn. Dialectica models of type theory, LICS 2018. 
 
 
 
