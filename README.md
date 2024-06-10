@@ -28,7 +28,8 @@ As part of this formalization, we also formalize locally cartesian closed catego
 - [ ] Polynomial functors in locally cartesian closed categories
     - [x] Definition of locally cartesian closed category
     - [ ] Beck-Chevalley condition in LCCCs
-    - [x] Polynomial functors in LCCCs
+    - [x] Polynomial functors in LCCCs 
+    - [ ] Composition of polynomials
     - [ ] The bicategory of polynomial functors 
     - [ ] Cartesian closedness of a category of polynomial functors
 
