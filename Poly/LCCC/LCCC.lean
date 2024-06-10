@@ -52,29 +52,19 @@ section lccc_definitions
 
 variable (C : Type u) [Category.{v} C]
 
-class lexLCC (C : Type u) [Category.{v} C] [HasFiniteWidePullbacks C] where
+class LCC (C : Type u) [Category.{v} C] [HasFiniteWidePullbacks C] where
   over_cc : Π (I : C), CartesianClosed (Over I)
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
 
-class LexOverCC [HasFiniteWidePullbacks C] where
+class OverCC [HasFiniteWidePullbacks C] where
   over_cc : Π (I : C), CartesianClosed (Over I)
 
-attribute [instance] LexOverCC.over_cc
+attribute [instance] OverCC.over_cc
 
-class LexPushforwardAdj [HasFiniteWidePullbacks C] where
+class PushforwardAdj [HasFiniteWidePullbacks C] where
   pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
   adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
-
--- Note (SH): Maybe convenient to include the fact that lcccs have a terminal object?
--- Will see if that is needed. For now, we do not include that in the definition.
--- this is the general definition of a locally cartesian closed category where we do not assume a terminal object in `C`.
-class PushforwardAdj [HasPullbacks C] where
-  pushforward {X Y : C} (f : X ⟶ Y) : Over X ⥤ Over Y
-  adj (f : X ⟶ Y) : baseChange f ⊣ pushforward f := by infer_instance
-
-class StableColimLocallyCartesianClosed' [HasPullbacks C] where
-  pushforward {X Y : C} (f : X ⟶ Y) : IsLeftAdjoint (baseChange f) := by infer_instance
 
 end lccc_definitions
 
@@ -205,15 +195,15 @@ end OverBinaryProduct
 open OverBinaryProduct
 
 /-
-Relating `StableColimLocallyCartesianClosed` and `LexOverCC`
+Relating `StableColimLocallyCartesianClosed` and `OverCC`
 Given `f : A ⟶ B` in `C/B`, the iterated slice `(C/B)/f` is isomorphic to
 `C/A`, and so `f* : C/B ⥤ (C/B)/f` is 'the same thing' as pulling back
 morphisms along `f`.
 -/
-namespace LexPushforwardAdj
+namespace PushforwardAdj
 
 instance cartesianClosedOfOver
-[HasFiniteWidePullbacks C] [LexPushforwardAdj C] {I : C} :
+[HasFiniteWidePullbacks C] [PushforwardAdj C] {I : C} :
     CartesianClosed (Over I) := by
   refine .mk _ fun f ↦ .mk f (baseChange f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor ) ?adj ?iso )
   case functor =>
@@ -223,36 +213,36 @@ instance cartesianClosedOfOver
   case iso =>
     apply NatOverProdIso
 
-instance [HasFiniteWidePullbacks C][LexPushforwardAdj C] :
-    LexOverCC C where
+instance [HasFiniteWidePullbacks C][PushforwardAdj C] :
+    OverCC C where
   over_cc (I : C) := by infer_instance
 
-end LexPushforwardAdj
+end PushforwardAdj
 
-namespace LexOverCC
+namespace OverCC
 
 variable {C : Type u} [Category.{v} C]
 
--- Defining the pushforward functor from the hypothesis that C is LexOverCC.
-def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
+-- Defining the pushforward functor from the hypothesis that C is OverCC.
+def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) : (Over.mk (𝟙 Y)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) :=
   CartesianClosed.curry prod.fst
 
-def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
+def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) (x : Over X) : ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) :=
   (((exp (Over.mk f)).map) (Over.homMk x.hom))
 
 -- @[simps]
-def pushforwardObj [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶ Y) (x : Over X)
+def pushforwardObj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) (x : Over X)
     : Over Y :=
   pullback (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x)
 
-def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
+def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) (x x' : Over X) (u : x ⟶ x') :
     ((exp (Over.mk f)).obj ((Over.map f).obj x)) ⟶  ((exp (Over.mk f)).obj ((Over.map f).obj x')) :=
   (exp (Over.mk f)).map ((Over.map f).map u)
 
-def pushforwardMap [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶ Y) (x x' : Over X)
+def pushforwardMap [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) (x x' : Over X)
     (u : x ⟶ x') : (pushforwardObj f x) ⟶ (pushforwardObj f x') := by
   refine pullback.map (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x) (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f))
     ?_ ?_
@@ -265,7 +255,7 @@ def pushforwardMap [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶
     simp only [map_obj_left, mk_left, map_map_left, homMk_left, w]
 
 -- The pushforward functor constructed from cartesian closed slices.
-def pushforwardFunctor [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶ Y) :
+def pushforwardFunctor [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) :
     (Over X) ⥤ (Over Y) where
   obj x := pushforwardObj f x
   map u := pushforwardMap f _ _ u
@@ -283,16 +273,16 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X
     · unfold pushforwardMap pushforwardCospanLeg2Map
       simp
 
--- The construction of the pushforward adjunction from the hypothesis that C is LexOverCC.
+-- The construction of the pushforward adjunction from the hypothesis that C is OverCC.
 
 -- Towards the construction of the transpose of u : f^* y ⟶ x.
-def PushforwardObjToLeg [HasFiniteWidePullbacks C] [LexOverCC C]
+def PushforwardObjToLeg [HasFiniteWidePullbacks C] [OverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y) (u : (baseChange f).obj y ⟶ x) :
     y ⟶ Over.mk f ⟹ (Over.map f).obj x :=
   CartesianClosed.curry ((OverProdIso.symm (Over.mk f) y).hom ≫ (Over.map f).map u)
 
 -- The transpose of u : f^* y ⟶ x.
-def PushforwardObjTo [HasFiniteWidePullbacks C] [LexOverCC C]
+def PushforwardObjTo [HasFiniteWidePullbacks C] [OverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y) (u : (baseChange f).obj y ⟶ x) :
     y ⟶ (pushforwardFunctor f).obj x := by
   apply pullback.lift ((mkIdTerminal (X := Y)).from y) (PushforwardObjToLeg f x y u)
@@ -310,7 +300,7 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [LexOverCC C]
 
 -- It's slightly easier to construct the transposed map f^*y ⟶ x from a cone over the pushforward cospan.
 attribute [local instance] monoidalOfHasFiniteProducts
-def PushforwardObjUP [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
+def PushforwardObjUP [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) (x : Over X) (y : Over Y) (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
     (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x)) :
     (baseChange f).obj y ⟶ x := by
@@ -334,7 +324,7 @@ def PushforwardObjUP [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C}
 
 -- The heart of the calculation that these constructions are inverses one way around,
 -- checking that they recover the same cone leg over the pushforward cospan.
-def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [LexOverCC C]
+def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [OverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y)
     (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
     (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x)) : PushforwardObjToLeg f x y (PushforwardObjUP f x y v w) = v := by
@@ -352,7 +342,7 @@ def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [LexOverCC C]
   exact id_comp (CartesianClosed.uncurry v).left
 
 -- The pushforward adjunction from cartesian closed slices.
-def pushforwardAdj [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶ Y) :
+def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) :
     baseChange f ⊣ pushforwardFunctor f :=
   mkOfHomEquiv {
     homEquiv := fun y x =>
@@ -414,26 +404,23 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [LexOverCC C] {X Y : C} (f : X ⟶
       rw [← CartesianClosed.curry_natural_right, assoc, (Over.map f).map_comp]
   }
 
-instance [HasFiniteWidePullbacks C] [LexOverCC C] :
-    LexPushforwardAdj C where
+instance [HasFiniteWidePullbacks C] [OverCC C] :
+    PushforwardAdj C where
   pushforward f := pushforwardFunctor f
   adj f := pushforwardAdj f
 
-end LexOverCC
+end OverCC
 
 -- Is there a better way to open both a namespace and a section?
-section LexPushforwardAdjSection
-namespace LexPushforwardAdj
-variable [HasFiniteWidePullbacks C] [LexPushforwardAdj C]
+section PushforwardAdjSection
+namespace PushforwardAdj
 
--- ER: Move this to a different namespace that assumes only that basechange exists.
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
-def idPullbackIso (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
+def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
-def idIso (X : C) : (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
+def idIso [HasFiniteWidePullbacks C] [PushforwardAdj C] (X : C) : (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
   asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
 
--- end Pushforward
 
 /- SH: TODO
 Every LCCC with reflexive coequalizers is a regular category.
@@ -442,8 +429,8 @@ reflexive coequalizers, then every morphism factors into a regular epic
 and monic.
 -/
 
-end LexPushforwardAdj
-end LexPushforwardAdjSection
+end PushforwardAdj
+end PushforwardAdjSection
 
 
 
@@ -458,85 +445,27 @@ def equivOverTerminal (T : C) (h : IsTerminal T) : C ≌ Over T :=
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
 
--- Improvements to my version with help from the above, but of course their version is better.
-@[simps]
-def HasTerminalSlicePromotion [HasTerminal C] : C ⥤ (Over (terminal C)) where
-  obj X := Over.mk (terminal.from X)
-  map f := Over.homMk f (IsTerminal.hom_ext terminalIsTerminal _ _)
+open OverCC
+open PushforwardAdj
 
-def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := by
-  apply CategoryTheory.Equivalence.mk (HasTerminalSlicePromotion) (Over.forget (terminal C))
-    (NatIso.ofComponents (fun X => Iso.refl _))
-  · fapply NatIso.ofComponents
-    · intro X
-      fapply Over.isoMk
-      · apply Iso.refl _
-      · simp
-        apply IsTerminal.hom_ext
-        exact terminalIsTerminal
-    · aesop_cat
-
--- we should be able to infer all finite limits from pullbacks and terminal which is part of definition of `LexPushforwardAdj C`.
--- ER: commented out below because I now assume `HasFiniteWidePullbacks C` in the definition of `LexPushforwardAdj C`
--- instance [LexPushforwardAdj C] :
---     haveI : HasFiniteWidePullbacks C := by sorry -- TODO: figure out how we can inline an instance.
---     LexOverCC C where
---   over_cc I := by infer_instance
-
-#check hasBinaryProducts_of_hasTerminal_and_pullbacks
-
--- Every locally cartesian closed category with a terminal object is cartesian closed.
--- Note (SH): This is a bit of a hack. We really should not be needing `HasFiniteProducts C`
--- instance cartesianClosed  [HasPullbacks C] [LocallyCartesianClosed C] [HasTerminal C] :
---     haveI : HasBinaryProducts C := hasBinaryProducts_of_hasTerminal_and_pullbacks C
---     haveI : HasFiniteProducts C := by sorry --finiteProductsOfBinaryProducts
---     haveI : MonoidalCategory C := monoidalOfHasFiniteProducts C
---     CartesianClosed C where
---   closed X := {
---     rightAdj := sorry
---     adj := sorry
---   }
-
--- TODO : seems mathlib does not have (?) an instance for getting `HasFiniteProducts ` from `HasTerminal` and `HasFiniteWidePullbacks`. Worth checking on Zulip
--- Here we need the iso C/1 ≅ C (port it from mathlib)
-
-instance testing [HasTerminal C][HasFiniteWidePullbacks C] : HasFiniteLimits C := by exact
-  hasFiniteLimits_of_hasTerminal_and_pullbacks
-
-instance cartesianClosed' [HasTerminal C][HasFiniteWidePullbacks C] [LexOverCC C] :
-    haveI : HasFiniteProducts C := by infer_instance
-    CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
-
-
--- Might be useful to have products as pullbacks over terminal.
--- TODO: figure out a way to not include `HasFiniteProducts C`, this is perhaps related to the fact that there is not instance of `HasFiniteProducts C` from `HasTerminal C` and `HasFiniteWidePullbacks C`.
-instance cartesianClosed [HasFiniteWidePullbacks C] [HasFiniteProducts C] [LexPushforwardAdj C] :
-    CartesianClosed C :=
-  cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
-
---TODO (SH): We need to prove some basic facts about pushforwards.
-
-open LexOverCC
-open LexPushforwardAdj
-
-namespace LexLCC
+namespace LCC
 
 -- The main theorems
-instance mkOfOverCC [HasFiniteWidePullbacks C][LexOverCC C] : lexLCC C where
-  over_cc := LexOverCC.over_cc
+instance mkOfOverCC [HasFiniteWidePullbacks C][OverCC C] : LCC C where
+  over_cc := OverCC.over_cc
   pushforward := pushforwardFunctor
   adj := pushforwardAdj
 
-instance mkOfPushforwardAdj [HasFiniteWidePullbacks C][LexPushforwardAdj C] : lexLCC C where
+instance mkOfPushforwardAdj [HasFiniteWidePullbacks C][PushforwardAdj C] : LCC C where
   over_cc := by
     apply cartesianClosedOfOver
     -- ER should be able to simplify this.
-  pushforward := LexPushforwardAdj.pushforward
-  adj := LexPushforwardAdj.adj
+  pushforward := PushforwardAdj.pushforward
+  adj := PushforwardAdj.adj
 
 -- Are nested namespaces a thing?
 
-end LexLCC
+end LCC
 namespace Limits
 
 instance WidePullbackShapeIsConnected (J : Type) :
@@ -546,34 +475,37 @@ end Limits
 namespace Over
 
 instance OverFiniteWidePullbacks [HasFiniteWidePullbacks C] (I : C) :
-    HasFiniteWidePullbacks (Over I) := by
+     HasFiniteWidePullbacks (Over I) := by
   exact hasFiniteWidePullbacks_of_hasFiniteLimits (Over I)
-
-instance test [HasFiniteWidePullbacks C] : HasTerminal C := by infer_instance
 
 end Over
 
-namespace LexLCC
+namespace LCC
 
-instance OverLCC [HasFiniteWidePullbacks C][LexOverCC C] (I : C) : lexLCC (Over I) := by
+instance FiniteWidePullbacksTerminal.FiniteLimits [HasTerminal C][HasFiniteWidePullbacks C] :
+    HasFiniteLimits C := hasFiniteLimits_of_hasTerminal_and_pullbacks
+
+instance cartesianClosed [HasTerminal C][HasFiniteWidePullbacks C] [OverCC C] :
+    CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
+
+
+-- The slices of a locally cartesian closed category are locally cartesian closed.
+instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := by
   have lem : Π (f : Over I), CartesianClosed (Over f) :=
     fun f ↦ cartesianClosedOfEquiv (C := Over (f.left))
       f.iteratedSliceEquiv.symm
-  have check : LexOverCC (Over I) := {
+  have check : OverCC (Over I) := {
     over_cc := lem
   }
   apply mkOfOverCC
 
-end LexLCC
+end LCC
 
---
-
--- The slices of a locally cartesian closed category are locally cartesian closed.
 
 
 namespace BeckChevalley
 
 -- ER: Am I doing this right?
-variable [HasFiniteWidePullbacks C] (lccc : lexLCC C)
+variable [HasFiniteWidePullbacks C] (lccc : LCC C)
 
 end BeckChevalley
