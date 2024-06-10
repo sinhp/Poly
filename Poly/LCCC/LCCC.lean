@@ -499,9 +499,14 @@ def HasTerminalSliceEquivalence [HasTerminal C] : C ≌ (Over (terminal C))  := 
 
 -- TODO : seems mathlib does not have (?) an instance for getting `HasFiniteProducts ` from `HasTerminal` and `HasFiniteWidePullbacks`. Worth checking on Zulip
 -- Here we need the iso C/1 ≅ C (port it from mathlib)
-instance cartesianClosed' [HasFiniteWidePullbacks C] [LexOverCC C] :
-    haveI : HasFiniteProducts C := by sorry
-    CartesianClosed C := by sorry
+
+instance testing [HasTerminal C][HasFiniteWidePullbacks C] : HasFiniteLimits C := by exact
+  hasFiniteLimits_of_hasTerminal_and_pullbacks
+
+instance cartesianClosed' [HasTerminal C][HasFiniteWidePullbacks C] [LexOverCC C] :
+    haveI : HasFiniteProducts C := by infer_instance
+    CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
+
 
 -- Might be useful to have products as pullbacks over terminal.
 -- TODO: figure out a way to not include `HasFiniteProducts C`, this is perhaps related to the fact that there is not instance of `HasFiniteProducts C` from `HasTerminal C` and `HasFiniteWidePullbacks C`.
@@ -543,6 +548,8 @@ namespace Over
 instance OverFiniteWidePullbacks [HasFiniteWidePullbacks C] (I : C) :
     HasFiniteWidePullbacks (Over I) := by
   exact hasFiniteWidePullbacks_of_hasFiniteLimits (Over I)
+
+instance test [HasFiniteWidePullbacks C] : HasTerminal C := by infer_instance
 
 end Over
 
