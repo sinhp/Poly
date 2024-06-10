@@ -28,13 +28,18 @@ As part of this formalization, we also formalize locally cartesian closed catego
 - [ ] Polynomial functors in locally cartesian closed categories
     - [x] Definition of locally cartesian closed category
     - [ ] Beck-Chevalley condition in LCCCs
-    - [ ] Polynomial functors in LCCCs
-- [ ] The LCCC structure on presheaves of types
+    - [x] Polynomial functors in LCCCs
+    - [ ] The bicategory of polynomial functors 
+    - [ ] Cartesian closedness of a category of polynomial functors
+
+- [x] The LCCC structure on presheaves of types
   - [ ] Polynomial endofunctors on presheaves of types
   - [ ] CwFs as cocontinuous polynomials
-
+- [ ] Polynomials as models of intuitionistic linear logic
+- [ ] Generalized combinatorial species
 
 ### Resources 
+> _ [Wellfounded Trees and Dependent Polynomial Functors, Nicola Gambino⋆ and Martin Hyland](https://www.dpmms.cam.ac.uk/~martin/Research/Publications/2004/gh04.pdf)
 > - [Tutorial on Polynomial Functors and Type Theory, Steve Awodey](https://www.cmu.edu/dietrich/philosophy/hott/slides/polytutorial.pdf)
 > - [Polynomial functors and polynomial monads, Nicola Gambino and Joachim Kock](https://arxiv.org/abs/0906.4931)
 > - [Notes on Locally Cartesian Closed Categories, Sina Hazratpour](https://sinhp.github.io/files/CT/notes_on_lcccs.pdf)
