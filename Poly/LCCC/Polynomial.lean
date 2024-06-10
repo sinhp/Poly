@@ -22,9 +22,9 @@ noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction Over
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C]
 
-open LocallyCartesianClosed
+open LCC
 
 /-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I` and output variables in `O`. -/
 structure MvPoly (I O : C) :=
@@ -43,9 +43,9 @@ structure UvPoly :=
 
 namespace MvPoly
 
-open LocallyCartesianClosed
+open LCC
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C] (I O : C)
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C] (I O : C)
 
 section
 variable {B : Type} {E : B → Type}
@@ -76,9 +76,9 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
       right := sorry
       w := sorry
     }
-  inv := _
-  hom_inv_id := _
-  inv_hom_id := _
+  inv := sorry
+  hom_inv_id := sorry
+  inv_hom_id := sorry
 
 
 
@@ -93,7 +93,7 @@ end MvPoly
 
 namespace UvPoly
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [LocallyCartesianClosed C]
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C]
 
 /-- The identity polynomial functor in single variable. -/
 @[simps!]
