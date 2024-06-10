@@ -1,10 +1,10 @@
 /-
 The category of presheaves on a (small) cat C is an LCCC:
 (1) the category of presheaves on a (small) cat C is a CCC.
-(2) the category of elements of a presheaf P the comma category (yoneda, P)
+(2) the category of elements of a presheaf P is the comma category (yoneda, P)
 (3) the slice of presheaves over P is presheaves on (yoneda, P).
-(4) so every slice is a CCC by (1).
-(5) use the results on LCCCs to infer that presheaves is LCC.
+(4) every slice is a CCC by (1).
+(5) use the results in the file on LCCCs to infer that presheaves is LCC.
 -/
 
 import Mathlib.CategoryTheory.Closed.Types
@@ -106,8 +106,7 @@ def pshElementsOpIsOverPsh {P : Psh C} : Psh ((Elements P)ᵒᵖ) ≌ Over P :=
 
 /-!
 # 4. The slice category Psh(C)/P is a CCC
-We can transfer the CCC structure across the equivalence (Psh C)/P ≃ Psh((Elements P)ᵒᵖ) using the following:
-
+We transfer the CCC structure across the equivalence (Psh C)/P ≃ Psh((Elements P)ᵒᵖ) using the following:
 def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D := MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
 
@@ -117,7 +116,8 @@ def pshOverCCC (P : Psh C) : CartesianClosed (Over P) :=
 def allPshOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
   fun P => (pshOverCCC P)
 
+end CategoryOfElements
 /-!
 # 5. Presheaves is an LCCC
-Use results on locally cartesian closed categories.
+Use results in the file on locally cartesian closed categories.
 -/
