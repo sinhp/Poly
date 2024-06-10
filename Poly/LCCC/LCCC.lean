@@ -491,13 +491,9 @@ instance cartesianClosed [HasTerminal C][HasFiniteWidePullbacks C] [OverCC C] :
 
 -- The slices of a locally cartesian closed category are locally cartesian closed.
 instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := by
-  have lem : Π (f : Over I), CartesianClosed (Over f) :=
-    fun f ↦ cartesianClosedOfEquiv (C := Over (f.left))
-      f.iteratedSliceEquiv.symm
-  have check : OverCC (Over I) := {
-    over_cc := lem
-  }
-  apply mkOfOverCC
+  apply (config := { allowSynthFailures:= true}) mkOfOverCC
+  exact ⟨fun f => cartesianClosedOfEquiv (C := Over (f.left))
+      f.iteratedSliceEquiv.symm⟩
 
 end LCC
 
