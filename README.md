@@ -57,13 +57,13 @@ As part of this formalization, we also formalize locally cartesian closed catego
 
 > 4. Jean-Yves Girard. Normal functors, power series and λ-calculus. Ann. Pure Appl. Logic, 37(2):129–177, 1988. doi:10.1016/0168-0072(88)90025-5.
 
-> 5. David Gepner, Rune Haugseng, and Joachim Kock. 8-Operads as analytic monads. Interna- tional Mathematics Research Notices, 2021.
+> 5. David Gepner, Rune Haugseng, and Joachim Kock. 8-Operads as analytic monads. International Mathematics Research Notices, 2021.
 
 > 6. Nicola Gambino and Joachim Kock. Polynomial functors and polynomial monads. Mathematical Proceedings of the Cambridge Philosophical Society, 154(1):153–192, 2013.
 
 > 7. Marcelo Fiore, Nicola Gambino, Martin Hyland, and Glynn Winskel. The cartesian closed bicategory of generalised species of structures. J. Lond. Math. Soc. (2), 77(1):203–220, 2008.
 
-> 8. M. Fiore, N. Gambino, M. Hyland, and G. Winskel. Relative pseudomonads, Kleisli bicategories, and substitution monoidal structures. Selecta Mathematica, 24(3):2791–2830, 2018.
+> 8. E. Finster, S. Mimram, M. Lucas, T. Seiller. A Cartesian Bicategory of Polynomial Functors in Homotopy Type Theory, MFPS 2021.  https://arxiv.org/pdf/2112.14050.
 
 > 9. Steve Awodey and Clive Newstead. Polynomial pseudomonads and dependent type theory, 2018.
 
