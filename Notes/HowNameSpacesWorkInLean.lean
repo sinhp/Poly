@@ -23,10 +23,6 @@ section annonymous1
 
 #check Foo.baz
 
-#check Foo.Odd
-
-#check Foo.Odd.val
-
 -- or first open `Foo` in this section and then access `bar` and `baz` in it
 
 open Foo
