@@ -448,7 +448,7 @@ def equivOverTerminal (T : C) (h : IsTerminal T) : C ≌ Over T :=
 open OverCC
 open PushforwardAdj
 
-namespace LCC
+namespace LCCC
 
 -- The main theorems
 instance mkOfOverCC [HasFiniteWidePullbacks C][OverCC C] : LCC C where
@@ -465,7 +465,7 @@ instance mkOfPushforwardAdj [HasFiniteWidePullbacks C][PushforwardAdj C] : LCC C
 
 -- Are nested namespaces a thing?
 
-end LCC
+end LCCC
 namespace Limits
 
 instance WidePullbackShapeIsConnected (J : Type) :
@@ -480,7 +480,7 @@ instance OverFiniteWidePullbacks [HasFiniteWidePullbacks C] (I : C) :
 
 end Over
 
-namespace LCC
+namespace LCCC
 
 instance FiniteWidePullbacksTerminal.FiniteLimits [HasTerminal C][HasFiniteWidePullbacks C] :
     HasFiniteLimits C := hasFiniteLimits_of_hasTerminal_and_pullbacks
@@ -488,20 +488,10 @@ instance FiniteWidePullbacksTerminal.FiniteLimits [HasTerminal C][HasFiniteWideP
 instance cartesianClosed [HasTerminal C][HasFiniteWidePullbacks C] [OverCC C] :
     CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
 
-
 -- The slices of a locally cartesian closed category are locally cartesian closed.
 instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := by
   apply (config := { allowSynthFailures:= true}) mkOfOverCC
   exact ⟨fun f => cartesianClosedOfEquiv (C := Over (f.left))
       f.iteratedSliceEquiv.symm⟩
 
-end LCC
-
-
-
-namespace BeckChevalley
-
--- ER: Am I doing this right?
-variable [HasFiniteWidePullbacks C] (lccc : LCC C)
-
-end BeckChevalley
+end LCCC
