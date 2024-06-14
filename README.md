@@ -2,8 +2,7 @@
 
 # Lean4 Formalization Of Polynomial Functors
 
-This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify 
-polynomials. 
+This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions. 
 
 ## Acknowledgment 
 The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn. 
