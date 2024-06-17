@@ -12,6 +12,7 @@ import Mathlib.CategoryTheory.Adjunction.Over
 
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 -- import Mathlib.CategoryTheory.Category.Limit
+import Poly.LCCC.LCCC
 import Poly.Exponentiable
 
 /-!
@@ -49,7 +50,9 @@ variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWid
 @[simps!]
 def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, 𝟙 I⟩
 
-def functor {I O : C} (P : MvPoly I O) [Pushforward P.p] : Over I ⥤ Over O :=
+instance (I : C) : Pushforward (id I).p := sorry
+
+def functor (I O : C) (P : MvPoly I O) [Pushforward P.p] : Over I ⥤ Over O :=
   baseChange (P.s) ⋙ (Pushforward.functor P.p) ⋙ Over.map (P.t)
 
 variable (I O : C) (P : MvPoly I O)
@@ -86,7 +89,7 @@ end MvPoly
 
 
 namespace UvPoly
-
+#print LCC
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C]
 
 /-- The identity polynomial functor in single variable. -/
@@ -98,7 +101,9 @@ def id (X : C) : UvPoly C := ⟨X, X, 𝟙 X⟩
 def toMvPoly (P : UvPoly C) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨P.B, P.E, terminal.from P.E, P.p, terminal.from P.B⟩
 
-#check (toMvPoly _).functor
+-- #check (toMvPoly _).functor
+
+instance (P : UvPoly C) : Pushforward P.toMvPoly.p := sorry
 
 def functor' (P : UvPoly C) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor (⊤_ C) (⊤_ C) P.toMvPoly
 
