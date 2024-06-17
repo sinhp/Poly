@@ -12,7 +12,7 @@ import Mathlib.CategoryTheory.Adjunction.Over
 
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 -- import Mathlib.CategoryTheory.Category.Limit
-import Poly.LCCC.LCCC
+import Poly.Exponentiable
 
 /-!
 # Polynomial Functor
@@ -22,9 +22,7 @@ noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction Over
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C]
-
-open LCC
+variable {C : Type*} [Category C]
 
 /-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I` and output variables in `O`. -/
 structure MvPoly (I O : C) :=
@@ -43,28 +41,24 @@ structure UvPoly :=
 
 namespace MvPoly
 
-open LCC
+open Pushforward
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C] (I O : C)
-
-section
-variable {B : Type} {E : B → Type}
-#check Σ (b : B), E b
-
-end
+variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
 
 /-- The identity polynomial functor in many variables. -/
 @[simps!]
 def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, 𝟙 I⟩
 
-def functor (P : MvPoly I O) : Over I ⥤ Over O :=
-  baseChange (P.s) ⋙ (pushforward P.p) ⋙ Over.map (P.t)
+def functor {I O : C} (P : MvPoly I O) [Pushforward P.p] : Over I ⥤ Over O :=
+  baseChange (P.s) ⋙ (Pushforward.functor P.p) ⋙ Over.map (P.t)
 
-def apply (P : MvPoly I O) : Over I → Over O := (P.functor).obj
+variable (I O : C) (P : MvPoly I O)
+-- #check (Σ_ P.t)
 
-#check forgetAdjStar
+def apply (P : MvPoly I O) [Pushforward P.p] : Over I → Over O := (P.functor).obj
 
-def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
+
+def id_apply (q : X ⟶ I) [Pushforward q]: (id I).apply (Over.mk q) ≅ Over.mk q where
   hom := by
     simp [apply]
     simp [functor]
