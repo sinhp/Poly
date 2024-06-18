@@ -72,6 +72,8 @@ variable (I O : C) (P : MvPoly I O)
 
 def apply (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
+-- TODO: write a coercion from `MvPoly` to a functor for evalutation of polynomials at a given object.
+
 def id_apply (q : X ⟶ I) [CartesianExponentiable q]: (id I).apply (Over.mk q) ≅ Over.mk q where
   hom := by
     simp [apply]
@@ -92,7 +94,8 @@ def id_apply (q : X ⟶ I) [CartesianExponentiable q]: (id I).apply (Over.mk q) 
 
 -- TODO: basic operations: sum, product, composition, differential
 
--- TODO (Steve's idea): a subcategory of small maps to be thought of as context extensions in LCCC. These are morphisms for which the CartesianExponentiable functor has a further right adjoint (maps with tiny fibres).
+-- TODO: The set of connected components of el(P) is in bijection with the set P(1) ≅ A
+
 
 end MvPoly
 
