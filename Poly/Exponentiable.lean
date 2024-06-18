@@ -12,7 +12,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.IsConnected
 import Mathlib.Tactic.ApplyFun
-
+import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
 /-!
 # Expontentiable morphisms in a category
@@ -50,6 +50,11 @@ given a morphism `f : J ⟶ I` in a category `C`,
                     f
 ```
 
+Using the notation above, we have
+* `hom_eq_pullback_snd` proves that `(Δ_ f Over.mk p).hom` is `pullback.snd`
+* `natIsoTensorLeft` proves that `Δ_ f` ⋙ `Σ_ f` is isomorphic to the product functor `f × _` in the slice category `Over I`. See
+We shall prove that
+
 -/
 
 
@@ -60,7 +65,7 @@ open CategoryTheory Category MonoidalCategory Limits Functor Adjunction IsConnec
 
 namespace baseChange
 
-variable {C : Type*} [Category C]
+variable {C : Type*} [Category C] [HasPullbacks C]
 
 -- local notation "Σ_" f => Prefunctor.obj (Functor.toPrefunctor (Over.map f))
 
@@ -72,19 +77,23 @@ local notation "Σ_" => Over.map
 
 local notation "Δ_" => baseChange
 
-example [HasPullbacks C] (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
+example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
     pullback p f ⟶ X := by
   exact pullback.fst
 
 
 /-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
-lemma hom_eq_pullback_snd [HasPullbacks C] {I J : C} (f : J ⟶ I) (X : Over I):
+lemma hom_eq_pullback_snd {I J : C} (f : J ⟶ I) (X : Over I):
     ((Δ_ f).obj X).hom = pullback.snd := by
+  rfl
+
+example {I : C} (f : J ⟶ I) (p : X ⟶ I) :
+    ((Δ_ f).obj (Over.mk p)).hom = pullback.snd := by
   rfl
 
 /-- For objects `X` and `Y` in `Over I`, the base-change of `X` along `Y.hom` is
 equal to `pullback.snd : pullback X.hom Y.hom ⟶ Y.left` -/
-example [HasPullbacks C] {I : C} (X Y : Over I) :
+example {I : C} (X Y : Over I) :
     ((Δ_ Y.hom).obj X).hom = pullback.snd := by
   rfl
 
@@ -132,7 +141,7 @@ def isLimitPullbackConeId {I J : C} (f : J ⟶ I) :
 
 -- Note (SH): Weird that this is not in mathlib!
 -- Also stuck at naturality sorry
-def id [HasPullbacks C] (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ := by
+def id (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ := by
   symm
   refine' NatIso.ofComponents (fun X => _) (fun {X Y} f => _)
   · simp [baseChange]
@@ -259,45 +268,55 @@ local notation "Σ_" => Over.map
 
 local notation "Δ_" => baseChange
 
-class Pushforward {X Y : C} (f : X ⟶ Y) where
+class CartesianExponentiable {X Y : C} (f : X ⟶ Y) where
   functor : Over X ⥤ Over Y
   adj : baseChange f ⊣ functor := by infer_instance
 
-prefix:75 "Π_" => Pushforward.functor
+prefix:75 "Π_" => CartesianExponentiable.functor
 
-namespace Pushforward
+namespace CartesianExponentiable
 
 variable {C : Type*} [Category C] [HasFiniteWidePullbacks C]
 
 attribute [local instance] monoidalOfHasFiniteProducts
 
 /-- The identity morphisms `𝟙` are exponentiable. -/
-instance id_exponentiable {I : C} : Pushforward (𝟙 I) where
+instance id {I : C} : CartesianExponentiable (𝟙 I) where
   functor := 𝟭 (Over I)
   adj := by
     fapply ofNatIsoLeft (F:= 𝟭 _) ?adj (baseChange.id I).symm
     exact Adjunction.id
 
-instance comp_exponentiable {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [Pushforward f] [Pushforward g] : Pushforward (f ≫ g) where
+
+instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
+    [CartesianExponentiable f] [CartesianExponentiable g] :
+    CartesianExponentiable (f ≫ g) where
   functor := (Π_ f) ⋙ (Π_ g)
   adj := by
     fapply ofNatIsoLeft  ?adj ?iso
-    sorry
-    sorry
-    sorry
-
+    fapply (Δ_ g) ⋙ (Δ_ f)
+    · apply Adjunction.comp
+      · exact CartesianExponentiable.adj
+      · exact CartesianExponentiable.adj
+    · fapply NatIso.ofComponents
+      · intro X
+        simp [Functor.comp, baseChange]
+        fapply Over.isoMk
+        · simp
+          --fapply IsLimit.conePointUniqueUpToIso ?fst ?snd
+          sorry
+        · sorry
+      · sorry
 
 /-- An arrow with a pushforward is exponentiable in the slice category. -/
-instance mkExponentiable [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [Pushforward f] : Exponentiable (Over.mk f) where
+instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [CartesianExponentiable f] : Exponentiable (Over.mk f) where
   rightAdj :=  (Δ_ f) ⋙ (Π_ f)
   adj := by
     fapply ofNatIsoLeft
     fapply Δ_ f ⋙ Σ_ f
     · apply Adjunction.comp
-      · exact Pushforward.adj
+      · exact CartesianExponentiable.adj
       · apply Over.mapAdjunction
     · exact natIsoTensorLeftOverMk f
 
-
-
-end Pushforward
+end CartesianExponentiable

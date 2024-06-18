@@ -440,10 +440,14 @@ def toOverTerminal (T : C) (h : IsTerminal T) : C ⥤ Over T where
   obj X := Over.mk (h.from _)
   map f := Over.homMk f
 
-def equivOverTerminal (T : C) (h : IsTerminal T) : C ≌ Over T :=
+def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
   CategoryTheory.Equivalence.mk (toOverTerminal T h) (Over.forget _)
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
+
+def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
+  equivOverTerminal' (⊤_ C) terminalIsTerminal
+
 
 open OverCC
 open PushforwardAdj
@@ -486,7 +490,7 @@ instance FiniteWidePullbacksTerminal.FiniteLimits [HasTerminal C][HasFiniteWideP
     HasFiniteLimits C := hasFiniteLimits_of_hasTerminal_and_pullbacks
 
 instance cartesianClosed [HasTerminal C][HasFiniteWidePullbacks C] [OverCC C] :
-    CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal (terminal C) terminalIsTerminal).symm
+    CartesianClosed C := cartesianClosedOfEquiv (equivOverTerminal).symm
 
 -- The slices of a locally cartesian closed category are locally cartesian closed.
 instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := by

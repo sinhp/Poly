@@ -14,7 +14,7 @@ import Mathlib.CategoryTheory.Whiskering
 
 import Mathlib.Tactic.ApplyFun
 
-import Poly.LCCC.LCCC
+import Poly.LCCC.Basic
 
 /-!
 # Beck-Chevalley natural transformations and natural isomorphisms
