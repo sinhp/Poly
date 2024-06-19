@@ -149,21 +149,18 @@ theorem pullback.NatTrans.isPullback.componentIsIso [HasPullbacks C] {W X Y Z : 
   let t := PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition
   have P := bigSquareIsPullback _ _ _ _ _ _ _ _ w.symm hyp (pullbackIsPullback y.hom h)
   have Q := pullbackIsPullback (y.hom ≫ k) g
-  have conemap : (PullbackCone.mk _ _
+  let conemap : (PullbackCone.mk _ _
         (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
           rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
     hom := pullback.NatTrans.app.map f g h k w y
     w := by
-      rintro ⟨l|r⟩
+      rintro (_|(left|right)) <;>
       · unfold app.map
         simp
-      · unfold app.map
-        simp
-        sorry
   }
   have mapiso := (IsLimit.hom_isIso P Q conemap)
   have underlyingmapiso := (Cones.forget _).map_isIso conemap
-  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by sorry
+  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by rfl
   rw [← dumb]
   exact ((Cones.forget _).map_isIso conemap)
 
