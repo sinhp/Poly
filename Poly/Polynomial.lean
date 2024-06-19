@@ -46,16 +46,21 @@ open CartesianExponentiable
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
 
+-- instance (I O : C) (P : MvPoly I O) : Inhabited (MvPoly I O) := ⟨P⟩
+
+-- instance (I O : C) (P : MvPoly I O) : CartesianExponentiable P.p := P.exp
+
+attribute [instance] MvPoly.exp
+
+attribute [instance] UvPoly.exp
+
 /-- The identity polynomial functor in many variables. -/
 @[simps!]
 def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.id, 𝟙 I⟩
 
-
-instance (I O : C) (P : MvPoly I O) : Inhabited (MvPoly I O) := ⟨P⟩
-
-instance (I O : C) (P : MvPoly I O) : CartesianExponentiable P.p := P.exp
-
 instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
+
+/-- The constant polynomial functor in many variables: for this we need the initial object. -/
 
 local notation "Σ_" => Over.map
 
@@ -104,6 +109,13 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] [LCC C]
 
+local notation "Σ_" => Over.map
+
+local notation "Δ_" => baseChange
+
+local notation "Π_" => CartesianExponentiable.functor
+
+
 /-- The identity polynomial functor in single variable. -/
 @[simps!]
 def id (X : C) : UvPoly C := ⟨X, X, 𝟙 X, by infer_instance⟩
@@ -120,5 +132,29 @@ def functor' (P : UvPoly C) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor
 /-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials. -/
 
 def functor (P : UvPoly C) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.functor'  ⋙ equivOverTerminal.inverse
+
+-- The projection `∑ b : B, X ^ (E b) ⟶ B`
+def proj (P : UvPoly C) (X : Over (⊤_ C)) :
+  ((Π_ P.p).obj ((Δ_ (terminal.from P.E)).obj X)).left ⟶ P.B :=
+  ((Δ_ (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
+
+-- set_option synthInstance.maxHeartbeats 100000 in
+def comp (P Q : UvPoly C) : UvPoly C :=
+  let E := P.E
+  let B := P.B
+  let D := Q.E
+  let C := Q.B
+  let f : E ⟶ B := P.p
+  let g : D ⟶ C := Q.p
+  {
+    B := P.functor.obj C
+    E := sorry
+    p := sorry
+    exp := sorry
+  }
+
+/-- The universal property of the polynomial functor.-/
+def equiv (P : UvPoly C) (Γ : C) (X : C) :
+    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ P.B, pullback P.p b ⟶ X := sorry
 
 end UvPoly
