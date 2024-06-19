@@ -53,7 +53,7 @@ instance map.square {W X Y Z : C}
   have fgiso := (mapComp f g).symm
   have hkiso := mapComp h k
   rw [w] at fgiso
-  exact (trans fgiso hkiso)
+  exact (Iso.trans fgiso hkiso)
 
 theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
 
@@ -78,13 +78,27 @@ theorem map.square'.app.left_id {W X Y Z : C}
   unfold map.square'
   simp
 
+theorem map.comp.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X) :
+    ((mapComp f g).hom.app x).left = 𝟙 (x.left) := by
+  unfold mapComp
+  simp
+
+theorem map.comp.symm.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X) :
+    ((mapComp f g).symm.hom.app x).left = 𝟙 (x.left) := by
+  unfold mapComp
+  simp
+
 theorem map.square.app.left_id {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (a : Over W) :
     ((map.square f g h k w).hom.app a).left = 𝟙 (a.left) := by
-  unfold map.square mapComp
-  simp
-  rw [← test]
+  unfold map.square
+  simp only [Iso.trans_hom, comp_left]
+  simp only [comp_obj, map_obj_left, Iso.instTransIso_trans, comp_app,
+    comp_left]
+  rw [map.comp.left_id]
+  simp only [eq_mp_eq_cast, comp_id]
+  rw [map.comp.symm.left_id]
   simp
   sorry
 
@@ -123,6 +137,7 @@ theorem pullback.NatTrans.app_pullback.lift [HasPullbacks C] {W X Y Z : C}
       }
     rw [mapAdjunction.counit.app_pullback.fst, ← assoc, ← assoc, pullback.lift_fst]
     simp only [id_comp, id_obj, const_obj_obj]
+    -- uses the sorried lemma here
     rw [map.square.app.left_id]
     simp
   · unfold app.map pullback.map
@@ -159,7 +174,6 @@ theorem pullback.NatTrans.isPullback.componentIsIso [HasPullbacks C] {W X Y Z : 
         simp
   }
   have mapiso := (IsLimit.hom_isIso P Q conemap)
-  have underlyingmapiso := (Cones.forget _).map_isIso conemap
   have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by rfl
   rw [← dumb]
   exact ((Cones.forget _).map_isIso conemap)
