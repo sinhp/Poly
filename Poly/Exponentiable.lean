@@ -103,7 +103,6 @@ example {I : C} (X Y : Over I) :
 --   rfl
 
 
-
 -- lemma baseChang_pullback_snd' [HasPullbacks C] {I : C} (X Y : Over I) :
 --     (Δ_ Y.hom |>.obj X).hom =  pullback.snd := by
 --   rfl
@@ -117,6 +116,17 @@ example {I : C} (X Y : Over I) :
 --   cases h
 --   cases h'
 --   rfl
+
+lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C) (X : C) :
+    (Over.star I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
+  simp [Over.star, Over.mk]
+
+
+-- lemma baseChange_terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : C) :
+--     ((Δ_ (terminal.from I)).obj _ ).hom = (Over.star I).obj X := by
+--   rfl
+
+-- Over.star -- Δ_ (prod.snd (X:= B) (Y:= E))
 
 #check forgetAdjStar
 
