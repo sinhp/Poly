@@ -45,19 +45,34 @@ end NaturalityOfWhiskering
 namespace Over
 variable {C : Type u} [Category.{v} C]
 
+@[simp]
+theorem eqToHom.left_eq {X Y : C}(f g : X ⟶ Y) (w : f = g) (x : Over X) :
+    ((eqToHom (congrArg Over.map w)).app x).left = 𝟙 (x.left) := by
+  subst w; rfl
+
 -- NOTE: If this were true, I'd replace map.square by an identity.
 theorem map.comp.eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
     map f ⋙ map g = map (f ≫ g) := by
-  show ({..} : Comma _ _ ⥤ Comma _ _ ) = {..}
+  fapply Functor.ext
+  · dsimp [Over, Over.map]
+    intro x
+    unfold Comma.mapRight
+    simp
+  · intros x y u
+    simp
+    ext
+    simp
+    sorry
+  --   simp_rw [eqToHom.left_eq]
+  --   aesop_cat
 
-  -- congr 2
-  -- rfl
+  --  show ({..} : Comma _ _ ⥤ Comma _ _ ) = {..}
 
-  dsimp [Over, Functor.comp, Over.map]
-  congr!
+  -- -- congr 2
+  -- -- rfl
 
-
-
+  -- dsimp [Over, Functor.comp, Over.map]
+  -- congr!
 
 
 
@@ -75,10 +90,6 @@ instance map.square {W X Y Z : C}
   have wiso := eqToIso (congrArg Over.map w)
 --  rw [w] at fgiso
   exact (Iso.trans (Iso.trans fgiso wiso) hkiso)
-
-theorem eqToHom.left_eq {X Y : C}(f g : X ⟶ Y) (w : f = g) (x : Over X) :
-    ((eqToHom (congrArg Over.map w)).app x).left = 𝟙 (x.left) := by
-  simp
 
 theorem map.comp.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X) :
     ((mapComp f g).hom.app x).left = 𝟙 (x.left) := by
@@ -103,8 +114,8 @@ theorem map.square.app.left_id {W X Y Z : C}
   simp only [comp_id, comp_left]
   rw [map.comp.symm.left_id]
   simp
+  erw [eqToHom.left_eq]
 
-  exact rfl
 
 /-- The Beck-Chevalley natural transformation. -/
 instance pullback.NatTrans [HasPullbacks C] {W X Y Z : C}
