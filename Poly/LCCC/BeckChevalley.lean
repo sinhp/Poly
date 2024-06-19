@@ -47,9 +47,23 @@ variable {C : Type u} [Category.{v} C]
 
 -- NOTE: If this were true, I'd replace map.square by an identity.
 theorem map.comp.eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
-    map f ⋙ map g = map (f ≫ g) := by sorry
+    map f ⋙ map g = map (f ≫ g) := by
+  show ({..} : Comma _ _ ⥤ Comma _ _ ) = {..}
+
+  -- congr 2
+  -- rfl
+
+  dsimp [Over, Functor.comp, Over.map]
+  congr!
+
+
+
+
+
 
 section BeckChevalleyUsingIsomorphism1
+
+theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
 
 --
 instance map.square {W X Y Z : C}
@@ -58,8 +72,13 @@ instance map.square {W X Y Z : C}
     Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k := by
   have fgiso := (mapComp f g).symm
   have hkiso := mapComp h k
-  rw [w] at fgiso
-  exact (Iso.trans fgiso hkiso)
+  have wiso := eqToIso (congrArg Over.map w)
+--  rw [w] at fgiso
+  exact (Iso.trans (Iso.trans fgiso wiso) hkiso)
+
+theorem eqToHom.left_eq {X Y : C}(f g : X ⟶ Y) (w : f = g) (x : Over X) :
+    ((eqToHom (congrArg Over.map w)).app x).left = 𝟙 (x.left) := by
+  simp
 
 theorem map.comp.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X) :
     ((mapComp f g).hom.app x).left = 𝟙 (x.left) := by
@@ -79,14 +98,13 @@ theorem map.square.app.left_id {W X Y Z : C}
   unfold map.square
   simp only [comp_obj, map_obj_left, comp_app,
     comp_left]
-  simp only [eq_mp_eq_cast]
   simp only [Iso.trans_hom, comp_app, comp_obj, comp_left, map_obj_left, Iso.instTransIso_trans]
   rw [map.comp.left_id]
   simp only [comp_id, comp_left]
---  simp only [eq_mp_eq_cast, comp_id]
   rw [map.comp.symm.left_id]
   simp
-  sorry
+
+  exact rfl
 
 /-- The Beck-Chevalley natural transformation. -/
 instance pullback.NatTrans [HasPullbacks C] {W X Y Z : C}
@@ -179,9 +197,6 @@ end BeckChevalleyUsingIsomorphism1
 
 -- NOTE: This is a repeat of the above with a less aesthetic definition of map square that lets me prove the Lemma. Here everything works.
 section BeckChevalleyUsingIsomorphism2
-
-
-theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
 
 instance map.squareALT {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
