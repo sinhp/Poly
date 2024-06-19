@@ -5,3 +5,4 @@ import Poly.LCCC.Basic
 import Poly.LCCC.Basic
 import Poly.Exponentiable
 import Poly.Polynomial
+import Poly.TempMates

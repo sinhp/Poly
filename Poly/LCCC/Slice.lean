@@ -18,7 +18,13 @@ open Category Functor
 
 universe v u
 
-variable {C : Type u} [Category.{v} C]
+variable {C D : Type u} [Category.{v} C][Category.{v} D]
+
+theorem LeftIdFunctor (F : C ⥤ D) : (𝟭 C ⋙ F) = F := by 
+  dsimp [Functor.comp] 
+
+theorem RightIdFunctor (F : C ⥤ D) : (F ⋙ 𝟭 D) = F := by 
+  dsimp [Functor.comp] 
 
 -- ER: What does structure mean?
 structure Slice (X : C) : Type max u v where

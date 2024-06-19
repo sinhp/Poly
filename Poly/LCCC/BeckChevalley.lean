@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emily Riehl
 -/
 
-import Mathlib.CategoryTheory.Adjunction.Mates
+-- import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.CategoryTheory.Functor.Basic
@@ -15,6 +15,7 @@ import Mathlib.CategoryTheory.Whiskering
 import Mathlib.Tactic.ApplyFun
 
 import Poly.LCCC.Basic
+import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
 
 /-!
 # Beck-Chevalley natural transformations and natural isomorphisms
