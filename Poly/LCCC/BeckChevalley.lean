@@ -14,7 +14,6 @@ import Mathlib.CategoryTheory.Whiskering
 
 import Mathlib.Tactic.ApplyFun
 
-import Poly.LCCC.Basic
 import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
 
 /-!
@@ -46,6 +45,13 @@ end NaturalityOfWhiskering
 namespace Over
 variable {C : Type u} [Category.{v} C]
 
+-- NOTE: If this were true, I'd replace map.square by an identity.
+theorem map.comp.eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
+    map f ⋙ map g = map (f ≫ g) := by sorry
+
+section BeckChevalleyUsingIsomorphism1
+
+--
 instance map.square {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
@@ -54,29 +60,6 @@ instance map.square {W X Y Z : C}
   have hkiso := mapComp h k
   rw [w] at fgiso
   exact (Iso.trans fgiso hkiso)
-
-theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
-
-instance map.square' {W X Y Z : C}
-    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) :
-    Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k := by
-  fapply NatIso.ofComponents
-  · intro a
-    refine isoMk ?app.hl ?app.hw
-    · simp only [comp_obj, map_obj_left]
-      exact (Iso.refl a.left)
-    · simp only [comp_obj, map_obj_left, const_obj_obj, id_eq, Iso.refl_hom, map_obj_hom, id_obj,
-      assoc, id_comp]
-      exact congrArg (CategoryStruct.comp a.hom) (Eq.symm w)
-  · aesop_cat
-
-theorem map.square'.app.left_id {W X Y Z : C}
-    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) (a : Over W) :
-    ((map.square' f g h k w).hom.app a).left = 𝟙 (a.left) := by
-  unfold map.square'
-  simp
 
 theorem map.comp.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X) :
     ((mapComp f g).hom.app x).left = 𝟙 (x.left) := by
@@ -88,16 +71,19 @@ theorem map.comp.symm.left_id {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) (x : Over X)
   unfold mapComp
   simp
 
+-- NOTE: This is one reason why the current definition of map.square is bad.
 theorem map.square.app.left_id {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (a : Over W) :
     ((map.square f g h k w).hom.app a).left = 𝟙 (a.left) := by
   unfold map.square
-  simp only [Iso.trans_hom, comp_left]
-  simp only [comp_obj, map_obj_left, Iso.instTransIso_trans, comp_app,
+  simp only [comp_obj, map_obj_left, comp_app,
     comp_left]
+  simp only [eq_mp_eq_cast]
+  simp only [Iso.trans_hom, comp_app, comp_obj, comp_left, map_obj_left, Iso.instTransIso_trans]
   rw [map.comp.left_id]
-  simp only [eq_mp_eq_cast, comp_id]
+  simp only [comp_id, comp_left]
+--  simp only [eq_mp_eq_cast, comp_id]
   rw [map.comp.symm.left_id]
   simp
   sorry
@@ -119,6 +105,7 @@ def pullback.NatTrans.app.map [HasPullbacks C] {W X Y Z : C}
     (forget X).obj ((baseChange h ⋙ map f).obj y) ⟶ (forget X).obj ((map k ⋙ baseChange g).obj y) :=
   pullback.map y.hom h (y.hom ≫ k) g (𝟙 y.left) f k (Eq.symm (id_comp (y.hom ≫ k))) w.symm
 
+-- NOTE: This is another reason why the map.square is bad.
 theorem pullback.NatTrans.app_pullback.lift [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (y : Over Y) :
@@ -185,18 +172,125 @@ theorem pullback.NatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
     IsIso (pullback.NatTrans f g h k w) := by
   apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
   intro y
-  have := pullback.NatTrans.isPullback.componentIsIso f g h k w y
+  have := pullback.NatTrans.isPullback.componentIsIso f g h k w hyp y
   apply (forget_reflects_iso (X := X)).reflects ((pullback.NatTrans f g h k w).app y)
+
+end BeckChevalleyUsingIsomorphism1
+
+-- NOTE: This is a repeat of the above with a less aesthetic definition of map square that lets me prove the Lemma. Here everything works.
+section BeckChevalleyUsingIsomorphism2
+
+
+theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
+
+instance map.squareALT {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) :
+    Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k := by
+  fapply NatIso.ofComponents
+  · intro a
+    refine isoMk ?app.hl ?app.hw
+    · simp only [comp_obj, map_obj_left]
+      exact (Iso.refl a.left)
+    · simp only [comp_obj, map_obj_left, const_obj_obj, id_eq, Iso.refl_hom, map_obj_hom, id_obj,
+      assoc, id_comp]
+      exact congrArg (CategoryStruct.comp a.hom) (Eq.symm w)
+  · aesop_cat
+
+theorem map.squareALT.app.left_id {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (a : Over W) :
+    ((map.squareALT f g h k w).hom.app a).left = 𝟙 (a.left) := by
+  unfold map.squareALT
+  simp
+
+
+/-- The Beck-Chevalley natural transformation. -/
+instance pullback.NatTransALT [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) :
+    baseChange h ⋙ Over.map f ⟶ Over.map k ⋙ baseChange g :=
+  (mateEquiv (mapAdjunction h) (mapAdjunction g)) ((map.squareALT f g h k w).hom)
+
+theorem pullback.NatTrans.app_pullback.liftALT [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (y : Over Y) :
+    (forget X).map ((NatTransALT f g h k w).app y) = pullback.NatTrans.app.map f g h k w y := by
+  dsimp
+  ext
+  · unfold app.map pullback.map
+    simp only [map_obj_left, baseChange_obj_left, id_obj, const_obj_obj, map_obj_hom, limit.lift_π,
+      PullbackCone.mk_pt, PullbackCone.mk_π_app, comp_id]
+    unfold pullback.NatTransALT mateEquiv
+    dsimp
+    unfold pullback.map
+    slice_lhs 2 3 =>
+      {
+        rw [pullback.lift_fst, ← assoc, pullback.lift_fst]
+      }
+    rw [mapAdjunction.counit.app_pullback.fst, ← assoc, ← assoc, pullback.lift_fst]
+    simp only [id_comp, id_obj, const_obj_obj]
+    rw [map.squareALT.app.left_id]
+    simp
+  · unfold app.map pullback.map
+    simp only [map_obj_left, baseChange_obj_left, id_obj, const_obj_obj, map_obj_hom, comp_id,
+      limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app]
+    unfold pullback.NatTransALT mateEquiv
+    dsimp
+    unfold pullback.map
+    slice_lhs 2 3 =>
+      {
+        rw [pullback.lift_snd, ← assoc, pullback.lift_snd]
+      }
+    simp only [comp_id, limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app]
+
+-- NB: I seem to have symmetry of HasPullback but not IsPullback
+theorem pullback.NatTrans.isPullback.componentIsIsoALT [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) (y : Over Y) :
+    IsIso ((forget X).map ((NatTransALT f g h k w).app y)) := by
+  rw [pullback.NatTrans.app_pullback.liftALT f g h k w y]
+  have s := PullbackCone.mk _ _
+        (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])
+  let t := PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition
+  have P := bigSquareIsPullback _ _ _ _ _ _ _ _ w.symm hyp (pullbackIsPullback y.hom h)
+  have Q := pullbackIsPullback (y.hom ≫ k) g
+  let conemap : (PullbackCone.mk _ _
+        (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
+    hom := pullback.NatTrans.app.map f g h k w y
+    w := by
+      rintro (_|(left|right)) <;>
+      · unfold app.map
+        simp
+  }
+  have mapiso := (IsLimit.hom_isIso P Q conemap)
+  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by rfl
+  rw [← dumb]
+  exact ((Cones.forget _).map_isIso conemap)
+
+/-- The Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
+theorem pullback.NatTrans.isPullback.isIsoALT [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) :
+    IsIso (pullback.NatTransALT f g h k w) := by
+  apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
+  intro y
+  have := pullback.NatTrans.isPullback.componentIsIsoALT f g h k w hyp y
+  apply (forget_reflects_iso (X := X)).reflects ((pullback.NatTransALT f g h k w).app y)
+
+end BeckChevalleyUsingIsomorphism2
 
 /-- The missing natural isomorphism between pullback functors. -/
 instance pullbackComp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     baseChange (f ≫ g) ≅ baseChange g ⋙ baseChange f := by
-  have := transferNatTransSelf_iso
+  have := conjugateEquiv
             (mapAdjunction (f ≫ g))
             ((mapAdjunction f).comp (mapAdjunction g)) (mapComp f g).symm.hom
   exact
     (asIso
-      (transferNatTransSelf
+      (conjugateEquiv
         (mapAdjunction (f ≫ g))
         ((mapAdjunction f).comp (mapAdjunction g))
         (mapComp f g).symm.hom))
@@ -230,11 +324,20 @@ instance pullback.NatIso' [HasPullbacks C] {W X Y Z : C}
 -- I think this should hold.
 theorem pullback.NatIso.eq [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k):
+    (pullback.NatIso f g h k w).hom = (pullback.NatIso' f g h k w).hom := by
+  unfold pullback.NatIso pullback.NatIso'
+  simp
+  sorry
+
+
+theorem pullback.NatIso.app.eq [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (z : Over Z):
     (pullback.NatIso f g h k w).app z = (pullback.NatIso' f g h k w).app z := by
   refine Iso.ext ?w
   unfold pullback.NatIso pullback.NatIso' pullbackComp
-  dsimp [transferNatTransSelf, transferNatTrans]
+  dsimp [conjugateEquiv, mateEquiv]
   simp
   sorry
 
