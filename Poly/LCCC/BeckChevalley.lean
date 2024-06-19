@@ -39,226 +39,12 @@ variable {F G : A ⥤ B}{H K : B ⥤ C}
 @[simp]
 theorem WhiskeringNaturality
     (α : F ⟶ G)(β : H ⟶ K) :
-    (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by aesop_cat
---   ext; unfold whiskerLeft; simp
+    (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by ext; unfold whiskerLeft; simp
 
 end NaturalityOfWhiskering
 
-section ReproveMates
-
-variable {C : Type u₁} {D : Type u₂} {E : Type u₃} {F : Type u₄}
-variable [Category.{v₁} C] [Category.{v₂} D]
- [Category.{v₃} E] [Category.{v₄} F]
-variable {G : C ⥤ E} {H : D ⥤ F} {L₁ : C ⥤ D} {R₁ : D ⥤ C} {L₂ : E ⥤ F} {R₂ : F ⥤ E}
-variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
-
-def RightMate :
-    (G ⋙ L₂ ⟶ L₁ ⋙ H₁) → (R₁ ⋙ G ⟶ H₁ ⋙ R₂) := by
-  intro α
-  have R₁Gη₂ := whiskerLeft (R₁ ⋙ G) adj₂.unit
-  have R₁αR₂ := whiskerRight (whiskerLeft R₁ α) R₂
-  have ε₁H₁R₂ := whiskerRight adj₁.counit (H₁ ⋙ R₂)
-  exact R₁Gη₂ ≫ R₁αR₂ ≫ ε₁H₁R₂
-
-def LeftMate :
-    (R₁ ⋙ G ⟶ H₁ ⋙ R₂) → (G ⋙ L₂ ⟶ L₁ ⋙ H₁) := by
-  intro α
-  have η₁GL₂ := whiskerRight adj₁.unit (G ⋙ L₂)
-  have L₁αL₂ := whiskerRight (whiskerLeft L₁ α) L₂
-  have H₁R₂ε₂ := whiskerLeft (L₁ ⋙ H₁) adj₂.counit
-  exact η₁GL₂ ≫ L₁αL₂ ≫ H₁R₂ε₂
-
-def Mates :
-    (G ⋙ L₂ ⟶ L₁ ⋙ H) ≃ (R₁ ⋙ G ⟶ H ⋙ R₂) where
-      toFun := by
-        intro α
-        have R₁Gη₂ := whiskerLeft (R₁ ⋙ G) adj₂.unit
-        have R₁αR₂ := whiskerRight (whiskerLeft R₁ α) R₂
-        have ε₁HR₂ := whiskerRight adj₁.counit (H ⋙ R₂)
-        exact R₁Gη₂ ≫ R₁αR₂ ≫ ε₁HR₂
-      invFun := by
-        intro β
-        have η₁GL₂ := whiskerRight adj₁.unit (G ⋙ L₂)
-        have L₁βL₂ := whiskerRight (whiskerLeft L₁ β) L₂
-        have HR₂ε₂ := whiskerLeft (L₁ ⋙ H) adj₂.counit
-        exact η₁GL₂ ≫ L₁βL₂ ≫ HR₂ε₂
-      left_inv := by
-        intro α
-        ext
-        unfold whiskerRight whiskerLeft
-        simp only [comp_obj, id_obj, Functor.comp_map, comp_app, map_comp, assoc, counit_naturality,
-          counit_naturality_assoc, left_triangle_components_assoc]
-        rw [← assoc, ← Functor.comp_map, α.naturality, Functor.comp_map, assoc, ← H.map_comp, left_triangle_components, map_id]
-        simp only [comp_obj, comp_id] -- Why can't I rewrite instead?
-
-        -- intro α
-        -- simp
-        -- rw [← whiskerRight_twice _ _ adj₁.counit]
-        -- rw [← whiskerRight_left _ (whiskerRight adj₁.counit H) _, whiskerRight_twice]
-        -- have step1 :=
-        --   WhiskeringNaturality
-        --     (whiskerLeft L₁ (whiskerRight adj₁.counit H)) adj₂.counit
-        -- have := Functor.id_comp H
-        -- rw [Functor.id_comp H] at step1
-
-        -- simp_rw [step1]
-        -- simp_rw [WhiskeringNaturality _ adj₂.counit]
-
--- WhiskeringNaturality α β :
---    (whiskerRight α H) ≫ (whiskerLeft G β)
---        = (whiskerLeft F β) ≫ (whiskerRight α K)
-      right_inv := by
-        intro β
-        ext
-        unfold whiskerLeft whiskerRight
-        simp only [comp_obj, id_obj, Functor.comp_map, comp_app, map_comp, assoc,
-          unit_naturality_assoc, right_triangle_components_assoc]
-        rw [← assoc, ← Functor.comp_map, assoc, ← β.naturality, ← assoc, Functor.comp_map, ← G.map_comp, right_triangle_components, map_id, id_comp]
-
-theorem RightMateEqualsTransferNatTrans
-    (α : G ⋙ L₂ ⟶ L₁ ⋙ H) :
-    RightMate adj₁ adj₂ α = (transferNatTrans adj₁ adj₂) α := by
-  ext; unfold RightMate transferNatTrans; simp
-
-theorem LeftMateEqualsTransferNatTrans.symm
-    (α : R₁ ⋙ G ⟶ H ⋙ R₂) :
-    LeftMate adj₁ adj₂ α = (transferNatTrans adj₁ adj₂).symm α := by
-  ext; unfold LeftMate transferNatTrans; simp
-
-end ReproveMates
-
-section MatesVComp
-
-variable {A : Type u₁} {B : Type u₂} {C : Type u₃}
-variable {D : Type u₄} {E : Type u₅} {F : Type u₆}
-variable [Category.{v₁} A] [Category.{v₂} B][Category.{v₃} C]
-variable [Category.{v₄} D] [Category.{v₅} E][Category.{v₆} F]
-variable {G₁ : A ⥤ C}{G₂ : C ⥤ E}{H₁ : B ⥤ D}{H₂ : D ⥤ F}
-variable {L₁ : A ⥤ B}{R₁ : B ⥤ A} {L₂ : C ⥤ D}{R₂ : D ⥤ C}
-variable {L₃ : E ⥤ F}{R₃ : F ⥤ E}
-variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂) (adj₃ : L₃ ⊣ R₃)
-
-def LeftAdjointSquare.vcomp :
-    (G₁ ⋙ L₂ ⟶ L₁ ⋙ H₁) → (G₂ ⋙ L₃ ⟶ L₂ ⋙ H₂) →
-    ((G₁ ⋙ G₂) ⋙ L₃ ⟶ L₁ ⋙ (H₁ ⋙ H₂)) := fun α β ↦
-  (whiskerLeft G₁ β) ≫ (whiskerRight α H₂)
-
-def RightAdjointSquare.vcomp :
-    (R₁ ⋙ G₁ ⟶ H₁ ⋙ R₂) → (R₂ ⋙ G₂ ⟶ H₂ ⋙ R₃) →
-    (R₁ ⋙ (G₁ ⋙ G₂) ⟶ (H₁ ⋙ H₂) ⋙ R₃) := fun α β ↦
-  (whiskerRight α G₂) ≫ (whiskerLeft H₁ β)
-
-theorem Mates.vcomp
-  (α : G₁ ⋙ L₂ ⟶ L₁ ⋙ H₁)
-  (β : G₂ ⋙ L₃ ⟶ L₂ ⋙ H₂) :
-  (Mates (G := G₁ ⋙ G₂) (H := H₁ ⋙ H₂) adj₁ adj₃) (LeftAdjointSquare.vcomp α β)
-    =
-  RightAdjointSquare.vcomp
-  ( (Mates (G := G₁) (H := H₁) adj₁ adj₂) α)
-  ( (Mates (G := G₂) (H := H₂) adj₂ adj₃) β)
-     := by
-  unfold LeftAdjointSquare.vcomp RightAdjointSquare.vcomp Mates
-  ext b
-  simp
-  slice_rhs 1 4 =>
-    {
-      rw [← assoc, ← assoc]
-      rw [← unit_naturality (adj₃)]
-    }
-  rw [L₃.map_comp, R₃.map_comp]
-  slice_rhs 3 4  =>
-    { rw [← Functor.comp_map G₂ L₃, ← R₃.map_comp]
-      rw [β.naturality]
-    }
-  rw [L₃.map_comp, R₃.map_comp]
-  slice_rhs 3 4 =>
-    { rw [← R₃.map_comp, ← Functor.comp_map G₂ L₃, ← assoc]
-      rw [β.naturality]
-    }
-  rw [R₃.map_comp, R₃.map_comp]
-  slice_rhs 2 3 =>
-    {
-      rw [← R₃.map_comp, ← Functor.comp_map G₂ L₃]
-      rw [β.naturality]
-    }
-  slice_rhs 4 5 =>
-    {
-      rw [← R₃.map_comp, Functor.comp_map L₂ _, ← Functor.comp_map _ L₂, ← H₂.map_comp]
-      rw [adj₂.counit.naturality]
-    }
-  simp
-  slice_rhs 4 5 =>
-    {
-      rw [← R₃.map_comp, ← H₂.map_comp, ← Functor.comp_map _ L₂]
-      rw [adj₂.counit.naturality]
-    }
-  simp
-  slice_rhs 3 4 =>
-    {
-      rw [← R₃.map_comp, ← H₂.map_comp]
-      rw [left_triangle_components]
-    }
-  simp only [map_id, id_comp]
-
-end MatesVComp
-
-section MatesHComp
-
-variable {A : Type u₁} {B : Type u₂} {C : Type u₃}
-variable {D : Type u₄} {E : Type u₅} {F : Type u₆}
-variable [Category.{v₁} A] [Category.{v₂} B][Category.{v₃} C]
-variable [Category.{v₄} D] [Category.{v₅} E][Category.{v₆} F]
-variable {G : A ⥤ D}{H : B ⥤ E}{K : C ⥤ F}
-variable {L₁ : A ⥤ B}{R₁ : B ⥤ A} {L₂ : D ⥤ E}{R₂ : E ⥤ D}
-variable {L₃ : B ⥤ C}{R₃ : C ⥤ B} {L₄ : E ⥤ F}{R₄ : F ⥤ E}
-variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
-variable (adj₃ : L₃ ⊣ R₃) (adj₄ : L₄ ⊣ R₄)
-
-def LeftAdjointSquare.hcomp :
-    (G ⋙ L₂ ⟶ L₁ ⋙ H) → (H ⋙ L₄ ⟶ L₃ ⋙ K) →
-    (G ⋙ (L₂ ⋙ L₄) ⟶ (L₁ ⋙ L₃) ⋙ K) := fun α β ↦
-  (whiskerRight α L₄) ≫ (whiskerLeft L₁ β)
-
-def RightAdjointSquare.hcomp :
-    (R₁ ⋙ G ⟶ H ⋙ R₂) → (R₃ ⋙ H ⟶ K ⋙ R₄) →
-    ((R₃ ⋙ R₁) ⋙ G ⟶ K ⋙ (R₄ ⋙ R₂)) := fun α β ↦
-  (whiskerLeft R₃ α) ≫ (whiskerRight β R₂)
-
-theorem Mates.hcomp
-    (α : G ⋙ L₂ ⟶ L₁ ⋙ H)
-    (β : H ⋙ L₄ ⟶ L₃ ⋙ K) :
-    (Mates (G := G) (H := K)
-      (adj₁.comp adj₃) (adj₂.comp adj₄)) (LeftAdjointSquare.hcomp α β) =
-    RightAdjointSquare.hcomp
-      ((Mates adj₁ adj₂) α)
-      ((Mates adj₃ adj₄) β) := by
-  unfold LeftAdjointSquare.hcomp RightAdjointSquare.hcomp Mates Adjunction.comp
-  ext c
-  simp
-  slice_rhs 3 4 =>
-    {
-      rw [← R₂.map_comp]
-      rw [← unit_naturality (adj₄)]
-    }
-  slice_rhs 2 3 =>
-    {
-      rw [← R₂.map_comp, ← assoc]
-      rw [← unit_naturality (adj₄)]
-    }
-  rw [R₂.map_comp, R₂.map_comp]
-  slice_rhs 4 5 =>
-    {
-      rw [← R₂.map_comp, ← R₄.map_comp, ← Functor.comp_map _ L₄]
-      rw [β.naturality]
-    }
-  simp only [comp_obj, Functor.comp_map, map_comp, assoc]
-
-end MatesHComp
-
 namespace Over
-
 variable {C : Type u} [Category.{v} C]
-
 
 instance map.square {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
@@ -269,14 +55,129 @@ instance map.square {W X Y Z : C}
   rw [w] at fgiso
   exact (trans fgiso hkiso)
 
--- The Beck-Chevalley natural transformation.
+theorem test {X : C} : (Iso.refl X).hom = 𝟙 X := by exact rfl
+
+instance map.square' {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) :
+    Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k := by
+  fapply NatIso.ofComponents
+  · intro a
+    refine isoMk ?app.hl ?app.hw
+    · simp only [comp_obj, map_obj_left]
+      exact (Iso.refl a.left)
+    · simp only [comp_obj, map_obj_left, const_obj_obj, id_eq, Iso.refl_hom, map_obj_hom, id_obj,
+      assoc, id_comp]
+      exact congrArg (CategoryStruct.comp a.hom) (Eq.symm w)
+  · aesop_cat
+
+theorem map.square'.app.left_id {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (a : Over W) :
+    ((map.square' f g h k w).hom.app a).left = 𝟙 (a.left) := by
+  unfold map.square'
+  simp
+
+theorem map.square.app.left_id {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (a : Over W) :
+    ((map.square f g h k w).hom.app a).left = 𝟙 (a.left) := by
+  unfold map.square mapComp
+  simp
+  rw [← test]
+  simp
+  sorry
+
+/-- The Beck-Chevalley natural transformation. -/
 instance pullback.NatTrans [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
     baseChange h ⋙ Over.map f ⟶ Over.map k ⋙ baseChange g :=
-  (transferNatTrans (G := Over.map f) (H := Over.map k) (mapAdjunction h) (mapAdjunction g)) ((map.square f g h k w).hom)
+  (mateEquiv (mapAdjunction h) (mapAdjunction g)) ((map.square f g h k w).hom)
 
--- The missing natural isomorphism between pullback functors
+/-- Calculating the counit components of mapAdjunction. -/
+theorem mapAdjunction.counit.app_pullback.fst  [HasPullbacks C] {X Y : C} (f : X ⟶ Y) (y : Over Y) :
+    ((mapAdjunction f).counit.app y).left = pullback.fst := by simp
+
+def pullback.NatTrans.app.map [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (y : Over Y) :
+    (forget X).obj ((baseChange h ⋙ map f).obj y) ⟶ (forget X).obj ((map k ⋙ baseChange g).obj y) :=
+  pullback.map y.hom h (y.hom ≫ k) g (𝟙 y.left) f k (Eq.symm (id_comp (y.hom ≫ k))) w.symm
+
+theorem pullback.NatTrans.app_pullback.lift [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (y : Over Y) :
+    (forget X).map ((NatTrans f g h k w).app y) = pullback.NatTrans.app.map f g h k w y := by
+  dsimp
+  ext
+  · unfold app.map pullback.map
+    simp only [map_obj_left, baseChange_obj_left, id_obj, const_obj_obj, map_obj_hom, limit.lift_π,
+      PullbackCone.mk_pt, PullbackCone.mk_π_app, comp_id]
+    unfold pullback.NatTrans mateEquiv
+    dsimp
+    unfold pullback.map
+    slice_lhs 2 3 =>
+      {
+        rw [pullback.lift_fst, ← assoc, pullback.lift_fst]
+      }
+    rw [mapAdjunction.counit.app_pullback.fst, ← assoc, ← assoc, pullback.lift_fst]
+    simp only [id_comp, id_obj, const_obj_obj]
+    rw [map.square.app.left_id]
+    simp
+  · unfold app.map pullback.map
+    simp only [map_obj_left, baseChange_obj_left, id_obj, const_obj_obj, map_obj_hom, comp_id,
+      limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app]
+    unfold pullback.NatTrans mateEquiv
+    dsimp
+    unfold pullback.map
+    slice_lhs 2 3 =>
+      {
+        rw [pullback.lift_snd, ← assoc, pullback.lift_snd]
+      }
+    simp only [comp_id, limit.lift_π, PullbackCone.mk_pt, PullbackCone.mk_π_app]
+
+-- NB: I seem to have symmetry of HasPullback but not IsPullback
+theorem pullback.NatTrans.isPullback.componentIsIso [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) (y : Over Y) :
+    IsIso ((forget X).map ((NatTrans f g h k w).app y)) := by
+  rw [pullback.NatTrans.app_pullback.lift f g h k w y]
+  have s := PullbackCone.mk _ _
+        (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])
+  let t := PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition
+  have P := bigSquareIsPullback _ _ _ _ _ _ _ _ w.symm hyp (pullbackIsPullback y.hom h)
+  have Q := pullbackIsPullback (y.hom ≫ k) g
+  have conemap : (PullbackCone.mk _ _
+        (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
+    hom := pullback.NatTrans.app.map f g h k w y
+    w := by
+      rintro ⟨l|r⟩
+      · unfold app.map
+        simp
+      · unfold app.map
+        simp
+        sorry
+  }
+  have mapiso := (IsLimit.hom_isIso P Q conemap)
+  have underlyingmapiso := (Cones.forget _).map_isIso conemap
+  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by sorry
+  rw [← dumb]
+  exact ((Cones.forget _).map_isIso conemap)
+
+/-- The Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
+theorem pullback.NatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) :
+    IsIso (pullback.NatTrans f g h k w) := by
+  apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
+  intro y
+  have := pullback.NatTrans.isPullback.componentIsIso f g h k w y
+  apply (forget_reflects_iso (X := X)).reflects ((pullback.NatTrans f g h k w).app y)
+
+/-- The missing natural isomorphism between pullback functors. -/
 instance pullbackComp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     baseChange (f ≫ g) ≅ baseChange g ⋙ baseChange f := by
   have := transferNatTransSelf_iso
@@ -298,10 +199,10 @@ instance pullback.NatIso [HasPullbacks C] {W X Y Z : C}
         (mapComp f g)
         (Trans.trans (map.square f g h k w) (mapComp h k).symm)
   have :=
-    (transferNatTransSelf_iso
+    (conjugateEquiv_iso
       (mapAdjunction (h ≫ k)) (mapAdjunction (f ≫ g))) orig.hom
   have conjiso : baseChange (h ≫ k) ≅ baseChange (f ≫ g)
-    := asIso ((transferNatTransSelf
+    := asIso ((conjugateEquiv
       (mapAdjunction (h ≫ k)) (mapAdjunction (f ≫ g)) ) orig.hom)
   exact (Trans.trans (Trans.trans (pullbackComp h k).symm conjiso)
             (pullbackComp f g))
