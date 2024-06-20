@@ -351,8 +351,8 @@ section conjugateEquiv
 
 variable {C : Type u₁} {D : Type u₂}
 variable [Category.{v₁} C] [Category.{v₂} D]
-variable {L₁ L₂ L₃ : C ⥤ D} {R₁ R₂ R₃ : D ⥤ C}
-variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂) (adj₃ : L₃ ⊣ R₃)
+variable {L₁ L₂ : C ⥤ D} {R₁ R₂ : D ⥤ C}
+variable (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
 
 /-- Given two adjunctions `L₁ ⊣ R₁` and `L₂ ⊣ R₂` both between categories `C`, `D`, there is a
 bijection between natural transformations `L₂ ⟶ L₁` and natural transformations `R₁ ⟶ R₂`. This is

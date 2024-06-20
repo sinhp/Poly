@@ -272,7 +272,7 @@ end baseChange
 
 open baseChange.overMap
 
-variable {C : Type*} [Category C] [HasFiniteWidePullbacks C]
+variable {C : Type*} [Category C] [HasPullbacks C]
 
 local notation "Σ_" => Over.map
 

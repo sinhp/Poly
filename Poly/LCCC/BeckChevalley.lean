@@ -102,14 +102,14 @@ def pullbackSquareIso [HasPullbacks C] {W X Y Z : C}
   conjugateIsoEquiv ((mapAdjunction h).comp (mapAdjunction k)) ((mapAdjunction f).comp (mapAdjunction g)) (mapSquareIso f g h k w)
 
 -- Why finite wide pullbacks and not just pullbacks?
-def pushforwardBeckChevalleyNatTrans [HasFiniteWidePullbacks C] {W X Y Z : C}
+def pushforwardBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h)
      : gexp.functor ⋙ baseChange k ⟶ baseChange f ⋙ hexp.functor :=
   conjugateEquiv ((mapAdjunction k).comp gexp.adj) (hexp.adj.comp (mapAdjunction f)) (pullbackBeckChevalleyNatTrans f g h k w)
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square. -/
-def pushforwardSquareIso [HasFiniteWidePullbacks C] {W X Y Z : C}
+def pushforwardSquareIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (fexp : CartesianExponentiable f) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h) (kexp : CartesianExponentiable k) : fexp.functor ⋙ gexp.functor ≅ hexp.functor ⋙ kexp.functor := conjugateIsoEquiv (gexp.adj.comp fexp.adj) (kexp.adj.comp hexp.adj) (pullbackSquareIso f g h k w)
 
@@ -178,8 +178,8 @@ theorem pullback.NatTrans.isPullback.componentIsIso [HasPullbacks C] {W X Y Z : 
   rw [← dumb]
   exact ((Cones.forget _).map_isIso conemap)
 
-/-- The Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
-theorem pullback.NatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
+/-- The pullback Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
+instance pullbackBeckChevalleyNatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) :
     IsIso (pullbackBeckChevalleyNatTrans f g h k w) := by
@@ -188,6 +188,14 @@ theorem pullback.NatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
   have := pullback.NatTrans.isPullback.componentIsIso f g h k w hyp y
   apply (forget_reflects_iso (X := X)).reflects
     ((pullbackBeckChevalleyNatTrans f g h k w).app y)
+
+/-- The pushforward Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
+instance pushforwardBeckChevalleyNatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
+    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h) :
+    IsIso (pushforwardBeckChevalleyNatTrans f g h k w gexp hexp) := by
+  have := pullbackBeckChevalleyNatTrans.isPullback.isIso f g h k w hyp
+  apply conjugateEquiv_iso
 
 end BeckChevalleyIsos
 
