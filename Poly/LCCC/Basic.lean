@@ -432,8 +432,6 @@ and monic.
 end PushforwardAdj
 end PushforwardAdjSection
 
-
-
 -- Proof by Markus Himmel (with commentary by Dagur Asgeirsson)
 @[simps]
 def toOverTerminal' (T : C) (h : IsTerminal T) : C ⥤ Over T where
@@ -450,16 +448,6 @@ def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
 
 def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
   equivOverTerminal' (⊤_ C) terminalIsTerminal
-
-section
-variable [HasTerminal C]
-#check Over (⊤_ C)
-#check C
-#check Cat.of
-#check Bundled.map
-
-end
-
 
 def isoOverTerminal [HasTerminal C] : Cat.of (ULift C) ≅ Cat.of (Over (⊤_ C)) where
   hom := {
