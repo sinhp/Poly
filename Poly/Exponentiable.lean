@@ -7,13 +7,15 @@ Authors: Sina Hazratpour
 import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.CategoryTheory.Closed.Monoidal
 import Mathlib.CategoryTheory.Closed.Cartesian
-import Mathlib.CategoryTheory.Adjunction.Mates
+-- import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.IsConnected
 import Mathlib.Tactic.ApplyFun
 import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
+import Poly.Basic -- some isos in here
+import Poly.TempMates
 
 /-!
 # Expontentiable morphisms in a category
@@ -181,19 +183,9 @@ def isLimitPullbackConeId {I J : C} (f : J ⟶ I) :
   · aesop_cat
 
 
--- Note (SH): Weird that this is not in mathlib!
--- Also stuck at naturality sorry
+-- ER: it's a mate:
 def id (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ := by
-  symm
-  refine' NatIso.ofComponents (fun X => _) (fun {X Y} f => _)
-  · simp [baseChange]
-    fapply Over.isoMk
-    · apply IsLimit.conePointUniqueUpToIso (isLimitPullbackConeId X.hom) (pullbackIsPullback _ _)
-    · apply IsLimit.conePointUniqueUpToIso_hom_comp (isLimitPullbackConeId (I:= I) (J:= X.left) X.hom) (pullbackIsPullback _ _) (.right)
-  . simp [Functor.id, baseChange, Functor.map]
-    -- simp [IsLimit.conePointUniqueUpToIso, IsLimit.uniqueUpToIso, IsLimit.liftConeMorphism]
-    -- apply IsLimit.uniq (pullbackIsPullback _ _) (PullbackCone.mk (fst:= 𝟙 (X.left)) (snd := f) (eq:= by simp) : PullbackCone f (𝟙 I))
-    sorry
+  refine conjugateIsoEquiv (mapAdjunction (𝟙 I)) Adjunction.id (mapId I).symm
 
 namespace overMap
 
@@ -211,7 +203,9 @@ def swapIso {X Y : Over I} :
 @[simp]
 lemma swap_eq_hom {X Y : Over I} :
     ((Σ_ X.hom).obj ((Δ_ X.hom).obj Y)).hom = (pullbackSymmetry _ _).hom ≫ ((Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)).hom  := by
-  sorry
+  simp only [const_obj_obj, id_obj, map_obj_left, baseChange_obj_left, map_obj_hom,
+    baseChange_obj_hom, pullbackSymmetry_hom_comp_snd_assoc]
+  exact pullback.condition.symm
 
 /-- The base-change of `Y` along `X` is `pullback.fst (f:= Y.hom) (g:= X.hom)` -/
 @[simp]
@@ -331,24 +325,16 @@ instance id {I : C} : CartesianExponentiable (𝟙 I) where
 
 
 instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
-    [CartesianExponentiable f] [CartesianExponentiable g] :
+    [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :
     CartesianExponentiable (f ≫ g) where
   functor := (Π_ f) ⋙ (Π_ g)
-  adj := by
-    fapply ofNatIsoLeft  ?adj ?iso
-    fapply (Δ_ g) ⋙ (Δ_ f)
-    · apply Adjunction.comp
-      · exact CartesianExponentiable.adj
-      · exact CartesianExponentiable.adj
-    · fapply NatIso.ofComponents
-      · intro X
-        simp [Functor.comp, baseChange]
-        fapply Over.isoMk
-        · simp
-          --fapply IsLimit.conePointUniqueUpToIso ?fst ?snd
-          sorry
-        · sorry
-      · sorry
+  adj := ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackCompIso f g).symm
+
+/-- The conjugate isomorphism between pushforward functors. -/
+-- I should be able to cite the above to remove the fgexp hypothesis but then how do I access its data?
+def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (fexp : CartesianExponentiable f) (gexp : CartesianExponentiable g) (fgexp : CartesianExponentiable (f ≫ g)):
+    fexp.functor ⋙ gexp.functor ≅ fgexp.functor :=
+  conjugateIsoEquiv (gexp.adj.comp fexp.adj) (fgexp.adj) (pullbackCompIso f g)
 
 /-- An arrow with a pushforward is exponentiable in the slice category. -/
 instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [CartesianExponentiable f] : Exponentiable (Over.mk f) where

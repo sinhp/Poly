@@ -14,6 +14,7 @@ import Mathlib.CategoryTheory.Whiskering
 
 import Mathlib.Tactic.ApplyFun
 
+import Poly.Basic
 import Poly.Exponentiable
 import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
 
@@ -27,59 +28,31 @@ namespace CategoryTheory
 open Category Functor Adjunction Limits NatTrans
 
 universe v u
-universe v₁ v₂ v₃ v₄ v₅ v₆ u₁ u₂ u₃ u₄ u₅ u₆
-
-section NaturalityOfWhiskering
-
-variable {A : Type u₁} {B : Type u₂} {C : Type u₃}
-variable [Category.{v₁} A] [Category.{v₂} B][Category.{v₃} C]
-variable {F G : A ⥤ B}{H K : B ⥤ C}
-
--- Naturality of β implies naturality of whiskering; this is not used.
-@[simp]
-theorem WhiskeringNaturality
-    (α : F ⟶ G)(β : H ⟶ K) :
-    (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by ext; unfold whiskerLeft; simp
-
-end NaturalityOfWhiskering
 
 namespace Over
 variable {C : Type u} [Category.{v} C]
 
 section BeckChevalleyTransformations
 
-@[simp]
-theorem eqToHom_left {X : C} {x y : Over X} (e : x = y) : (eqToHom e).left = eqToHom (e ▸ rfl) := by
-  subst e; rfl
-
-theorem map.comp_eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
-    map f ⋙ map g = map (f ≫ g) := by
-  fapply Functor.ext
-  · dsimp [Over, Over.map]; intro x; unfold Comma.mapRight; simp
-  · intros x y u; ext; simp
-
-def mapCompIso {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
-    Over.map f ⋙ Over.map g ≅ Over.map (f ≫ g) := eqToIso (map.comp_eq f g)
-
-theorem map.square_eq {W X Y Z : C}
+theorem mapSquare_eq {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
     Over.map f ⋙ Over.map g = Over.map h ⋙ Over.map k := by
-  rw [map.comp_eq, w, ← map.comp_eq]
+  rw [mapComp_eq, w, ← mapComp_eq]
 
 /-- The Beck Chevalley transformations are iterated mates of this isomorphism.-/
 def mapSquareIso {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
     Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k :=
-  eqToIso (map.square_eq f g h k w)
+  eqToIso (mapSquare_eq f g h k w)
 
 -- Is this better or worse?
 def mapSquareIso' {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
     Over.map f ⋙ Over.map g ≅ Over.map h ⋙ Over.map k := by
-  rw [map.square_eq]
+  rw [mapSquare_eq]
   exact w
 
 /-- The Beck-Chevalley natural transformation. -/
@@ -89,11 +62,6 @@ def pullbackBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
     baseChange h ⋙ Over.map f ⟶ Over.map k ⋙ baseChange g :=
   (mateEquiv (mapAdjunction h) (mapAdjunction g)) ((mapSquareIso f g h k w).hom)
 
-/-- The conjugate isomorphism between pullback functors. -/
-def pullbackCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    baseChange (f ≫ g) ≅ baseChange g ⋙ baseChange f :=
-  conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
-
 /-- The conjugate isomorphism between the pullbacks along a commutative square. -/
 def pullbackSquareIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
@@ -101,7 +69,7 @@ def pullbackSquareIso [HasPullbacks C] {W X Y Z : C}
     baseChange k ⋙ baseChange h ≅ baseChange g ⋙ baseChange f :=
   conjugateIsoEquiv ((mapAdjunction h).comp (mapAdjunction k)) ((mapAdjunction f).comp (mapAdjunction g)) (mapSquareIso f g h k w)
 
--- Why finite wide pullbacks and not just pullbacks?
+/-- The Beck-Chevalley natural transformations in a square of pullbacks and pushforwards.-/
 def pushforwardBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h)
