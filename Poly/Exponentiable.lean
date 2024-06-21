@@ -64,38 +64,6 @@ noncomputable section
 
 open CategoryTheory Category MonoidalCategory Limits Functor Adjunction IsConnected Over
 
-variable {C : Type*} [Category C] [HasPullbacks C]
-
-@[simps]
-def toOverTerminal' (T : C) (h : IsTerminal T) : C ⥤ Over T where
-  obj X := Over.mk (h.from _)
-  map f := Over.homMk f
-
-def toOverTerminal [HasTerminal C] : C ⥤ Over (⊤_ C) :=
-  toOverTerminal' (⊤_ C) terminalIsTerminal
-
-def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
-  CategoryTheory.Equivalence.mk (toOverTerminal' T h) (Over.forget _)
-    (NatIso.ofComponents (fun X => Iso.refl _))
-    (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
-
-def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
-  equivOverTerminal' (⊤_ C) terminalIsTerminal
-
-def isoOverTerminal [HasTerminal C] : Cat.of (ULift C) ≅ Cat.of (Over (⊤_ C)) where
-  hom := {
-    obj  := fun ⟨X⟩ => by
-      exact Over.mk (terminalIsTerminal.from X)
-    map := @fun ⟨X⟩ ⟨Y⟩ f => by
-      exact Over.homMk f
-  }
-  inv := {
-    obj := fun X => sorry
-    map := sorry
-  }
-  hom_inv_id := sorry
-  inv_hom_id := sorry
-
 namespace baseChange
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -153,9 +121,6 @@ example {I : C} (X Y : Over I) :
 lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C) (X : C) :
     (Over.star I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
   simp [Over.star, Over.mk]
-
-#check toOverTerminal
-#check forget
 
 /-- The base-change along `terminal.from`  -/
 lemma baseChange_terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :

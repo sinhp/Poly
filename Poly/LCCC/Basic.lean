@@ -12,6 +12,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.IsConnected
 import Mathlib.Tactic.ApplyFun
+import Poly.Basic
 
 -- All the imports below are transitively imported by the above import.
 -- import Mathlib.CategoryTheory.Adjunction.Basic
@@ -431,38 +432,6 @@ and monic.
 
 end PushforwardAdj
 end PushforwardAdjSection
-
--- Proof by Markus Himmel (with commentary by Dagur Asgeirsson)
-@[simps]
-def toOverTerminal' (T : C) (h : IsTerminal T) : C ⥤ Over T where
-  obj X := Over.mk (h.from _)
-  map f := Over.homMk f
-
-def toOverTerminal [HasTerminal C] : C ⥤ Over (⊤_ C) :=
-  toOverTerminal' (⊤_ C) terminalIsTerminal
-
-def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
-  CategoryTheory.Equivalence.mk (toOverTerminal' T h) (Over.forget _)
-    (NatIso.ofComponents (fun X => Iso.refl _))
-    (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
-
-def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
-  equivOverTerminal' (⊤_ C) terminalIsTerminal
-
-def isoOverTerminal [HasTerminal C] : Cat.of (ULift C) ≅ Cat.of (Over (⊤_ C)) where
-  hom := {
-    obj  := fun ⟨X⟩ => by
-      exact Over.mk (terminalIsTerminal.from X)
-    map := @fun ⟨X⟩ ⟨Y⟩ f => by
-      exact Over.homMk f
-  }
-  inv := {
-    obj := fun X => sorry
-    map := sorry
-  }
-  hom_inv_id := sorry
-  inv_hom_id := sorry
-
 
 open OverCC
 open PushforwardAdj
