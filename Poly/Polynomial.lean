@@ -218,16 +218,17 @@ instance {E B : C} : Category (UvPoly (C:= C) E B) where
 
 /-- The category of polynomial functors in a single variable. -/
 instance : Category (UvPoly.Total (C:= C)) where
-  Hom P Q := sorry
-  id P := sorry
-  comp := sorry
+  Hom P Q := UvPoly.Hom P.P Q.P
+  id P := UvPoly.Hom.id P.P
+  comp := UvPoly.Hom.comp
   id_comp := by
-    sorry
+    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
   comp_id := by
-    sorry
+    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
   assoc := by
-    sorry
+    simp [UvPoly.Hom.comp]
 
+namespace UvPoly
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
@@ -239,7 +240,6 @@ def natural {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B')
     (e : E ⟶ E') (b : B ⟶ B') (pb : IsPullback P.p e b Q.p) : P.functor ⟶ Q.functor := by
   sorry
 
-
-
-
 end UvPoly
+
+end
