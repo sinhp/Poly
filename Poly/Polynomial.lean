@@ -114,7 +114,7 @@ local notation "Δ_" => baseChange
 
 local notation "Π_" => CartesianExponentiable.functor
 
-instance : HasBinaryProducts C := by sorry -- infer_instance not woking; we should get this from `HasTerminal` and `HasPullbacks`?
+instance : HasBinaryProducts C := by sorry --infer_instance --not woking; we should get this from `HasTerminal` and `HasPullbacks`?
 
 variable {E B : C}
 
@@ -137,6 +137,10 @@ def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.
 
 -- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ Π_ P.p ⋙ Over.forget B
+
+def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt :=
+  sorry
+
 
 example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
 
@@ -193,28 +197,15 @@ def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E''
 
 end Hom
 
+
 /-- Bundling up the all the polynomials over different bases to form the underlying type of the category of polynomials. -/
-structure Total where
+structure Total (C : Type*) [Category C] [HasPullbacks C] where
   (E B : C)
   (P : UvPoly E B)
 
 end UvPoly
 
-variable {C : Type*} [Category C] [HasPullbacks C]
-
 open UvPoly
-
-instance {E B : C} : Category (UvPoly (C:= C) E B) where
-  Hom P Q := Hom P Q
-  id P := Hom.id P
-  comp := Hom.comp
-  id_comp := by
-    simp [Hom.id, Hom.comp]
-  comp_id := by
-    simp [Hom.id, Hom.comp]
-  assoc := by
-    intros
-    simp [Hom.comp]
 
 /-- The category of polynomial functors in a single variable. -/
 instance : Category (UvPoly.Total (C:= C)) where
@@ -236,8 +227,7 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
 
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
-def natural {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B')
-    (e : E ⟶ E') (b : B ⟶ B') (pb : IsPullback P.p e b Q.p) : P.functor ⟶ Q.functor := by
+def natural [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q): P.P.functor ⟶ Q.P.functor := by
   sorry
 
 end UvPoly
