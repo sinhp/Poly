@@ -62,6 +62,12 @@ def pullbackBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
     baseChange h ⋙ Over.map f ⟶ Over.map k ⋙ baseChange g :=
   (mateEquiv (mapAdjunction h) (mapAdjunction g)) ((mapSquareIso f g h k w).hom)
 
+def pullbackBeckChevalleyOfMap [HasPullbacks C] {X Y : C}
+    (f : X ⟶ Y) : baseChange f ⋙ forget X ⟶ forget Y := by
+  have := (mapForgetIso f).inv
+  rw [← Functor.comp_id (forget X)] at this
+  exact (mateEquiv (mapAdjunction f) (Adjunction.id)) (this)
+
 /-- The conjugate isomorphism between the pullbacks along a commutative square. -/
 def pullbackSquareIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)

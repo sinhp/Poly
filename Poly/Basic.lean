@@ -91,6 +91,7 @@ def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
 
+
 def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
   equivOverTerminal' (⊤_ C) terminalIsTerminal
 
@@ -107,3 +108,13 @@ def isoOverTerminal [HasTerminal C] : Cat.of (ULift C) ≅ Cat.of (Over (⊤_ C)
   }
   hom_inv_id := sorry
   inv_hom_id := sorry
+
+def toOverTerminalStarIso [HasTerminal C] [HasBinaryProducts C] : Over.star (⊤_ C) ≅ toOverTerminal := by
+  have := Iso.refl (Over.forget (⊤_ C))
+  sorry -- I can't seem to infer that the inverse equivalence used above is an equivalence.
+  -- have : (Over.forget (⊤_ C)).IsEquivalence := by infer_instance
+  -- have := (Over.forget (⊤_ C)).asEquivalence.toAdjunction
+  -- have := conjugateIsoEquiv (Over.forgetAdjStar (⊤_ C)) _ this
+
+def toOverTerminalStarTriangleIso [HasTerminal C] [HasBinaryProducts C] (X : C) : Over.star X ≅ toOverTerminal ⋙ baseChange (terminal.from X) :=
+  mapStarIso (terminal.from X) ≪≫ isoWhiskerRight (toOverTerminalStarIso (C := C)) (baseChange (terminal.from X))

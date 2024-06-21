@@ -115,7 +115,7 @@ local notation "Δ_" => baseChange
 
 local notation "Π_" => CartesianExponentiable.functor
 
-instance : HasBinaryProducts C := by sorry --infer_instance --not woking; we should get this from `HasTerminal` and `HasPullbacks`?
+instance : HasBinaryProducts C := by sorry --infer_instance --not working; we should get this from `HasTerminal` and `HasPullbacks`?
 
 variable {E B : C}
 
@@ -140,7 +140,8 @@ def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ Π_ P.p ⋙ Over.forget B
 
 def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
-  unfold functor_alt auxFunctor functor MvPoly.functor
+  unfold functor_alt auxFunctor functor MvPoly.functor toMvPoly
+  simp
   sorry
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
@@ -167,14 +168,10 @@ variable (B)
 @[simps!]
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
-/-- Evaluating the identity polynomial at an object `X` is isomorphic to `X` -/
-def id_apply (X : C) : (id B).apply X ≅ X where
-  hom := by
-    simp [id, apply, functor]
-    sorry
-  inv := sorry
-  hom_inv_id := sorry
-  inv_hom_id := sorry
+/-- Evaluating the identity polynomial at an object `X` is isomorphic to `X`  ER: This is only true if B is terminal.-/
+def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
+  hom := 𝟙 (B ⨯ X)
+  inv := 𝟙 (B ⨯ X)
 
 variable {B}
 
@@ -240,26 +237,31 @@ def polyPair (P : UvPoly E B) (Γ : C) (X : C) :
   · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Over.star E ⋙ (Π_ P.p)).obj X) := (Over.homMk be)
     let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Over.star E).obj X)).symm be'
     let be''' := (Over.forget E).map be''
-    exact ((pullbackSymmetry P.p (be ≫ P.proj X)).hom ≫ be''' ≫ prod.snd)
+    exact ((pullbackSymmetry (be ≫ P.proj X) P.p).inv ≫ be''' ≫ prod.snd)
 
 def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
     (Σ b : Γ ⟶ B, pullback P.p b ⟶ X) → (Γ ⟶ P.functor.obj X) := by
   intro ⟨b , e⟩
-  unfold functor
-  let pbE' := (baseChange P.p).obj (Over.mk b)
-  let pbE := Over.mk (pullback.fst : pullback P.p b ⟶ E)
-  sorry
---   let eE : pbE' ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE' X) e
-
-
-
-
-
+  let pbE := (baseChange P.p).obj (Over.mk b)
+  let eE : pbE ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE X) ((pullbackSymmetry b P.p).hom ≫ e)
+  exact ((Over.forget B).map ((P.exp.adj.homEquiv (Over.mk b) ((Over.star E).obj X)) eE))
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback P.p b ⟶ X := sorry
-
+    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback P.p b ⟶ X where
+      toFun := polyPair P Γ X
+      invFun := pairPoly P Γ X
+      left_inv := by
+        intro be
+        unfold polyPair pairPoly
+        simp
+        sorry
+      right_inv := by
+        intro ⟨b , e⟩
+        unfold polyPair pairPoly
+        ext
+        · simp; sorry
+        · simp; sorry
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
 def natural [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q): P.P.functor ⟶ Q.P.functor := by
