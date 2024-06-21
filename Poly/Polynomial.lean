@@ -106,7 +106,7 @@ end MvPoly
 
 namespace UvPoly
 
-variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C] {E B : C}
+variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
 local notation "Σ_" => Over.map
 
@@ -116,16 +116,19 @@ local notation "Π_" => CartesianExponentiable.functor
 
 instance : HasBinaryProducts C := by sorry -- infer_instance not woking; we should get this from `HasTerminal` and `HasPullbacks`?
 
-/-- The identity polynomial functor in single variable. -/
-@[simps!]
-def id (B : C) : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
+variable {E B : C}
 
 -- Note (SH): We define the functor associated to a single variable polyonimal in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
 
-def toMvPoly {E B : C} (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
+def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
 
 #check (toMvPoly _).functor
+
+/-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
+def proj (P : UvPoly E B) (X : Over (⊤_ C)) :
+  ((Π_ P.p).obj ((Δ_ (terminal.from E)).obj X)).left ⟶ B :=
+  ((Δ_ (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
 
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
@@ -144,8 +147,13 @@ def functor' [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := (Over.star E) �
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
 
+variable (B)
+/-- The identity polynomial functor in single variable. -/
+@[simps!]
+def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
+
 /-- Evaluating the identity polynomial at an object `X` is isomorphic to `X` -/
-def id_apply (X : C) : (id I).apply X ≅ X where
+def id_apply (X : C) : (id B).apply X ≅ X where
   hom := by
     simp [id, apply, functor]
     sorry
@@ -153,10 +161,7 @@ def id_apply (X : C) : (id I).apply X ≅ X where
   hom_inv_id := sorry
   inv_hom_id := sorry
 
-/-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
-def proj (P : UvPoly E B) (X : Over (⊤_ C)) :
-  ((Π_ P.p).obj ((Δ_ (terminal.from E)).obj X)).left ⟶ B :=
-  ((Δ_ (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
+variable {B}
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'` and `b : B ⟶ B'` such that the diagram
 ```
@@ -173,12 +178,6 @@ structure Hom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') where
   b : B ⟶ B'
   is_pullback : IsPullback P.p e b Q.p
 
-section
-variable {E' B' : C} {P : UvPoly E B} {Q : UvPoly E' B'} (f : Hom P Q)
-#check (f.is_pullback).w
-end
-
-
 namespace Hom
 
 open IsPullback
@@ -194,7 +193,18 @@ def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E''
 
 end Hom
 
-instance [HasPullbacks C]: Category (UvPoly E B) where
+/-- Bundling up the all the polynomials over different bases to form the underlying type of the category of polynomials. -/
+structure Total where
+  (E B : C)
+  (P : UvPoly E B)
+
+end UvPoly
+
+variable {C : Type*} [Category C] [HasPullbacks C]
+
+open UvPoly
+
+instance {E B : C} : Category (UvPoly (C:= C) E B) where
   Hom P Q := Hom P Q
   id P := Hom.id P
   comp := Hom.comp
@@ -205,7 +215,19 @@ instance [HasPullbacks C]: Category (UvPoly E B) where
   assoc := by
     intros
     simp [Hom.comp]
--- IsPullback lam ((P tp).map tp) tp Pi
+
+/-- The category of polynomial functors in a single variable. -/
+instance : Category (UvPoly.Total (C:= C)) where
+  Hom P Q := sorry
+  id P := sorry
+  comp := sorry
+  id_comp := by
+    sorry
+  comp_id := by
+    sorry
+  assoc := by
+    sorry
+
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
