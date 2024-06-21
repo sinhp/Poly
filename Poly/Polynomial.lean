@@ -61,11 +61,11 @@ instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.i
 
 /-- The constant polynomial functor in many variables: for this we need the initial object. -/
 
-local notation "Σ_" => Over.map
+scoped notation "Σ_" => Over.map
 
-local notation "Δ_" => baseChange
+scoped notation "Δ_" => baseChange
 
-local notation "Π_" => CartesianExponentiable.functor
+scoped notation "Π_" => CartesianExponentiable.functor
 
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
@@ -109,11 +109,11 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
-local notation "Σ_" => Over.map
+scoped notation "Σ_" => Over.forget
 
-local notation "Δ_" => baseChange
+scoped notation "Δ_" => Over.star
 
-local notation "Π_" => CartesianExponentiable.functor
+scoped notation "Π_" => CartesianExponentiable.functor
 
 instance : HasBinaryProducts C := by sorry --infer_instance --not woking; we should get this from `HasTerminal` and `HasPullbacks`?
 
@@ -124,12 +124,10 @@ variable {E B : C}
 def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
 
-#check (toMvPoly _).functor
-
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
 def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
-  ((Π_ P.p).obj ((Δ_ (terminal.from E)).obj X)).left ⟶ B :=
-  ((Δ_ (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
+  ((Π_ P.p).obj ((baseChange (terminal.from E)).obj X)).left ⟶ B :=
+  ((baseChange (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
 
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
@@ -137,7 +135,8 @@ def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.fun
 def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
 
 -- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
-def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ Π_ P.p ⋙ Over.forget B
+def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
+    Δ_ E ⋙ Π_ P.p ⋙ Σ_ B
 
 def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
   unfold functor_alt auxFunctor functor MvPoly.functor
@@ -145,7 +144,7 @@ def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functo
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
 def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
-  ((Over.star E ⋙ Π_ P.p).obj X).hom
+  ((Δ_ E ⋙ Π_ P.p).obj X).hom
 
 /-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by g, but you have to compose with various natural isomorphisms. -/
 def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
@@ -154,10 +153,6 @@ def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
   have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by rw [comp_id]; exact h.symm
   have bc := pushforwardBeckChevalleyNatTrans g Q.p P.p (𝟙 _) hsquare Q.exp P.exp
   exact (whiskerRight ((whiskerLeft (Over.star F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (mapStarIso g).inv (Π_ P.p))) (Over.forget B))
-
-example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
-
-#check Over.star -- Δ_ (prod.snd (X:= B) (Y:= E))
 
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
@@ -246,8 +241,8 @@ def polyPair (P : UvPoly E B) (Γ : C) (X : C) :
   intro be
   fconstructor
   · exact (be ≫ proj P X)
-  · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Over.star E ⋙ (Π_ P.p)).obj X) := (Over.homMk be)
-    let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Over.star E).obj X)).symm be'
+  · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Δ_ E ⋙ Π_ P.p).obj X) := (Over.homMk be)
+    let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Δ_ E).obj X)).symm be'
     let be''' := (Over.forget E).map be''
     exact ((pullbackSymmetry P.p (be ≫ P.proj X)).hom ≫ be''' ≫ prod.snd)
 
@@ -258,7 +253,7 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
   let pbE' := (baseChange P.p).obj (Over.mk b)
   let pbE := Over.mk (pullback.fst : pullback P.p b ⟶ E)
   sorry
---   let eE : pbE' ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE' X) e
+--   let eE : pbE' ⟶ (Δ_ E).obj X := ((Over.forgetAdjStar E).homEquiv pbE' X) e
 --   ·
 
 /-- The universal property of the polynomial functor.-/
