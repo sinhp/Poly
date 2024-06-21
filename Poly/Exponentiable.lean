@@ -295,10 +295,9 @@ instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
   adj := ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackCompIso f g).symm
 
 /-- The conjugate isomorphism between pushforward functors. -/
--- I should be able to cite the above to remove the fgexp hypothesis but then how do I access its data?
-def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (fexp : CartesianExponentiable f) (gexp : CartesianExponentiable g) (fgexp : CartesianExponentiable (f ≫ g)):
-    fexp.functor ⋙ gexp.functor ≅ fgexp.functor :=
-  conjugateIsoEquiv (gexp.adj.comp fexp.adj) (fgexp.adj) (pullbackCompIso f g)
+def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :
+    fexp.functor ⋙ gexp.functor ≅ (comp f g).functor :=
+  conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackCompIso f g)
 
 /-- An arrow with a pushforward is exponentiable in the slice category. -/
 instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [CartesianExponentiable f] : Exponentiable (Over.mk f) where

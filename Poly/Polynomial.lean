@@ -13,6 +13,7 @@ import Mathlib.CategoryTheory.Limits.Shapes.CommSq
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 --import Mathlib.CategoryTheory.Category.Limit
 import Poly.Exponentiable
+import Poly.LCCC.BeckChevalley
 -- import Poly.LCCC.Basic
 
 /-!
@@ -146,7 +147,13 @@ def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functo
 def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
   ((Over.star E ⋙ Π_ P.p).obj X).hom
 
-
+/-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by g, but you have to compose with various natural isomorphisms. -/
+def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
+    Q.functor ⟶ P.functor := by
+  unfold functor
+  have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by rw [comp_id]; exact h.symm
+  have bc := pushforwardBeckChevalleyNatTrans g Q.p P.p (𝟙 _) hsquare Q.exp P.exp
+  exact (whiskerRight ((whiskerLeft (Over.star F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (mapStarIso g).inv (Π_ P.p))) (Over.forget B))
 
 example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
 
@@ -225,12 +232,28 @@ instance : Category (UvPoly.Total (C:= C)) where
 
 namespace UvPoly
 
--- def toPair (P : UvPoly E B) (Γ : C) (X : C) :
---     (Γ ⟶ P.functor.obj X) → Σ b : Γ ⟶ B, pullback P.p b ⟶ X := by
---   intro be
---   fconstructor
---   · exact (be ≫ proj' P X)
---   ·
+def polyPair (P : UvPoly E B) (Γ : C) (X : C) :
+    (Γ ⟶ P.functor.obj X) → Σ b : Γ ⟶ B, pullback P.p b ⟶ X := by
+  intro be
+  fconstructor
+  · exact (be ≫ proj P X)
+  · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Over.star E ⋙ (Π_ P.p)).obj X) := (Over.homMk be)
+    let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Over.star E).obj X)).symm be'
+    let be''' := (Over.forget E).map be''
+    exact ((pullbackSymmetry P.p (be ≫ P.proj X)).hom ≫ be''' ≫ prod.snd)
+
+def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
+    (Σ b : Γ ⟶ B, pullback P.p b ⟶ X) → (Γ ⟶ P.functor.obj X) := by
+  intro ⟨b , e⟩
+  unfold functor
+  let pbE' := (baseChange P.p).obj (Over.mk b)
+  let pbE := Over.mk (pullback.fst : pullback P.p b ⟶ E)
+  sorry
+--   let eE : pbE' ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE' X) e
+
+
+
+
 
 
 /-- The universal property of the polynomial functor.-/
