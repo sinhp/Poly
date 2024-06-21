@@ -212,7 +212,9 @@ end Hom
 /-- Bundling up the all the polynomials over different bases to form the underlying type of the category of polynomials. -/
 structure Total (C : Type*) [Category C] [HasPullbacks C] where
   (E B : C)
-  (P : UvPoly E B)
+  (poly : UvPoly E B)
+
+def Total.of (P : UvPoly E B) : Total C := ⟨E, B, P⟩
 
 end UvPoly
 
@@ -220,8 +222,8 @@ open UvPoly
 
 /-- The category of polynomial functors in a single variable. -/
 instance : Category (UvPoly.Total (C:= C)) where
-  Hom P Q := UvPoly.Hom P.P Q.P
-  id P := UvPoly.Hom.id P.P
+  Hom P Q := UvPoly.Hom P.poly Q.poly
+  id P := UvPoly.Hom.id P.poly
   comp := UvPoly.Hom.comp
   id_comp := by
     simp [UvPoly.Hom.id, UvPoly.Hom.comp]
@@ -229,6 +231,13 @@ instance : Category (UvPoly.Total (C:= C)) where
     simp [UvPoly.Hom.id, UvPoly.Hom.comp]
   assoc := by
     simp [UvPoly.Hom.comp]
+
+
+def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
+    Total.of P ⟶ Total.of Q where
+      e := α.e
+      b := α.b
+      is_pullback := α.is_pullback
 
 namespace UvPoly
 
@@ -250,19 +259,15 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
   let pbE := Over.mk (pullback.fst : pullback P.p b ⟶ E)
   sorry
 --   let eE : pbE' ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE' X) e
-
-
-
-
-
+--   ·
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback P.p b ⟶ X := sorry
 
-
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
-def natural [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q): P.P.functor ⟶ Q.P.functor := by
+def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    P.poly.functor ⟶ Q.poly.functor := by
   sorry
 
 end UvPoly
