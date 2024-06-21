@@ -138,8 +138,15 @@ def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.
 -- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ Π_ P.p ⋙ Over.forget B
 
-def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt :=
-  sorry
+def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
+  unfold functor_alt auxFunctor functor MvPoly.functor
+
+
+
+/-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
+def proj' (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
+  ((Over.star E ⋙ Π_ P.p).obj X).hom
+
 
 
 example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
@@ -220,6 +227,14 @@ instance : Category (UvPoly.Total (C:= C)) where
     simp [UvPoly.Hom.comp]
 
 namespace UvPoly
+
+-- def toPair (P : UvPoly E B) (Γ : C) (X : C) :
+--     (Γ ⟶ P.functor.obj X) → Σ b : Γ ⟶ B, pullback P.p b ⟶ X := by
+--   intro be
+--   fconstructor
+--   · exact (be ≫ proj' P X)
+--   ·
+
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
