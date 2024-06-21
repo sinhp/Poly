@@ -312,7 +312,7 @@ prefix:75 "Π_" => CartesianExponentiable.functor
 
 namespace CartesianExponentiable
 
-variable {C : Type*} [Category C] [HasFiniteWidePullbacks C]
+variable {C : Type*} [Category C] [HasPullbacks C]
 
 attribute [local instance] monoidalOfHasFiniteProducts
 
@@ -322,7 +322,6 @@ instance id {I : C} : CartesianExponentiable (𝟙 I) where
   adj := by
     fapply ofNatIsoLeft (F:= 𝟭 _) ?adj (baseChange.id I).symm
     exact Adjunction.id
-
 
 instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
     [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :

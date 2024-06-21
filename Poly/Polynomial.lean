@@ -106,13 +106,15 @@ end MvPoly
 
 namespace UvPoly
 
-variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C] {E B : C}
+variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C] {E B : C}
 
 local notation "Σ_" => Over.map
 
 local notation "Δ_" => baseChange
 
 local notation "Π_" => CartesianExponentiable.functor
+
+instance : HasBinaryProducts C := by sorry -- infer_instance not woking; we should get this from `HasTerminal` and `HasPullbacks`?
 
 /-- The identity polynomial functor in single variable. -/
 @[simps!]
@@ -128,8 +130,10 @@ def toMvPoly {E B : C} (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
 /-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials. -/
+def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
 
-def functor (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
+-- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
+def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ Π_ P.p ⋙ Over.forget B
 
 example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
 
@@ -190,7 +194,6 @@ def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E''
 
 end Hom
 
-
 instance [HasPullbacks C]: Category (UvPoly E B) where
   Hom P Q := Hom P Q
   id P := Hom.id P
@@ -208,6 +211,11 @@ instance [HasPullbacks C]: Category (UvPoly E B) where
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback P.p b ⟶ X := sorry
 
+
+/-- A map of polynomials induces a natural transformation between their associated functors. -/
+def natural {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B')
+    (e : E ⟶ E') (b : B ⟶ B') (pb : IsPullback P.p e b Q.p) : P.functor ⟶ Q.functor := by
+  sorry
 
 
 
