@@ -126,7 +126,7 @@ def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
 #check (toMvPoly _).functor
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
-def proj (P : UvPoly E B) (X : Over (⊤_ C)) :
+def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
   ((Π_ P.p).obj ((Δ_ (terminal.from E)).obj X)).left ⟶ B :=
   ((Δ_ (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
 
@@ -140,11 +140,10 @@ def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := Over.star E ⋙ 
 
 def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
   unfold functor_alt auxFunctor functor MvPoly.functor
-
-
+  sorry
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
-def proj' (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
+def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
   ((Over.star E ⋙ Π_ P.p).obj X).hom
 
 
@@ -152,8 +151,6 @@ def proj' (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
 example [HasBinaryProducts C] (X  Y : C) : X ⨯  Y ⟶ X := prod.fst
 
 #check Over.star -- Δ_ (prod.snd (X:= B) (Y:= E))
-
-def functor' [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C := (Over.star E) ⋙ (Π_ P.p) ⋙ (Over.forget B)
 
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
