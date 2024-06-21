@@ -8,7 +8,6 @@ import Mathlib.CategoryTheory.Monad.Products
 import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
 import Mathlib.CategoryTheory.Limits.Shapes.CommSq
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 --import Mathlib.CategoryTheory.Category.Limit
@@ -109,6 +108,8 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
+-- TODO: can we write a smart macro here automatically detecting the input of `Σ_` and `Δ_`?
+
 scoped notation "Σ_" => Over.forget
 
 scoped notation "Δ_" => Over.star
@@ -153,7 +154,7 @@ def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
   unfold functor
   have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by rw [comp_id]; exact h.symm
   have bc := pushforwardBeckChevalleyNatTrans g Q.p P.p (𝟙 _) hsquare Q.exp P.exp
-  exact (whiskerRight ((whiskerLeft (Over.star F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (mapStarIso g).inv (Π_ P.p))) (Over.forget B))
+  exact whiskerRight ((whiskerLeft (Δ_ F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (mapStarIso g).inv (Π_ P.p))) (Over.forget B)
 
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
@@ -247,8 +248,8 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
     (Σ b : Γ ⟶ B, pullback P.p b ⟶ X) → (Γ ⟶ P.functor.obj X) := by
   intro ⟨b , e⟩
   let pbE := (baseChange P.p).obj (Over.mk b)
-  let eE : pbE ⟶ (Over.star E).obj X := ((Over.forgetAdjStar E).homEquiv pbE X) ((pullbackSymmetry b P.p).hom ≫ e)
-  exact ((Over.forget B).map ((P.exp.adj.homEquiv (Over.mk b) ((Over.star E).obj X)) eE))
+  let eE : pbE ⟶ (Δ_ E).obj X := ((Over.forgetAdjStar E).homEquiv pbE X) ((pullbackSymmetry b P.p).hom ≫ e)
+  exact ((Σ_ B).map ((P.exp.adj.homEquiv (Over.mk b) ((Δ_ E).obj X)) eE))
 
 /-- The universal property of the polynomial functor.-/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
@@ -266,6 +267,22 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
         ext
         · simp; sorry
         · simp; sorry
+
+
+#check mapSquareIso
+
+def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
+  apply mapSquareIso
+  rw [f.is_pullback.w]
+
+#check pullbackBeckChevalleyNatTrans
+-- #check pullbackBeckChevalleyNatTransIso
+#check IsPullback
+
+def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    (Over.baseChange P.poly.p) ⋙ (Over.map f.e) ≅ (Over.map f.b) ⋙ (Over.baseChange Q.poly.p) := by
+  sorry
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
 def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :

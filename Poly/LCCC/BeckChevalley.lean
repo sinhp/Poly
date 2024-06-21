@@ -11,7 +11,7 @@ import Mathlib.CategoryTheory.Functor.Basic
 import Mathlib.CategoryTheory.Functor.Category
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Whiskering
-
+import Mathlib.CategoryTheory.Limits.Shapes.CommSq
 import Mathlib.Tactic.ApplyFun
 
 import Poly.Basic
@@ -85,7 +85,11 @@ def pushforwardBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
 /-- The conjugate isomorphism between the pushforwards along a commutative square. -/
 def pushforwardSquareIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) (fexp : CartesianExponentiable f) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h) (kexp : CartesianExponentiable k) : fexp.functor ⋙ gexp.functor ≅ hexp.functor ⋙ kexp.functor := conjugateIsoEquiv (gexp.adj.comp fexp.adj) (kexp.adj.comp hexp.adj) (pullbackSquareIso f g h k w)
+    (w : f ≫ g = h ≫ k) (fexp : CartesianExponentiable f)
+    (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h)
+    (kexp : CartesianExponentiable k) :
+    fexp.functor ⋙ gexp.functor ≅ hexp.functor ⋙ kexp.functor :=
+  conjugateIsoEquiv (gexp.adj.comp fexp.adj) (kexp.adj.comp hexp.adj) (pullbackSquareIso f g h k w)
 
 
 end BeckChevalleyTransformations
@@ -127,48 +131,48 @@ theorem pullbackBeckChevalleyComponent_pullbackMap [HasPullbacks C] {W X Y Z : C
     simp
 
 -- NB: I seem to have symmetry of HasPullback but not IsPullback
+-- SH: yes, we do have that: it is given by the function `.flip`
 theorem pullback.NatTrans.isPullback.componentIsIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) (y : Over Y) :
-    IsIso ((forget X).map ((pullbackBeckChevalleyNatTrans f g h k w).app y)) := by
-  rw [pullbackBeckChevalleyComponent_pullbackMap f g h k w y]
-  have s := PullbackCone.mk _ _
-        (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
-          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])
+    (pb : IsPullback f h g k)
+    (y : Over Y) :
+    IsIso ((forget X).map ((pullbackBeckChevalleyNatTrans f g h k pb.w).app y)) := by
+  rw [pullbackBeckChevalleyComponent_pullbackMap f g h k pb.w y]
   let t := PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition
-  have P := bigSquareIsPullback _ _ _ _ _ _ _ _ w.symm hyp (pullbackIsPullback y.hom h)
+  have P := bigSquareIsPullback _ _ _ _ _ _ _ _ pb.w.symm (IsPullback.isLimit pb.flip) (pullbackIsPullback y.hom h)
   have Q := pullbackIsPullback (y.hom ≫ k) g
   let conemap : (PullbackCone.mk _ _
         (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
-          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
-    hom := pullback.NatTrans.app.map f g h k w y
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, pb.w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
+    hom := pullback.NatTrans.app.map f g h k pb.w y
     w := by
       rintro (_|(left|right)) <;>
       · unfold app.map
         simp
   }
   have mapiso := (IsLimit.hom_isIso P Q conemap)
-  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k w y := by rfl
+  have dumb : conemap.hom = pullback.NatTrans.app.map f g h k pb.w y := by rfl
   rw [← dumb]
   exact ((Cones.forget _).map_isIso conemap)
 
 /-- The pullback Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
 instance pullbackBeckChevalleyNatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
-    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) :
-    IsIso (pullbackBeckChevalleyNatTrans f g h k w) := by
+    (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z) (pb : IsPullback f h g k)
+     :
+    IsIso (pullbackBeckChevalleyNatTrans f g h k pb.w) := by
   apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
   intro y
-  have := pullback.NatTrans.isPullback.componentIsIso f g h k w hyp y
+  have := pullback.NatTrans.isPullback.componentIsIso f g h k pb y
   apply (forget_reflects_iso (X := X)).reflects
-    ((pullbackBeckChevalleyNatTrans f g h k w).app y)
+    ((pullbackBeckChevalleyNatTrans f g h k pb.w).app y)
 
 /-- The pushforward Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
 instance pushforwardBeckChevalleyNatTrans.isPullback.isIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
-    (w : f ≫ g = h ≫ k) (hyp : IsLimit (PullbackCone.mk _ _ w.symm)) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h) :
-    IsIso (pushforwardBeckChevalleyNatTrans f g h k w gexp hexp) := by
-  have := pullbackBeckChevalleyNatTrans.isPullback.isIso f g h k w hyp
+    (pb : IsPullback f h g k)
+    (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h) :
+    IsIso (pushforwardBeckChevalleyNatTrans f g h k pb.w gexp hexp) := by
+  have := pullbackBeckChevalleyNatTrans.isPullback.isIso f g h k pb
   apply conjugateEquiv_iso
 
 end BeckChevalleyIsos
