@@ -64,19 +64,18 @@ noncomputable section
 
 open CategoryTheory Category MonoidalCategory Limits Functor Adjunction IsConnected Over
 
+
 namespace baseChange
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
--- local notation "Σ_" f => Prefunctor.obj (Functor.toPrefunctor (Over.map f))
+prefix: 70 " Σ_ " => Over.map
 
--- local notation3 "Δ_" f => Prefunctor.obj (Functor.toPrefunctor (baseChange f))
+prefix: 70 " Σ_ " => Over.forget
 
--- TODO: write a macro for a notation which defines `Σ_ X` as `Over.map X.hom` for objects `X : Over I`
+prefix: 70 " Δ_ " => baseChange
 
-local notation "Σ_" => Over.map
-
-local notation "Δ_" => baseChange
+prefix: 70 " Δ_ " => Over.star
 
 example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
     pullback p f ⟶ X := by
@@ -123,7 +122,7 @@ lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C
   simp [Over.star, Over.mk]
 
 /-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism. Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
-def baseChange_terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
+def terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
     (Δ_ (terminal.from I)).obj X ≅ (Over.star I).obj (X.left)
     := by
   unfold baseChange Over.star
@@ -246,7 +245,7 @@ lemma isoProd_comp_snd {X Y : Over I}  :
 /-- The functor composition `(baseChange X.hom) ⋙ (Over.map X.hom)` is naturally isomorphic
 to the left tensor product functor `X × _` -/
 def natIsoTensorLeft {I : C} (X : Over I) :
-    Δ_ X.hom ⋙ Σ_ X.hom ≅ tensorLeft X := by
+    (Δ_ X.hom) ⋙ (Σ_ X.hom) ≅ tensorLeft X := by
   fapply NatIso.ofComponents
   · intro Y
     apply isoProd
@@ -263,7 +262,7 @@ def natIsoTensorLeft {I : C} (X : Over I) :
       simp
 
 def natIsoTensorLeftOverMk {I J : C} (f : J ⟶ I) :
-    Δ_ f ⋙ Σ_ f ≅ tensorLeft (Over.mk f) := by
+    (Δ_ f) ⋙ (Σ_ f) ≅ tensorLeft (Over.mk f) := by
   apply natIsoTensorLeft (Over.mk f)
 
 end overMap
@@ -273,10 +272,6 @@ end baseChange
 open baseChange.overMap
 
 variable {C : Type*} [Category C] [HasPullbacks C]
-
-local notation "Σ_" => Over.map
-
-local notation "Δ_" => baseChange
 
 class CartesianExponentiable {X Y : C} (f : X ⟶ Y) where
   functor : Over X ⥤ Over Y
@@ -313,7 +308,7 @@ instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [C
   rightAdj :=  (Δ_ f) ⋙ (Π_ f)
   adj := by
     fapply ofNatIsoLeft
-    fapply Δ_ f ⋙ Σ_ f
+    fapply (Δ_ f) ⋙ (Σ_ f)
     · apply Adjunction.comp
       · exact CartesianExponentiable.adj
       · apply Over.mapAdjunction

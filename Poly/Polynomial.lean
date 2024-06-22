@@ -60,15 +60,10 @@ instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.i
 
 /-- The constant polynomial functor in many variables: for this we need the initial object. -/
 
-scoped notation "Σ_" => Over.map
-
-scoped notation "Δ_" => baseChange
-
-scoped notation "Π_" => CartesianExponentiable.functor
 
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
-  Δ_ (P.s) ⋙ (Π_ P.p) ⋙ Σ_ (P.t)
+  (Δ_ P.s) ⋙ (Π_ P.p) ⋙ (Σ_ P.t)
 
 variable (I O : C) (P : MvPoly I O)
 -- #check (Σ_ P.t)
@@ -110,11 +105,11 @@ variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
 -- TODO: can we write a smart macro here automatically detecting the input of `Σ_` and `Δ_`?
 
-scoped notation "Σ_" => Over.forget
+-- scoped notation "Σ_" => Over.forget
 
-scoped notation "Δ_" => Over.star
+-- scoped notation "Δ_" => Over.star
 
-scoped notation "Π_" => CartesianExponentiable.functor
+-- scoped notation "Π_" => CartesianExponentiable.functor
 
 instance : HasBinaryProducts C := by sorry --infer_instance --not working; we should get this from `HasTerminal` and `HasPullbacks`?
 
@@ -137,7 +132,7 @@ def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.
 
 -- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
-    Δ_ E ⋙ Π_ P.p ⋙ Σ_ B
+    (Δ_ E) ⋙ (Π_ P.p) ⋙ (Σ_ B)
 
 def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
   unfold functor_alt auxFunctor functor MvPoly.functor toMvPoly
@@ -146,7 +141,7 @@ def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functo
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
 def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
-  ((Δ_ E ⋙ Π_ P.p).obj X).hom
+  (((Δ_ E) ⋙ (Π_ P.p)).obj X).hom
 
 /-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by g, but you have to compose with various natural isomorphisms. -/
 def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
@@ -268,20 +263,19 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
         · simp; sorry
         · simp; sorry
 
-
-#check mapSquareIso
-
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
   apply mapSquareIso
   rw [f.is_pullback.w]
 
-#check pullbackBeckChevalleyNatTrans
--- #check pullbackBeckChevalleyNatTransIso
-#check IsPullback
-
 def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (Over.baseChange P.poly.p) ⋙ (Over.map f.e) ≅ (Over.map f.b) ⋙ (Over.baseChange Q.poly.p) := by
+    ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
+  set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
+  have : IsIso l := (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
+  exact asIso l
+
+def bar' [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    (Δ_ P.poly.p) ⋙ (Σ_ f.e) ≅ (Σ_ f.b) ⋙ (Δ_ Q.poly.p) := by
   sorry
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
