@@ -234,7 +234,7 @@ def polyPair (P : UvPoly E B) (Γ : C) (X : C) :
   intro be
   fconstructor
   · exact (be ≫ proj P X)
-  · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Δ_ E ⋙ Π_ P.p).obj X) := (Over.homMk be)
+  · let be' : Over.mk (be ≫ P.proj X) ⟶ (((Δ_ E) ⋙ (Π_ P.p)).obj X) := (Over.homMk be)
     let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Δ_ E).obj X)).symm be'
     let be''' := (Over.forget E).map be''
     exact ((pullbackSymmetry (be ≫ P.proj X) P.p).inv ≫ be''' ≫ prod.snd)
