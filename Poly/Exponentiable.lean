@@ -32,11 +32,11 @@ We prove that if a morphism `f : X ⟶ Y` has pushforwards then `f` is exponenti
 We provide the following notations:
 
 given a morphism `f : J ⟶ I` in a category `C`,
-* `Σ_ f` is for the object part of the functor `Over.map f : Over I ⥤ Over J`. As such, for an object
+* `Σ_ f` is the functor `Over.map f : Over I ⥤ Over J`. As such, for an object
 `X : Over J`, we have `Σ_f X : Over I`
-* `Δ_ f` is for the object part of the functor `baseChange f : Over J ⥤ Over I`. As such, for an object
+* `Δ_ f` is the functor `baseChange f : Over J ⥤ Over I`. As such, for an object
 `X : Over I`, we have `Δ_f X : Over J`
-* `Π_ f` is for object part of the functor `pushforward f : Over J ⥤ Over I`. As such, for an object
+* `Π_ f` is the functor `pushforward f : Over J ⥤ Over I`. As such, for an object
 `X : Over J`, we have `Π_f X : Over I`
 
 ### Diagrams
