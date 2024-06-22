@@ -69,13 +69,13 @@ namespace baseChange
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
-prefix: 70 " Σ_ " => Over.map
+prefix:90 "Σ_ " => Over.map
 
-prefix: 70 " Σ_ " => Over.forget
+prefix:90 "Σ_ " => Over.forget
 
-prefix: 70 " Δ_ " => baseChange
+prefix:90 "Δ_ " => baseChange
 
-prefix: 70 " Δ_ " => Over.star
+prefix:90 "Δ_ " => Over.star
 
 example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
     pullback p f ⟶ X := by
@@ -277,7 +277,7 @@ class CartesianExponentiable {X Y : C} (f : X ⟶ Y) where
   functor : Over X ⥤ Over Y
   adj : baseChange f ⊣ functor := by infer_instance
 
-prefix:75 "Π_" => CartesianExponentiable.functor
+prefix:90 "Π_" => CartesianExponentiable.functor
 
 namespace CartesianExponentiable
 
