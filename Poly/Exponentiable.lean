@@ -122,11 +122,20 @@ lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C
     (Over.star I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
   simp [Over.star, Over.mk]
 
-/-- The base-change along `terminal.from`  -/
-lemma baseChange_terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
-    (Δ_ (terminal.from I)).obj X = (Over.star I).obj (X.left)
+/-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism. Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
+def baseChange_terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
+    (Δ_ (terminal.from I)).obj X ≅ (Over.star I).obj (X.left)
     := by
-  sorry
+  unfold baseChange Over.star
+  fapply Over.isoMk
+  · simp only [id_obj, const_obj_obj, mk_left, comp_obj, coalgebraToOver_obj, Comonad.cofree_obj_A,
+    prodComonad_obj, Comonad.cofree_obj_a, prodComonad_δ_app, limit.lift_π, BinaryFan.mk_pt,
+    BinaryFan.π_app_left, BinaryFan.mk_fst]
+    have := prodIsoPullback I X.left
+    have lem := terminal.hom_ext X.hom (terminal.from X.left)
+    rw [← lem] at this
+    exact pullbackSymmetry X.hom (terminal.from I) ≪≫ this.symm
+  · simp; sorry
 
 -- Over.star -- Δ_ (prod.snd (X:= B) (Y:= E))
 
