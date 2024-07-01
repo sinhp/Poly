@@ -159,7 +159,7 @@ variable (B)
 @[simps!]
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
-/-- Evaluating the identity polynomial at an object `X` is isomorphic to `X`  ER: This is only true if B is terminal.-/
+/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
 def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
   hom := 𝟙 (B ⨯ X)
   inv := 𝟙 (B ⨯ X)

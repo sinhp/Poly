@@ -69,12 +69,16 @@ namespace baseChange
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
+@[inherit_doc]
 prefix:90 "Σ_ " => Over.map
 
+@[inherit_doc]
 prefix:90 "Σ_ " => Over.forget
 
+@[inherit_doc]
 prefix:90 "Δ_ " => baseChange
 
+@[inherit_doc]
 prefix:90 "Δ_ " => Over.star
 
 example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
@@ -123,8 +127,7 @@ lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C
 
 /-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism. Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
 def terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
-    (Δ_ (terminal.from I)).obj X ≅ (Over.star I).obj (X.left)
-    := by
+    (Δ_ (terminal.from I)).obj X ≅ (Over.star I).obj (X.left) := by
   unfold baseChange Over.star
   fapply Over.isoMk
   · simp only [id_obj, const_obj_obj, mk_left, comp_obj, coalgebraToOver_obj, Comonad.cofree_obj_A,
@@ -196,9 +199,9 @@ lemma projRight_counit {X Y : Over I} :
   simp_all only [const_obj_obj, id_obj, mapAdjunction_counit_app]
   rfl
 
-local notation "π_"   => projLeft
+local notation "π_ "   => projLeft
 
-local notation "μ_"   => projRight
+local notation "μ_ "   => projRight
 
 -- pullbackCompositionIsBinaryProduct
 /-- Compsotion after base change gives the binary product in slices.-/
@@ -274,10 +277,12 @@ open baseChange.overMap
 variable {C : Type*} [Category C] [HasPullbacks C]
 
 class CartesianExponentiable {X Y : C} (f : X ⟶ Y) where
+  /-- A functor `C/X ⥤ C/Y` right adjoint to `f*`. -/
   functor : Over X ⥤ Over Y
   adj : baseChange f ⊣ functor := by infer_instance
 
-prefix:90 "Π_" => CartesianExponentiable.functor
+@[inherit_doc]
+prefix:90 "Π_ " => CartesianExponentiable.functor
 
 namespace CartesianExponentiable
 
