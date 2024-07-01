@@ -56,8 +56,9 @@ def mapForgetIso {X Y : C}(f : X ⟶ Y) :
     map f ⋙ forget Y ≅ forget X := eqToIso (mapForget_eq f)
 
 /-- For use elsewhere.-/
-def mapStarIso [HasBinaryProducts C] [HasPullbacks C] {X Y : C}(f : X ⟶ Y) :
-  star X ≅ star Y ⋙ baseChange f := conjugateIsoEquiv (forgetAdjStar X) ((mapAdjunction f).comp (forgetAdjStar Y)) (mapForgetIso f)
+def mapStarIso [HasBinaryProducts C] [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
+    star X ≅ star Y ⋙ baseChange f :=
+  conjugateIsoEquiv (forgetAdjStar X) ((mapAdjunction f).comp (forgetAdjStar Y)) (mapForgetIso f)
 
 theorem mapComp_eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
     map f ⋙ map g = map (f ≫ g) := by
@@ -68,12 +69,30 @@ theorem mapComp_eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
 def mapCompIso {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
     Over.map f ⋙ Over.map g ≅ Over.map (f ≫ g) := eqToIso (mapComp_eq f g)
 
+@[simp]
+lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
+    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
+  sorry
+
 /-- The conjugate isomorphism between pullback functors. -/
 def pullbackCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     baseChange (f ≫ g) ≅ baseChange g ⋙ baseChange f :=
   conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
 
+def forgetAdjStar_homEquiv [HasBinaryProducts C] (X : C) (U : Over X) (A : C)
+    (f : U.left ⟶ A) :
+    (Over.forgetAdjStar X).homEquiv U A f =
+      Over.homMk (V := (Over.star X).obj A) (prod.lift U.hom f) := by
+  sorry
+
+def forgetAdjStar_homEquiv_symm [HasBinaryProducts C] (X : C) (U : Over X) (A : C)
+    (f : U ⟶ (Over.star X).obj A) :
+    -- i.e., counit.app _ = prod.snd
+    ((Over.forgetAdjStar X).homEquiv U A).symm f = f.left ≫ prod.snd := by
+  sorry
+
 end Over
+
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
