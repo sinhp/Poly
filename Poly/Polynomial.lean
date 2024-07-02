@@ -189,10 +189,10 @@ open IsPullback
 def id (P : UvPoly E B) : Hom P P := ⟨𝟙 E, 𝟙 B, ⟨by aesop, ⟨ sorry ⟩⟩⟩
 
 def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E'' B''} (f : Hom P Q) (g : Hom Q R) :
-  Hom P R where
-    e := f.e ≫ g.e
-    b := f.b ≫ g.b
-    is_pullback := paste_vert f.is_pullback g.is_pullback
+    Hom P R where
+  e := f.e ≫ g.e
+  b := f.b ≫ g.b
+  is_pullback := paste_vert f.is_pullback g.is_pullback
 
 end Hom
 
@@ -223,9 +223,9 @@ instance : Category (UvPoly.Total (C:= C)) where
 
 def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
     Total.of P ⟶ Total.of Q where
-      e := α.e
-      b := α.b
-      is_pullback := α.is_pullback
+  e := α.e
+  b := α.b
+  is_pullback := α.is_pullback
 
 namespace UvPoly
 
@@ -246,26 +246,26 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.
 /-- Universal property of the polynomial functor. -/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback b P.p ⟶ X where
-      toFun := polyPair P Γ X
-      invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
-      left_inv be := by
-        simp_rw [polyPair, pairPoly, ← forgetAdjStar_homEquiv_symm]
-        simp
-      right_inv := by
-        intro ⟨b, e⟩
-        dsimp [polyPair, pairPoly]
-        have := Over.forgetAdjStar_homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
-        simp at this
-        rw [this]
-        set pairHat := P.exp.adj.homEquiv _ _ _
-        congr! with h
-        · simpa [-w] using pairHat.w
-        · -- We deal with HEq/dependency by precomposing with an iso
-          rw [show homMk _ _ = eqToHom (by rw [h]) ≫ pairHat by ext; simp,
-            show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by simp [pairHat]]
-          generalize pairHat.left ≫ _ = x at h
-          cases h
-          simp [pullback.congrHom]
+  toFun := polyPair P Γ X
+  invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
+  left_inv be := by
+    simp_rw [polyPair, pairPoly, ← forgetAdjStar_homEquiv_symm]
+    simp
+  right_inv := by
+    intro ⟨b, e⟩
+    dsimp [polyPair, pairPoly]
+    have := Over.forgetAdjStar_homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
+    simp at this
+    rw [this]
+    set pairHat := P.exp.adj.homEquiv _ _ _
+    congr! with h
+    · simpa [-w] using pairHat.w
+    · -- We deal with HEq/dependency by precomposing with an iso
+      rw [show homMk _ _ = eqToHom (by rw [h]) ≫ pairHat by ext; simp,
+        show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by simp [pairHat]]
+      generalize pairHat.left ≫ _ = x at h
+      cases h
+      simp [pullback.congrHom]
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
