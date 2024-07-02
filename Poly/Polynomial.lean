@@ -159,7 +159,7 @@ variable (B)
 @[simps!]
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
-/-- Evaluating the identity polynomial at an object `X` is isomorphic to `X`  ER: This is only true if B is terminal.-/
+/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
 def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
   hom := 𝟙 (B ⨯ X)
   inv := 𝟙 (B ⨯ X)
@@ -229,39 +229,57 @@ def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
 
 namespace UvPoly
 
-def polyPair (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) → Σ b : Γ ⟶ B, pullback P.p b ⟶ X := by
-  intro be
-  fconstructor
-  · exact (be ≫ proj P X)
-  · let be' : Over.mk (be ≫ P.proj X) ⟶ ((Δ_ E ⋙ Π_ P.p).obj X) := (Over.homMk be)
-    let be'' := (P.exp.adj.homEquiv (Over.mk (be ≫ P.proj X)) ((Δ_ E).obj X)).symm be'
-    let be''' := (Over.forget E).map be''
-    exact ((pullbackSymmetry (be ≫ P.proj X) P.p).inv ≫ be''' ≫ prod.snd)
+def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
+    Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
+  let b := be ≫ P.proj X
+  let be' : Over.mk b ⟶ (Δ_ E ⋙ Π_ P.p).obj X := Over.homMk be
+  let be'' := (P.exp.adj.homEquiv _ _).symm be'
+  let be''' : pullback b P.p ⟶ E ⨯ X := be''.left
+  ⟨b, be''' ≫ prod.snd⟩
 
-def pairPoly (P : UvPoly E B) (Γ : C) (X : C) :
-    (Σ b : Γ ⟶ B, pullback P.p b ⟶ X) → (Γ ⟶ P.functor.obj X) := by
-  intro ⟨b , e⟩
-  let pbE := (baseChange P.p).obj (Over.mk b)
-  let eE : pbE ⟶ (Δ_ E).obj X := ((Over.forgetAdjStar E).homEquiv pbE X) ((pullbackSymmetry b P.p).hom ≫ e)
-  exact ((Σ_ B).map ((P.exp.adj.homEquiv (Over.mk b) ((Δ_ E).obj X)) eE))
+def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
+    Γ ⟶ P.functor.obj X :=
+  let pbE := (Δ_ P.p).obj (Over.mk b)
+  let eE : pbE ⟶ (Δ_ E).obj X := (Over.forgetAdjStar E).homEquiv _ _ e
+  (P.exp.adj.homEquiv _ _ eE).left
 
-/-- The universal property of the polynomial functor.-/
+/-- Universal property of the polynomial functor. -/
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback P.p b ⟶ X where
+    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback b P.p ⟶ X where
       toFun := polyPair P Γ X
-      invFun := pairPoly P Γ X
-      left_inv := by
-        intro be
-        unfold polyPair pairPoly
+      invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
+      left_inv be := by
+        simp_rw [polyPair, pairPoly, ← forgetAdjStar_homEquiv_symm]
         simp
-        sorry
       right_inv := by
-        intro ⟨b , e⟩
-        unfold polyPair pairPoly
-        ext
-        · simp; sorry
-        · simp; sorry
+        intro ⟨b, e⟩
+        dsimp [polyPair, pairPoly]
+        have := Over.forgetAdjStar_homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
+        simp at this
+        rw [this]
+        set pairHat := P.exp.adj.homEquiv _ _ _
+        congr! with h
+        . simpa [-w] using pairHat.w
+        . -- We deal with HEq/dependency by precomposing with an iso
+          let i : pullback (pairHat.left ≫ P.proj X) P.p ≅ pullback b P.p :=
+            pullback.congrHom h rfl
+          set g := _ ≫ prod.snd (X := E) (Y := X)
+          suffices g = i.hom ≫ e by
+            rw [this]
+            clear g this
+            generalize pairHat.left ≫ _ = x at h
+            cases h
+            simp [pullback.congrHom, i]
+          -- And again
+          let j : Over.mk (pairHat.left ≫ P.proj X) ≅ Over.mk b :=
+            eqToIso (by rw [h])
+          suffices homMk (U := Over.mk (pairHat.left ≫ P.proj X))
+              pairHat.left (polyPair.proof_1 ..) = j.hom ≫ pairHat by
+            dsimp [g]
+            rw [this]
+            simp [pairHat, i, j]
+          ext
+          simp [j]
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
