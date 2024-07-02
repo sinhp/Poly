@@ -266,6 +266,7 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X âŸ
       simp
     Â· unfold pushforwardMap pushforwardCospanLeg2Map
       simp
+      apply id_comp -- FIXME: why is this needed
   map_comp := by
     intros x y z u v
     apply pullback.hom_ext
