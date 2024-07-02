@@ -31,10 +31,22 @@ variable {F G : A ⥤ B}{H K : B ⥤ C}
 -- Naturality of β implies naturality of whiskering; this is not used.
 @[simp]
 theorem WhiskeringNaturality
-    (α : F ⟶ G)(β : H ⟶ K) :
+    (α : F ⟶ G) (β : H ⟶ K) :
     (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by ext; unfold whiskerLeft; simp
 
 end NaturalityOfWhiskering
+
+section
+
+variable {C : Type u} [Category.{v} C]
+
+@[simp]
+lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
+    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
+  unfold pullback.map
+  ext <;> simp
+
+end
 
 noncomputable section
 
@@ -69,30 +81,45 @@ theorem mapComp_eq {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
 def mapCompIso {X Y Z : C}(f : X ⟶ Y)(g : Y ⟶ Z) :
     Over.map f ⋙ Over.map g ≅ Over.map (f ≫ g) := eqToIso (mapComp_eq f g)
 
-@[simp]
-lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
-    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
-  sorry
-
 /-- The conjugate isomorphism between pullback functors. -/
 def pullbackCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     baseChange (f ≫ g) ≅ baseChange g ⋙ baseChange f :=
   conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
 
+def forgetAdjStar_unit [HasBinaryProducts C] (X : C) : 𝟭 (Over X) ⟶ (forget X ⋙ star X) where
+  app f := homMk (prod.lift f.hom (𝟙 f.left))
+  naturality U V f := by ext; simp
+
+def forgetAdjStar_unit_eq [HasBinaryProducts C] (X : C) :
+    (forgetAdjStar X).unit = forgetAdjStar_unit X := by
+  ext
+  simp [forgetAdjStar, forgetAdjStar_unit, Adjunction.comp, Equivalence.symm]
+
 def forgetAdjStar_homEquiv [HasBinaryProducts C] (X : C) (U : Over X) (A : C)
     (f : U.left ⟶ A) :
-    (Over.forgetAdjStar X).homEquiv U A f =
-      Over.homMk (V := (Over.star X).obj A) (prod.lift U.hom f) := by
-  sorry
+    (forgetAdjStar X).homEquiv U A f =
+      homMk (V := (star X).obj A) (prod.lift U.hom f) := by
+  rw [homEquiv_unit, forgetAdjStar_unit_eq, forgetAdjStar_unit]
+  ext
+  simp
+
+def forgetAdjStar_counit [HasBinaryProducts C] (X : C) : (star X ⋙ forget X) ⟶ 𝟭 C where
+  app A := prod.snd
+  naturality := by simp
+
+def forgetAdjStar_counit_eq [HasBinaryProducts C] (X : C) :
+    (forgetAdjStar X).counit = forgetAdjStar_counit X := by
+  ext
+  simp [forgetAdjStar, forgetAdjStar_counit, prodComonad,
+    Adjunction.comp, Comonad.ε, Equivalence.symm]
 
 def forgetAdjStar_homEquiv_symm [HasBinaryProducts C] (X : C) (U : Over X) (A : C)
-    (f : U ⟶ (Over.star X).obj A) :
-    -- i.e., counit.app _ = prod.snd
-    ((Over.forgetAdjStar X).homEquiv U A).symm f = f.left ≫ prod.snd := by
-  sorry
+    (f : U ⟶ (star X).obj A) :
+    ((forgetAdjStar X).homEquiv U A).symm f = f.left ≫ prod.snd := by
+  rw [homEquiv_counit, forgetAdjStar_counit_eq, forgetAdjStar_counit]
+  simp
 
 end Over
-
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
@@ -109,7 +136,6 @@ def equivOverTerminal' (T : C) (h : IsTerminal T) : C ≌ Over T :=
   CategoryTheory.Equivalence.mk (toOverTerminal' T h) (Over.forget _)
     (NatIso.ofComponents (fun X => Iso.refl _))
     (NatIso.ofComponents (fun X => Over.isoMk (Iso.refl _) (by simpa using h.hom_ext _ _)))
-
 
 def equivOverTerminal [HasTerminal C] : C ≌ Over (⊤_ C) :=
   equivOverTerminal' (⊤_ C) terminalIsTerminal
