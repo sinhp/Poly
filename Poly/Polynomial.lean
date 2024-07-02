@@ -169,10 +169,10 @@ variable {B}
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'` and `b : B ⟶ B'` such that the diagram
 ```
   E ---P.p--> B
-  |          |
- e            b
-  |          |
-  v          v
+  |           |
+  e           b
+  |           |
+  v           v
   E' --Q.p--> B'
 ```
 is a pullback square. -/
@@ -259,27 +259,13 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
         rw [this]
         set pairHat := P.exp.adj.homEquiv _ _ _
         congr! with h
-        . simpa [-w] using pairHat.w
-        . -- We deal with HEq/dependency by precomposing with an iso
-          let i : pullback (pairHat.left ≫ P.proj X) P.p ≅ pullback b P.p :=
-            pullback.congrHom h rfl
-          set g := _ ≫ prod.snd (X := E) (Y := X)
-          suffices g = i.hom ≫ e by
-            rw [this]
-            clear g this
-            generalize pairHat.left ≫ _ = x at h
-            cases h
-            simp [pullback.congrHom, i]
-          -- And again
-          let j : Over.mk (pairHat.left ≫ P.proj X) ≅ Over.mk b :=
-            eqToIso (by rw [h])
-          suffices homMk (U := Over.mk (pairHat.left ≫ P.proj X))
-              pairHat.left (polyPair.proof_1 ..) = j.hom ≫ pairHat by
-            dsimp [g]
-            rw [this]
-            simp [pairHat, i, j]
-          ext
-          simp [j]
+        · simpa [-w] using pairHat.w
+        · -- We deal with HEq/dependency by precomposing with an iso
+          rw [show homMk _ _ = eqToHom (by rw [h]) ≫ pairHat by ext; simp,
+            show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by simp [pairHat]]
+          generalize pairHat.left ≫ _ = x at h
+          cases h
+          simp [pullback.congrHom]
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
