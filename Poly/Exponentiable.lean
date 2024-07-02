@@ -169,7 +169,7 @@ variable [HasFiniteWidePullbacks C] {I : C}
 
 attribute [local instance] monoidalOfHasFiniteProducts
 
-@[simps]
+@[simps!]
 def swapIso {X Y : Over I} :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ (Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)  := by
   fapply Over.isoMk

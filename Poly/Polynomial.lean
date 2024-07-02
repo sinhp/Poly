@@ -76,7 +76,6 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
   hom := by
     simp [apply]
     simp [functor]
-    dsimp
     exact {
       left := by
         dsimp
