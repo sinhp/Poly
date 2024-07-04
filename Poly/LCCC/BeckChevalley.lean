@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2024 Emily Riehl. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Emily Riehl
+Authors: Emily Riehl, Sina Hazratpour
 -/
 
 -- import Mathlib.CategoryTheory.Adjunction.Mates
@@ -93,9 +93,14 @@ def pushforwardSquareIso [HasPullbacks C] {W X Y Z : C}
 
 
 end BeckChevalleyTransformations
+
+end Over
+
 section BeckChevalleyIsos
 
-open IsPullback
+variable {C : Type u} [Category.{v} C]
+
+open IsPullback Over
 
 /-- Calculating the counit components of mapAdjunction. -/
 theorem mapAdjunction.counit.app_pullback.fst  [HasPullbacks C] {X Y : C} (f : X ⟶ Y) (y : Over Y) :
@@ -185,8 +190,4 @@ instance pushforwardBeckChevalleyNatTrans_of_isPullback_isIso [HasPullbacks C] {
   have := pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso f g h k pb
   apply conjugateEquiv_iso
 
-
 end BeckChevalleyIsos
-
-
-end Over

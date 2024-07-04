@@ -140,15 +140,15 @@ def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functo
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
 def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
-  (((Δ_ E) ⋙ (Π_ P.p)).obj X).hom
+  ((Δ_ E ⋙ Π_ P.p).obj X).hom
 
-/-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by g, but you have to compose with various natural isomorphisms. -/
+/-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by `g`, but you have to compose with various natural isomorphisms. -/
 def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
     Q.functor ⟶ P.functor := by
   unfold functor
-  have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by rw [comp_id]; exact h.symm
+  have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by simpa [comp_id] using h.symm
   have bc := pushforwardBeckChevalleyNatTrans g Q.p P.p (𝟙 _) hsquare Q.exp P.exp
-  exact whiskerRight ((whiskerLeft (Δ_ F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (mapStarIso g).inv (Π_ P.p))) (Over.forget B)
+  exact whiskerRight ((whiskerLeft (Δ_ F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (baseChange.mapStarIso g).inv (Π_ P.p))) (Over.forget B)
 
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
@@ -195,8 +195,7 @@ def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E''
 
 end Hom
 
-
-/-- Bundling up the all the polynomials over different bases to form the underlying type of the category of polynomials. -/
+/-- Bundling up the the polynomials over different bases to form the underlying type of the category of polynomials. -/
 structure Total (C : Type*) [Category C] [HasPullbacks C] where
   (E B : C)
   (poly : UvPoly E B)
@@ -248,12 +247,12 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
   toFun := polyPair P Γ X
   invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
   left_inv be := by
-    simp_rw [polyPair, pairPoly, ← forgetAdjStar_homEquiv_symm]
+    simp_rw [polyPair, pairPoly, ← forgetAdjStar.homEquiv_symm]
     simp
   right_inv := by
     intro ⟨b, e⟩
     dsimp [polyPair, pairPoly]
-    have := Over.forgetAdjStar_homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
+    have := Over.forgetAdjStar.homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
     simp at this
     rw [this]
     set pairHat := P.exp.adj.homEquiv _ _ _
