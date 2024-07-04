@@ -275,28 +275,14 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
   dsimp
   congr! with h
   . simp [polyPair, pairPoly]
-  . let i : pullback (P.polyPair Δ X (σ ≫ be)).fst P.p ≅ pullback (σ ≫ (P.polyPair Γ X be).fst) P.p :=
-      pullback.congrHom h rfl
-    set f := (P.polyPair Δ X (σ ≫ be)).snd
-    set g := _ ≫ (P.polyPair Γ X be).snd
-    suffices f = i.hom ≫ g by
-      rw [this]
-      clear f this
-      generalize (P.polyPair Δ X (σ ≫ be)).fst = x at h
+  . set g := _ ≫ (P.polyPair Γ X be).snd
+    rw [(_ : (P.polyPair Δ X (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair Δ X (σ ≫ be)).fst = x at h
       cases h
-      simp [i]
-    dsimp [f, g, polyPair, pairPoly]
-    simp [pullback.map, i]
-    simp_rw [← assoc]
-    congr 2
-    ext
-    . simp
-      simp_rw [← assoc]
-      erw [pullback.lift_fst]
-      rfl
-    . simp
-      erw [pullback.lift_snd]
-      rfl
+      simp
+    · simp [g, polyPair, ← assoc]
+      congr 2
+      ext <;> simp
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
