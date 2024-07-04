@@ -252,7 +252,7 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
   right_inv := by
     intro ⟨b, e⟩
     dsimp [polyPair, pairPoly]
-    have := Over.forgetAdjStar.homEquiv (U := (Δ_ P.p).obj (Over.mk b)) (f := e)
+    have := Over.forgetAdjStar.homEquiv (X := (Δ_ P.p).obj (Over.mk b)) (f := e)
     simp at this
     rw [this]
     set pairHat := P.exp.adj.homEquiv _ _ _
