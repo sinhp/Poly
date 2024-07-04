@@ -60,7 +60,7 @@ We prove that `μ_ X Y` and `π_ X Y` form a pullback square:
 
 ### Implementation Notes
 
-(SH): The definitions `Over.pullback` and `mapPullbackAdj`.
+(SH): The definitions `Over.pullback` and `mapPullbackAdj` already existed in mathlib.
 Later, `Over.baseChange` and `Over.mapAdjunction` were added
 which are duplicates, but the latter have additional `simp` lemmas, namely `unit_app` and `counit_app` which makes proving things with
 `simp` easier.
