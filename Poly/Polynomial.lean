@@ -242,6 +242,7 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.
   (P.exp.adj.homEquiv _ _ eE).left
 
 /-- Universal property of the polynomial functor. -/
+@[simps]
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback b P.p ⟶ X where
   toFun := polyPair P Γ X
@@ -264,6 +265,23 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
       generalize pairHat.left ≫ _ = x at h
       cases h
       simp [pullback.congrHom]
+
+/-- `UvPoly.equiv` is natural in `Γ`. -/
+lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
+    equiv P Δ X (σ ≫ be) = let ⟨b, e⟩ := equiv P Γ X be
+                           ⟨σ ≫ b, pullback.lift (pullback.fst ≫ σ) pullback.snd
+                                     (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
+  dsimp
+  congr! with h
+  . simp [polyPair, pairPoly]
+  . set g := _ ≫ (P.polyPair Γ X be).snd
+    rw [(_ : (P.polyPair Δ X (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair Δ X (σ ≫ be)).fst = x at h
+      cases h
+      simp
+    · simp [g, polyPair, ← assoc]
+      congr 2
+      ext <;> simp
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by

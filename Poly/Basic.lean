@@ -157,10 +157,22 @@ variable {F G : A ⥤ B} {H K : B ⥤ C}
 -- Naturality of β implies naturality of whiskering; this is not used.
 @[simp]
 theorem WhiskeringNaturality
-    (α : F ⟶ G)(β : H ⟶ K) :
+    (α : F ⟶ G) (β : H ⟶ K) :
     (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by ext; unfold whiskerLeft; simp
 
 end NaturalityOfWhiskering
+
+section
+
+variable {C : Type u} [Category.{v} C]
+
+@[simp]
+lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
+    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
+  unfold pullback.map
+  ext <;> simp
+
+end
 
 noncomputable section
 
@@ -384,6 +396,8 @@ def id (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ :=
 def comp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Δ_ (f ≫ g) ≅ Δ_ g ⋙ Δ_ f :=
   conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
+
+end Over
 
 end baseChange
 namespace Limits
