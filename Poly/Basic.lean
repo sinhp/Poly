@@ -397,9 +397,8 @@ def comp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Δ_ (f ≫ g) ≅ Δ_ g ⋙ Δ_ f :=
   conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
 
-end Over
-
 end baseChange
+
 namespace Limits
 
 /- Note (SH) : In general, in `Poly` project, we use `IsPullback` instead of `HasPullback`. -/
