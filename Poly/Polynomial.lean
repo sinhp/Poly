@@ -93,7 +93,25 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
 
 -- TODO: The set of connected components of el(P) is in bijection with the set P(1) ≅ A
 
+section Composition
+variable {I}
+
+-- the auxiliary pullback square with `P.t`, `Q.s`
+def pullback_fst (P : MvPoly I J) (Q : MvPoly J K) :
+    pullback (P.t) (Q.s) ⟶ P.B :=
+  pullback.fst
+
+def pullback_snd (P : MvPoly I J) (Q : MvPoly J K) :
+    pullback (P.t) (Q.s) ⟶ Q.E :=
+  pullback.snd
+
+def pullback_counit (P: MvPoly I J) (Q : MvPoly J K) :
+    (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback_snd P Q)) ⟶ (Over.mk <| pullback_snd P Q) :=
+  adj.counit.app _
+
 def comp (P: MvPoly I J) (Q : MvPoly J K) : MvPoly I K := sorry
+
+end Composition
 
 end MvPoly
 
@@ -282,21 +300,6 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
     · simp [g, polyPair, ← assoc]
       congr 2
       ext <;> simp
-
-def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
-  apply mapSquareIso
-  rw [f.is_pullback.w]
-
-def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
-  set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
-  have : IsIso l := (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
-  exact asIso l
-
-def bar' [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (Δ_ P.poly.p) ⋙ (Σ_ f.e) ≅ (Σ_ f.b) ⋙ (Δ_ Q.poly.p) := by
-  sorry
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
 def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
