@@ -25,7 +25,8 @@ open CategoryTheory Category Limits Functor Adjunction Over
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
-/-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I` and output variables in `O`. -/
+/-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I`,
+output variables in `O`, and with arities `E` dependent on `I`. -/
 structure MvPoly (I O : C) :=
   (E B : C)
   (s : E ⟶ I)
@@ -44,10 +45,6 @@ open CartesianExponentiable
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
 
--- instance (I O : C) (P : MvPoly I O) : Inhabited (MvPoly I O) := ⟨P⟩
-
--- instance (I O : C) (P : MvPoly I O) : CartesianExponentiable P.p := P.exp
-
 attribute [instance] MvPoly.exp
 
 attribute [instance] UvPoly.exp
@@ -58,8 +55,15 @@ def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.i
 
 instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
 
-/-- The constant polynomial functor in many variables: for this we need the initial object. -/
+instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
+  functor := {
+    obj := sorry
+    map := sorry
+  }
+  adj := sorry
 
+/-- The constant polynomial functor in many variables: for this we need the initial object. -/
+def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O := ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
@@ -68,7 +72,7 @@ def functor {I O : C} (P : MvPoly I O) :
 variable (I O : C) (P : MvPoly I O)
 -- #check (Σ_ P.t)
 
-def apply (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
 -- TODO: write a coercion from `MvPoly` to a functor for evalutation of polynomials at a given object.
 
@@ -94,20 +98,29 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
 -- TODO: The set of connected components of el(P) is in bijection with the set P(1) ≅ A
 
 section Composition
+
 variable {I}
 
+variable {J K : C}
+
+variable (P : MvPoly I J) (Q : MvPoly J K)
+
 -- the auxiliary pullback square with `P.t`, `Q.s`
-def pullback_fst (P : MvPoly I J) (Q : MvPoly J K) :
+def pullback_fst :
     pullback (P.t) (Q.s) ⟶ P.B :=
   pullback.fst
 
-def pullback_snd (P : MvPoly I J) (Q : MvPoly J K) :
+def pullback_snd :
     pullback (P.t) (Q.s) ⟶ Q.E :=
   pullback.snd
 
-def pullback_counit (P: MvPoly I J) (Q : MvPoly J K) :
+-- def pullback_fst_pb
+
+def pullback_counit :
     (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback_snd P Q)) ⟶ (Over.mk <| pullback_snd P Q) :=
   adj.counit.app _
+
+
 
 def comp (P: MvPoly I J) (Q : MvPoly J K) : MvPoly I K := sorry
 
@@ -300,6 +313,21 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
     · simp [g, polyPair, ← assoc]
       congr 2
       ext <;> simp
+
+def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
+  apply mapSquareIso
+  rw [f.is_pullback.w]
+
+def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
+  set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
+  have : IsIso l := (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
+  exact asIso l
+
+def bar' [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
+    (Δ_ P.poly.p) ⋙ (Σ_ f.e) ≅ (Σ_ f.b) ⋙ (Δ_ Q.poly.p) := by
+  sorry
 
 /-- A map of polynomials induces a natural transformation between their associated functors. -/
 def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
