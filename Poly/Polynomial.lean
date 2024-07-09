@@ -73,6 +73,10 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   s := coprod.desc P.s Q.s
   p := coprod.map P.p Q.p
+  exp := {
+    functor := sorry  -- prove that the sum of exponentiables is exponentiable.
+    adj := sorry
+  }
   t := coprod.desc P.t Q.t
 
 
