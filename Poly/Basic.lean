@@ -111,6 +111,8 @@ prefix:90 "Δ_ " => Over.baseChange -- we might change this to `Over.pullback` l
 prefix:90 "Δ_ " => Over.star
 
 
+#check Over.pullback
+#check Over.forgetAdjStar
 namespace Over.forgetAdjStar
 
 variable [HasBinaryProducts C] {I : C}
@@ -122,7 +124,7 @@ theorem unit_app_left_eq (X : Over I):
 
 @[simp]
 theorem unit_app_eq (X : Over I):
-    (Over.forgetAdjStar I).unit.app X = homMk (by simp; exact prod.lift X.hom (𝟙 _)) := by
+    (Over.forgetAdjStar I).unit.app X = homMk (V := (Σ_ I ⋙ Δ_ I).obj X) (prod.lift X.hom (𝟙 X.left)) := by
   ext
   simp
 
@@ -207,6 +209,8 @@ of it are `Iso.refl`.
  -/
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g)
+
+#check Over.mapComp
 
 end Over
 

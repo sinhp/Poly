@@ -55,6 +55,7 @@ def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.i
 
 instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
 
+/-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
 instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
   functor := {
     obj := sorry
@@ -65,14 +66,23 @@ instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
 /-- The constant polynomial functor in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O := ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
+
+/-- The sum of two polynomial functors in many variables. -/
+def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
+  E := P.E ⨿ Q.E
+  B := P.B ⨿ Q.B
+  s := coprod.desc P.s Q.s
+  p := coprod.map P.p Q.p
+  t := coprod.desc P.t Q.t
+
+
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
   (Δ_ P.s) ⋙ (Π_ P.p) ⋙ (Σ_ P.t)
 
 variable (I O : C) (P : MvPoly I O)
--- #check (Σ_ P.t)
 
-def apply {I O : C} (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
+def apply [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
 -- TODO: write a coercion from `MvPoly` to a functor for evalutation of polynomials at a given object.
 
@@ -119,8 +129,6 @@ def pullback_snd :
 def pullback_counit :
     (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback_snd P Q)) ⟶ (Over.mk <| pullback_snd P Q) :=
   adj.counit.app _
-
-
 
 def comp (P: MvPoly I J) (Q : MvPoly J K) : MvPoly I K := sorry
 
