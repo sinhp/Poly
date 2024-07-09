@@ -29,10 +29,10 @@ variable {C : Type*} [Category C] [HasPullbacks C]
 output variables in `O`, and with arities `E` dependent on `I`. -/
 structure MvPoly (I O : C) :=
   (E B : C)
-  (s : E ⟶ I)
+  (i : E ⟶ I)
   (p : E ⟶ B)
   (exp : CartesianExponentiable p := by infer_instance)
-  (t : B ⟶ O)
+  (o : B ⟶ O)
 
 /-- `P : UvPoly C` is a polynomial functors in a single variable -/
 structure UvPoly (E B : C) :=
@@ -49,7 +49,7 @@ attribute [instance] MvPoly.exp
 
 attribute [instance] UvPoly.exp
 
-/-- The identity polynomial functor in many variables. -/
+/-- The identity polynomial in many variables. -/
 @[simps!]
 def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.id, 𝟙 I⟩
 
@@ -63,26 +63,32 @@ instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
   }
   adj := sorry
 
-/-- The constant polynomial functor in many variables: for this we need the initial object. -/
+/-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O := ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
+/-- The monomial polynomial in many variables. -/
+def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [CartesianExponentiable p]: MvPoly I O :=
+  ⟨E, O, i, p, inferInstance, 𝟙 O⟩
 
-/-- The sum of two polynomial functors in many variables. -/
+/-- The sum of two polynomials in many variables. -/
 def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   E := P.E ⨿ Q.E
   B := P.B ⨿ Q.B
-  s := coprod.desc P.s Q.s
+  s := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
   exp := {
     functor := sorry  -- prove that the sum of exponentiables is exponentiable.
     adj := sorry
   }
-  t := coprod.desc P.t Q.t
+  t := coprod.desc P.o Q.o
+
+
+
 
 
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
-  (Δ_ P.s) ⋙ (Π_ P.p) ⋙ (Σ_ P.t)
+  (Δ_ P.i) ⋙ (Π_ P.p) ⋙ (Σ_ P.o)
 
 variable (I O : C) (P : MvPoly I O)
 
@@ -119,13 +125,13 @@ variable {J K : C}
 
 variable (P : MvPoly I J) (Q : MvPoly J K)
 
--- the auxiliary pullback square with `P.t`, `Q.s`
+-- the auxiliary pullback square with `P.o`, `Q.i`
 def pullback_fst :
-    pullback (P.t) (Q.s) ⟶ P.B :=
+    pullback (P.o) (Q.i) ⟶ P.B :=
   pullback.fst
 
 def pullback_snd :
-    pullback (P.t) (Q.s) ⟶ Q.E :=
+    pullback (P.o) (Q.i) ⟶ Q.E :=
   pullback.snd
 
 -- def pullback_fst_pb

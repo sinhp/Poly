@@ -48,7 +48,6 @@ instance : Inhabited Poly :=
 @[simps!]
 def monomial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 
-
 /-- A constant polynomial at `α` is a polynomial with a base type `β` and the type family given by the constant map `fun _ => Empty : β → Type u`.
 -/
 def constant (β : Type*) : Poly := ⟨β, fun _ => PEmpty⟩
