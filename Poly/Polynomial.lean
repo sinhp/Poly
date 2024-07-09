@@ -17,6 +17,10 @@ import Poly.LCCC.BeckChevalley
 
 /-!
 # Polynomial Functor
+
+
+-- TODO: there are various `sorry`-carrying proofs in below which require instances of `CartesianExponentiable`
+for various construcitons on morphisms. They need to be defined in `Poly.Exponentiable`.
 -/
 
 noncomputable section
@@ -152,6 +156,12 @@ variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 instance : HasBinaryProducts C := by sorry --infer_instance --not working; we should get this from `HasTerminal` and `HasPullbacks`?
 
 variable {E B : C}
+
+/-- The constant polynomial in many variables: for this we need the initial object. -/
+def const [HasInitial C] (S : C) : UvPoly (⊥_ C) S := ⟨initial.to S, inferInstance⟩
+
+def smul [HasBinaryProducts C] (S : C) (P : UvPoly E B) : UvPoly (S ⨯ E) (S ⨯ B) :=
+  ⟨prod.map (𝟙 S) P.p, sorry⟩
 
 /-- The product of two polynomials in a single variable. -/
 def prod (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]: UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
