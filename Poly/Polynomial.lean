@@ -74,17 +74,17 @@ def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [CartesianExponentiable p]:
 def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   E := P.E ⨿ Q.E
   B := P.B ⨿ Q.B
-  s := coprod.desc P.i Q.i
+  i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
   exp := {
     functor := sorry  -- prove that the sum of exponentiables is exponentiable.
     adj := sorry
   }
-  t := coprod.desc P.o Q.o
+  o := coprod.desc P.o Q.o
 
-
-
-
+/-- The product of two polynomials in many variables. -/
+def prod {I O : C} [HasBinaryProducts C] (P Q : MvPoly I O) : MvPoly I O :=
+  sorry
 
 def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
@@ -112,8 +112,6 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
   inv_hom_id := sorry
 
 -- TODO: examples monomials, linear polynomials, 1/1-X, ...
-
--- TODO: basic operations: sum, product, composition, differential
 
 -- TODO: The set of connected components of el(P) is in bijection with the set P(1) ≅ A
 
@@ -151,20 +149,25 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
--- TODO: can we write a smart macro here automatically detecting the input of `Σ_` and `Δ_`?
-
--- scoped notation "Σ_" => Over.forget
-
--- scoped notation "Δ_" => Over.star
-
--- scoped notation "Π_" => CartesianExponentiable.functor
-
 instance : HasBinaryProducts C := by sorry --infer_instance --not working; we should get this from `HasTerminal` and `HasPullbacks`?
 
 variable {E B : C}
 
--- Note (SH): We define the functor associated to a single variable polyonimal in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
+/-- The product of two polynomials in a single variable. -/
+def prod (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]: UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
+  p := coprod.desc (prod.map P.p (𝟙 B')) (prod.map (𝟙 B) Q.p)
+  exp := sorry -- perhaps we need extra assumptions on `C` to prove this, e.g. `C` is lextensive?
 
+-- TODO: show that the product is associative and unital.
+#check Associative
+
+
+/-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
+to a single variable polynomial `P : UvPoly E B`. -/
+def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
+    (Δ_ E) ⋙ (Π_ P.p) ⋙ (Σ_ B)
+
+-- Note (SH): Alternatively, we can define the functor associated to a single variable polyonimal in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
 def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
 
@@ -176,14 +179,10 @@ def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
 /-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials. -/
-def functor_alt (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
+def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
 
--- (SH): The following definition might be more ergonomic but it assumes more, namely that the category `C` has binary products.
-def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
-    (Δ_ E) ⋙ (Π_ P.p) ⋙ (Σ_ B)
-
-def functor_is_iso_functor_alt [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor_alt := by
-  unfold functor_alt auxFunctor functor MvPoly.functor toMvPoly
+def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by
+  unfold functor' auxFunctor functor MvPoly.functor toMvPoly
   simp
   sorry
 
