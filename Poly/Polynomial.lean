@@ -148,7 +148,6 @@ end Composition
 
 end MvPoly
 
-
 namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
@@ -167,10 +166,6 @@ def smul [HasBinaryProducts C] (S : C) (P : UvPoly E B) : UvPoly (S ⨯ E) (S �
 def prod (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]: UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
   p := coprod.desc (prod.map P.p (𝟙 B')) (prod.map (𝟙 B) Q.p)
   exp := sorry -- perhaps we need extra assumptions on `C` to prove this, e.g. `C` is lextensive?
-
--- TODO: show that the product is associative and unital.
-#check Associative
-
 
 /-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
 to a single variable polynomial `P : UvPoly E B`. -/
@@ -265,7 +260,7 @@ end UvPoly
 open UvPoly
 
 /-- The category of polynomial functors in a single variable. -/
-instance : Category (UvPoly.Total (C:= C)) where
+instance : Category (UvPoly.Total C) where
   Hom P Q := UvPoly.Hom P.poly Q.poly
   id P := UvPoly.Hom.id P.poly
   comp := UvPoly.Hom.comp
@@ -276,7 +271,6 @@ instance : Category (UvPoly.Total (C:= C)) where
   assoc := by
     simp [UvPoly.Hom.comp]
 
-
 def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
     Total.of P ⟶ Total.of Q where
   e := α.e
@@ -284,6 +278,18 @@ def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
   is_pullback := α.is_pullback
 
 namespace UvPoly
+
+instance : SMul C (Total C) where
+  smul S P := Total.of (smul S P.poly)
+
+/-- Scaling a polynomial `P` by an object `S` is isomorphic to the product of `const S` and the polynomial `P`. -/
+@[simps!]
+def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total C) :
+    S • P ≅ Total.of ((const S).prod P.poly) where
+      hom := sorry
+      inv := sorry
+      hom_inv_id := sorry
+      inv_hom_id := sorry
 
 def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
     Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
