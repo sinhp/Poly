@@ -11,36 +11,33 @@ The work has been done during the Trimester Program "Prospects of formal mathema
 
 As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
 
-- [ ] Polynomial functors as endofunctors on the category of types
-  - [x] Definition of univariate polynomials as a type family
-  - [x] The construction of a bundle map associated to a polynomial 
-  - [x] The construction of associated polynomial functor
-  - [ ] Definition of multivariate polynomials and the associated polynomial functor
+- [x] Locally cartesian closed categories
+  - [ ] The Beck-Chevalley condition in LCCC
+  - [x] LCCC structure on presheaves of types
+
+- [ ] Univariate and Multivariate Polynomial functors in Locally Cartesian Closed Categories
+  - [x] Definition of univariate and multivariate polynomials 
+  - [x] The construction of associated polynomial functors for univariate and multivariate polynomials
   - [x] Monomials 
   - [x] Linear polynomials
   - [x] Sums of polynomials
   - [ ] Products of polynomials
   - [x] Composition of polynomials
-  - [ ] The classifying property of polynomial functors
-  - [ ] The category `Type [X]` of polynomial functors in one variable
-  - [ ] Differential calculus of polynomials
-- [ ] Polynomial functors in locally cartesian closed categories
-    - [x] Definition of locally cartesian closed category
-    - [ ] Beck-Chevalley condition in LCCCs
-    - [x] Polynomial functors in LCCCs 
-    - [ ] Composition of polynomials
-    - [ ] The bicategory of polynomial functors 
-    - [ ] Cartesian closedness of a category of polynomial functors
+  - [x] The classifying property of polynomial functors
+  - [x] The category `C [X]` of univariate polynomial functors
+  - [ ] The category of multivariate polynomial functors
+  - [ ] The bicategory of polynomial functors
+  - [ ] Cartesian closedness of a category of polynomial functors
+ 
+- [ ] Polynomial functors and the semantics of linear logic
+    - [ ] A relational presentation of polynomial functors. 
+    - [ ] The differential calculus of polynomials
 
-- [x] The LCCC structure on presheaves of types
-  - [ ] Polynomial endofunctors on presheaves of types
-  - [ ] CwFs as cocontinuous polynomials
-- [ ] Polynomials as models of intuitionistic linear logic
-- [ ] Generalized combinatorial species
-
+- [ ] Polynomial functors and generalized combinatorial species
+  
 ### Resources 
 
-# Some references
+# Main references used in the formalization
 
 > - [Wellfounded Trees and Dependent Polynomial Functors, Nicola Gambino⋆ and Martin Hyland](https://www.dpmms.cam.ac.uk/~martin/Research/Publications/2004/gh04.pdf)
 > - [Tutorial on Polynomial Functors and Type Theory, Steve Awodey](https://www.cmu.edu/dietrich/philosophy/hott/slides/polytutorial.pdf)
@@ -48,35 +45,35 @@ As part of this formalization, we also formalize locally cartesian closed catego
 > - [Notes on Locally Cartesian Closed Categories, Sina Hazratpour](https://sinhp.github.io/files/CT/notes_on_lcccs.pdf)
 > - [Notes on Polynomial Functors, Joachim Kock](https://mat.uab.cat/~kock/cat/polynomial.pdf)
 
-> 1. Wellfounded trees and dependent polynomial functors.Gambino, Nicola; Hyland, Martin. Types for proofs and programs. International workshop, TYPES 2003, Torino, Italy, 2003. Revised selected papers.. Springer Berlin, 2004. p. 210-225.
+## Additional references on polynomial functors
 
-> 2. Tamara Von Glehn. Polynomials and models of type theory. PhD thesis, University of Cambridge, 2015.
+> Nicola Gambino, Martin Hyland. Wellfounded trees and dependent polynomial functors.  Types for proofs and programs. International workshop, TYPES 2003, Torino, Italy, 2003. Revised selected papers. Springer Berlin, 2004. p. 210-225.
 
-> 3. Joachim Kock. Data types with symmetries and polynomial functors over groupoids. Electronic Notes in Theoretical Computer Science, 286:351–365, 2012. Proceedings of the 28th Conference on the Mathematical Foundations of Programming Semantics (MFPS XXVIII).
+> Nicola Gambino and Joachim Kock. Polynomial functors and polynomial monads. Mathematical Proceedings of the Cambridge Philosophical Society, 154(1):153–192, 2013.
 
-> 4. Jean-Yves Girard. Normal functors, power series and λ-calculus. Ann. Pure Appl. Logic, 37(2):129–177, 1988. doi:10.1016/0168-0072(88)90025-5.
+> Joachim Kock. Data types with symmetries and polynomial functors over groupoids. Electronic Notes in Theoretical Computer Science, 286:351–365, 2012. Proceedings of the 28th Conference on the Mathematical Foundations of Programming Semantics (MFPS XXVIII).
 
-> 5. David Gepner, Rune Haugseng, and Joachim Kock. 8-Operads as analytic monads. International Mathematics Research Notices, 2021.
+> Paul-André Melliès. Template games and differential linear logic. Proceedings of the 34th Annual ACM/IEEE Symposium on Logic in Computer Science, LICS'19.
 
-> 6. Nicola Gambino and Joachim Kock. Polynomial functors and polynomial monads. Mathematical Proceedings of the Cambridge Philosophical Society, 154(1):153–192, 2013.
+> Marcelo Fiore, Nicola Gambino, Martin Hyland, and Glynn Winskel. The cartesian closed bicategory of generalised species of structures. J. Lond. Math. Soc. (2), 77(1):203–220, 2008.
 
-> 7. Marcelo Fiore, Nicola Gambino, Martin Hyland, and Glynn Winskel. The cartesian closed bicategory of generalised species of structures. J. Lond. Math. Soc. (2), 77(1):203–220, 2008.
+> Tamara Von Glehn. Polynomials and models of type theory. PhD thesis, University of Cambridge, 2015.
 
-> 8. E. Finster, S. Mimram, M. Lucas, T. Seiller. A Cartesian Bicategory of Polynomial Functors in Homotopy Type Theory, MFPS 2021.  https://arxiv.org/pdf/2112.14050.
+> E. Finster, S. Mimram, M. Lucas, T. Seiller. A Cartesian Bicategory of Polynomial Functors in Homotopy Type Theory, MFPS 2021.  https://arxiv.org/pdf/2112.14050.
 
-> 9. Steve Awodey and Clive Newstead. Polynomial pseudomonads and dependent type theory, 2018.
+> Jean-Yves Girard. Normal functors, power series and λ-calculus. Ann. Pure Appl. Logic, 37(2):129–177, 1988. doi:10.1016/0168-0072(88)90025-5.
 
-> 10. Steve Awodey, Natural models of homotopy type theory, Mathematical Structures in Computer Science, 28 2 (2016) 241-286, arXiv:1406.3219.
+> Mark Weber (2015): Polynomials in categories with pullbacks. Theory and applications of categories 30(16), pp. 533–598.
 
-> 11. Sean K. Moss and Tamara von Glehn. Dialectica models of type theory, LICS 2018.
+> David Gepner, Rune Haugseng, and Joachim Kock. 8-Operads as analytic monads. International Mathematics Research Notices, 2021.
+
+> Steve Awodey and Clive Newstead. Polynomial pseudomonads and dependent type theory, 2018.
+
+> Steve Awodey, Natural models of homotopy type theory, Mathematical Structures in Computer Science, 28 2 (2016) 241-286, arXiv:1406.3219.
+
+> Sean K. Moss and Tamara von Glehn. Dialectica models of type theory, LICS 2018.
     
-> 12. Thorsten Altenkirch, Neil Ghani, Peter Hancock, Conor McBride, Peter Morris. Indexed containers. Journal of Functional Programming 25, 2015.
+> Thorsten Altenkirch, Neil Ghani, Peter Hancock, Conor McBride, Peter Morris. Indexed containers. Journal of Functional Programming 25, 2015.
 
-> 13. Jakob Vidmar (2018): Polynomial functors and W-types for groupoids. Ph.D. thesis, University of Leeds.
-
-> 14. Mark Weber (2015): Polynomials in categories with pullbacks. Theory and applications of categories 30(16), pp. 533–598.
-
-
-
-
+> Jakob Vidmar (2018): Polynomial functors and W-types for groupoids. Ph.D. thesis, University of Leeds.
 
