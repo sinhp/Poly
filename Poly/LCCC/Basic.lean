@@ -401,10 +401,10 @@ section PushforwardAdjSection
 namespace PushforwardAdj
 
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
-def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((transferNatTransSelf Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
+def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((conjugateEquiv Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
 def idIso [HasFiniteWidePullbacks C] [PushforwardAdj C] (X : C) : (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
-  asIso ((transferNatTransSelf (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
+  asIso ((conjugateEquiv (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
 
 
 /- SH: TODO

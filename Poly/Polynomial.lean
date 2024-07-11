@@ -5,10 +5,9 @@ Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.CategoryTheory.Monad.Products
-import Mathlib.CategoryTheory.Limits.Shapes.Pullbacks
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Limits.Shapes.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 --import Mathlib.CategoryTheory.Category.Limit
 import Poly.Exponentiable

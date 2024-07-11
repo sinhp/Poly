@@ -4,24 +4,29 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emily Riehl, Sina Hazratpour
 -/
 
--- import Mathlib.CategoryTheory.Adjunction.Mates
-
-import Mathlib.CategoryTheory.Category.Basic
-import Mathlib.CategoryTheory.Functor.Basic
-import Mathlib.CategoryTheory.Functor.Category
-import Mathlib.CategoryTheory.Whiskering
-
-import Mathlib.CategoryTheory.Limits.Over
+import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.Limits.Shapes.CommSq
-
-import Mathlib.CategoryTheory.Closed.Monoidal
-import Mathlib.CategoryTheory.Closed.Cartesian
+import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 
-import Mathlib.CategoryTheory.Monad.Products
+-- import Mathlib.CategoryTheory.Adjunction.Mates
 
-import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
+-- import Mathlib.CategoryTheory.Category.Basic
+-- import Mathlib.CategoryTheory.Functor.Basic
+-- import Mathlib.CategoryTheory.Functor.Category
+-- import Mathlib.CategoryTheory.Whiskering
+
+-- import Mathlib.CategoryTheory.Limits.Over
+-- import Mathlib.CategoryTheory.Adjunction.Over
+-- import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
+-- import Mathlib.CategoryTheory.Closed.Monoidal
+-- import Mathlib.CategoryTheory.Closed.Cartesian
+-- import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+
+-- import Mathlib.CategoryTheory.Monad.Products
+
+--import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
 
 
 /-!
@@ -110,9 +115,6 @@ prefix:90 "Δ_ " => Over.baseChange -- we might change this to `Over.pullback` l
 @[inherit_doc]
 prefix:90 "Δ_ " => Over.star
 
-
-#check Over.pullback
-#check Over.forgetAdjStar
 namespace Over.forgetAdjStar
 
 variable [HasBinaryProducts C] {I : C}
@@ -462,3 +464,5 @@ def toOverTerminalStarIso [HasTerminal C] [HasBinaryProducts C] : Δ_ (⊤_ C) �
 def toOverTerminalStarTriangleIso [HasTerminal C] [HasBinaryProducts C] (X : C) :
     Δ_ X ≅ toOverTerminal ⋙ Δ_ (terminal.from X) :=
   baseChange.mapStarIso (terminal.from X) ≪≫ isoWhiskerRight (toOverTerminalStarIso (C := C)) (Δ_ (terminal.from X))
+
+#minimize_imports
