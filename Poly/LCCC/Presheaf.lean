@@ -9,6 +9,7 @@ The category of presheaves on a (small) cat C is an LCCC:
 
 import Mathlib.CategoryTheory.Closed.Types
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+import Mathlib.CategoryTheory.Limits.Presheaf
 
 /- the rest of these are apparently dependent on the above -/
 --import Mathlib.CategoryTheory.Yoneda
@@ -29,7 +30,7 @@ universe u v w
 
 variable {C : Type*} [Category C]
 
-open Category Limits Functor Adjunction Over Opposite Equivalence
+open Category Limits Functor Adjunction Over Opposite Equivalence Presheaf
 
 /-!
 # 1. Presheaves are a CCC
@@ -38,20 +39,22 @@ The category of presheaves on a small category is cartesian closed
 
 noncomputable section
 
-@[simp]
-abbrev Psh (C : Type*) [SmallCategory C] := Cᵒᵖ ⥤ Type*
-/- Note (SH): In general `abbrev` works better with `simp` and instance inference. Another alternative is to use `notation`: `notation "Psh" "(" C ")" => Cᵒᵖ ⥤ Type`
--/
+variable (C)
 
-def diagCCC (C : Type v₁) [SmallCategory C] : CartesianClosed (C ⥤ Type v₁) :=
+@[simp]
+abbrev Psh  := Cᵒᵖ ⥤ Type*
+
+variable {C}
+
+def diagCCC : CartesianClosed (Psh C) :=
   CartesianClosed.mk _
     (fun F => by
       letI := FunctorCategory.prodPreservesColimits F
-      have := isLeftAdjointOfPreservesColimits (prod.functor.obj F)
+      have := isLeftAdjoint_of_preservesColimits (prod.functor.obj F)
       exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
 
-def pshCCC {C : Type v₁} [SmallCategory C] : CartesianClosed (Psh C) :=
-  diagCCC (Cᵒᵖ)
+def presheafCCC {C : Type v₁} [SmallCategory C] : CartesianClosed (Psh C) :=
+  diagCCC
 
 /-!
 # 2. The category of elements
@@ -62,47 +65,20 @@ In MathLib the comma category is called the ``costructured arrow category''.
 
 namespace CategoryOfElements
 
-def costructuredArrowYonedaEquivalenceOp (P : Psh C) :
-  (Elements P)ᵒᵖ ≌ CostructuredArrow yoneda P :=
-    Equivalence.mk (toCostructuredArrow P) (fromCostructuredArrow P).rightOp
-    (NatIso.op (eqToIso (from_toCostructuredArrow_eq P))) (eqToIso <| to_fromCostructuredArrow_eq P)
+def equivPsh {C D : Type*} [Category C] [Category D] (e : C ≌ D) :
+    (Psh C ≌ Psh D) := by
+  apply congrLeft e.op
 
-def equivOp (C D : Type*)[Category C][Category D] : (C ≌ D) → (Cᵒᵖ ≌ Dᵒᵖ) := fun e => op e
-
-def equivSymm (C D : Type*)[Category C][Category D] : (C ≌ D) → (D ≌ C) := symm
-
-def equivTrans {C D E : Type*}[Category C][Category D][Category E] (d : C ≌ D) (e : D ≌ E) :
- (C ≌ E) := trans d e
-
-def equivPsh {C D : Type*} [Category C][Category D] :
-  (C ≌ D) → (Psh C ≌ Psh D) := by
-  intro e
-  apply congrLeft
-  apply equivOp
-  apply e
-
-def pshElementsOpIsPshCostArrowYon (P : Psh C) :
-  Psh (Elements P)ᵒᵖ ≌ Psh (CostructuredArrow yoneda P) := by
-  apply equivPsh
-  apply costructuredArrowYonedaEquivalenceOp
-
-def pshCostArrowYonIsPshElementsOp {P : Psh C} :
-  Psh (CostructuredArrow yoneda P) ≌ Psh ((Elements P)ᵒᵖ) :=
-  symm (pshElementsOpIsPshCostArrowYon P)
+def presheafElementsOpIsPshCostructuredArrow (P : Psh C) : Psh (Elements P)ᵒᵖ ≌ Psh (CostructuredArrow yoneda P) :=
+  equivPsh (costructuredArrowYonedaEquivalence P)
 
 /-!
 # 3. The slice category of presheaves
 The slice category (Psh C)/P  is called the "over category" in MathLib and written "Over P".
 -/
 
-def overPshIsPshCostArrowYon {P : Psh C} : Over P ≌ Psh (CostructuredArrow yoneda P) :=
- overEquivPresheafCostructuredArrow P
-
 def overPshIsPshElementsOp {P : Psh C} : Over P ≌ Psh ((Elements P)ᵒᵖ) :=
-  equivTrans overPshIsPshCostArrowYon pshCostArrowYonIsPshElementsOp
-
-def pshElementsOpIsOverPsh {P : Psh C} : Psh ((Elements P)ᵒᵖ) ≌ Over P :=
-  symm overPshIsPshElementsOp
+  Equivalence.trans (overEquivPresheafCostructuredArrow P) (symm <| equivPsh (costructuredArrowYonedaEquivalence P))
 
 /-!
 # 4. The slice category Psh(C)/P is a CCC
@@ -110,11 +86,11 @@ We transfer the CCC structure across the equivalence (Psh C)/P ≃ Psh((Elements
 def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D := MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
 
-def pshOverCCC (P : Psh C) : CartesianClosed (Over P) :=
-  cartesianClosedOfEquiv pshElementsOpIsOverPsh
+def presheafOverCCC (P : Psh C) : CartesianClosed (Over P) :=
+  cartesianClosedOfEquiv overPshIsPshElementsOp.symm
 
-def allPshOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
-  fun P => (pshOverCCC P)
+def allPresheafOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
+  fun P => (presheafOverCCC P)
 
 end CategoryOfElements
 /-!
