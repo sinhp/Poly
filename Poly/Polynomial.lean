@@ -17,9 +17,9 @@ import Poly.LCCC.BeckChevalley
 /-!
 # Polynomial Functor
 
-
--- TODO: there are various `sorry`-carrying proofs in below which require instances of `CartesianExponentiable`
-for various constructions on morphisms. They need to be defined in `Poly.Exponentiable`.
+-- TODO: there are various `sorry`-carrying proofs in below which require instances of
+`CartesianExponentiable` for various constructions on morphisms. They need to be defined in
+`Poly.Exponentiable`.
 -/
 
 noncomputable section
@@ -67,7 +67,8 @@ instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
   adj := sorry
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
-def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O := ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
+def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
+  ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
 /-- The monomial polynomial in many variables. -/
 def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [CartesianExponentiable p]: MvPoly I O :=
@@ -97,7 +98,8 @@ variable (I O : C) (P : MvPoly I O)
 
 def apply [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
--- TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given object.
+/-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
+object.-/
 
 def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
   hom := by
@@ -151,18 +153,20 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
-instance : HasBinaryProducts C := by sorry --infer_instance --not working; we should get this from `HasTerminal` and `HasPullbacks`?
+instance : HasBinaryProducts C := by sorry /-infer_instance --not working; we should get this
+from `HasTerminal` and `HasPullbacks`?-/
 
 variable {E B : C}
 
-/-- The constant polynomial in many variables: for this we need the initial object. -/
+/-- The constant polynomial in many variables: for this we need the initial object -/
 def const [HasInitial C] (S : C) : UvPoly (⊥_ C) S := ⟨initial.to S, inferInstance⟩
 
 def smul [HasBinaryProducts C] (S : C) (P : UvPoly E B) : UvPoly (S ⨯ E) (S ⨯ B) :=
   ⟨prod.map (𝟙 S) P.p, sorry⟩
 
 /-- The product of two polynomials in a single variable. -/
-def prod (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]: UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
+def prod (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]:
+    UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
   p := coprod.desc (prod.map P.p (𝟙 B')) (prod.map (𝟙 B) Q.p)
   exp := sorry -- perhaps we need extra assumptions on `C` to prove this, e.g. `C` is lextensive?
 
@@ -171,7 +175,9 @@ to a single variable polynomial `P : UvPoly E B`. -/
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
     (Δ_ E) ⋙ (Π_ P.p) ⋙ (Σ_ B)
 
--- Note (SH): Alternatively, we can define the functor associated to a single variable polynomial in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
+/-Note (SH): Alternatively, we can define the functor associated to a single variable polynomial in
+terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials
+to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.-/
 def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
 
@@ -182,7 +188,8 @@ def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
 
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
-/-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
+/-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`.
+Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
 def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
 
 def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by
@@ -194,13 +201,16 @@ def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.
 def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
   ((Δ_ E ⋙ Π_ P.p).obj X).hom
 
-/-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to the square defined by `g`, but you have to compose with various natural isomorphisms. -/
+/-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to
+the square defined by `g`, but you have to compose with various natural isomorphisms. -/
 def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
     Q.functor ⟶ P.functor := by
   unfold functor
   have hsquare : g ≫ Q.p = P.p ≫ 𝟙 _ := by simpa [comp_id] using h.symm
   have bc := pushforwardBeckChevalleyNatTrans g Q.p P.p (𝟙 _) hsquare Q.exp P.exp
-  exact whiskerRight ((whiskerLeft (Δ_ F) ((whiskerLeft (Π_ Q.p) (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (baseChange.mapStarIso g).inv (Π_ P.p))) (Over.forget B)
+  exact whiskerRight ((whiskerLeft (Δ_ F) ((whiskerLeft (Π_ Q.p)
+    (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (baseChange.mapStarIso g).inv (Π_ P.p)))
+      (Over.forget B)
 
 /-- Evaluating a single variable polynomial at an object `X` -/
 def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
@@ -217,7 +227,8 @@ def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
 
 variable {B}
 
-/-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'` and `b : B ⟶ B'` such that the diagram
+/-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
+and `b : B ⟶ B'` such that the diagram
 ```
   E ---P.p--> B
   |           |
@@ -239,15 +250,16 @@ open IsPullback
 -- baseChange.isLimitPullbackConeId _
 def id (P : UvPoly E B) : Hom P P := ⟨𝟙 E, 𝟙 B, ⟨by aesop, ⟨ sorry ⟩⟩⟩
 
-def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E'' B''} (f : Hom P Q) (g : Hom Q R) :
-    Hom P R where
+def comp {E' B' E'' B'' : C} {P : UvPoly E B} {Q : UvPoly E' B'} {R : UvPoly E'' B''}
+    (f : Hom P Q) (g : Hom Q R) : Hom P R where
   e := f.e ≫ g.e
   b := f.b ≫ g.b
   is_pullback := paste_vert f.is_pullback g.is_pullback
 
 end Hom
 
-/-- Bundling up the the polynomials over different bases to form the underlying type of the category of polynomials. -/
+/-- Bundling up the the polynomials over different bases to form the underlying type of the
+category of polynomials. -/
 structure Total (C : Type*) [Category C] [HasPullbacks C] where
   (E B : C)
   (poly : UvPoly E B)
@@ -281,7 +293,8 @@ namespace UvPoly
 instance : SMul C (Total C) where
   smul S P := Total.of (smul S P.poly)
 
-/-- Scaling a polynomial `P` by an object `S` is isomorphic to the product of `const S` and the polynomial `P`. -/
+/-- Scaling a polynomial `P` by an object `S` is isomorphic to the product of `const S` and the
+polynomial `P`. -/
 @[simps!]
 def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total C) :
     S • P ≅ Total.of ((const S).prod P.poly) where
@@ -347,14 +360,14 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
       ext <;> simp
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) := by
-  apply mapSquareIso
-  rw [f.is_pullback.w]
+    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) :=
+  mapSquareIso _ _ _ _ (f.is_pullback.w)
 
 def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
   set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
-  have : IsIso l := (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
+  have : IsIso l :=
+    (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
   exact asIso l
 
 def bar' [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
