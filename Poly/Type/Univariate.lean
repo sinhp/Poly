@@ -28,7 +28,8 @@ universe u v v₁ v₂ v₃
 /-- A polynomial functor `P` is given by a type family `B → Type u`.
 `Poly` is the type of polynomial functors is.
 
-Given a polynomial `P` and a type `X` we define a new type `P X`, which is defined as the sigma type `Σ (b : P.B), (P.E b) → X` (mor informally `Σ (b : B), X ^ (E b)`).
+Given a polynomial `P` and a type `X` we define a new type `P X`, which is defined as the sigma
+type `Σ (b : P.B), (P.E b) → X` (mor informally `Σ (b : B), X ^ (E b)`).
 
 An element of `P X` is a pair `⟨b, x⟩`, where `b` is a term of the base type `B` and `x : E b → X`.
 -/
@@ -43,16 +44,19 @@ namespace Poly
 instance : Inhabited Poly :=
   ⟨⟨default, default⟩⟩
 
-/-- A monomial at `α` is a polynomial with base type `Unit` and and the type family given by the map `fun _ => α : PUnit → Type u`.
+/-- A monomial at `α` is a polynomial with base type `Unit` and and the type family given by the
+map `fun _ => α : PUnit → Type u`.
 -/
 @[simps!]
 def monomial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 
-/-- A constant polynomial at `α` is a polynomial with a base type `β` and the type family given by the constant map `fun _ => Empty : β → Type u`.
+/-- A constant polynomial at `α` is a polynomial with a base type `β` and the type family given by
+the constant map `fun _ => Empty : β → Type u`.
 -/
 def constant (β : Type*) : Poly := ⟨β, fun _ => PEmpty⟩
 
-/-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identity map `id : α → α`  -/
+/-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the
+identity map `id : α → α`  -/
 @[simps!]
 def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
 
@@ -60,16 +64,13 @@ def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
 def sum (P : Poly.{u}) (Q : Poly.{u}): Poly :=
   ⟨P.B ⊕ Q.B, Sum.elim P.E Q.E⟩
 
-lemma sum_base {P : Poly.{u}} {Q : Poly.{u}} : (P.sum Q).B = (P.B ⊕ Q.B) := by
-  simp only [sum_B]
+lemma sum_base {P : Poly.{u}} {Q : Poly.{u}} : (P.sum Q).B = (P.B ⊕ Q.B) := rfl
 
 lemma sum_fibre_left {P : Poly.{u}} {Q : Poly.{u}} (b : P.B) :
-    (P.sum Q).E (Sum.inl b) = P.E b := by
-  simp [sum_E]
+    (P.sum Q).E (Sum.inl b) = P.E b := rfl
 
 lemma sum_fibre_right {P : Poly.{u}} {Q : Poly.{u}} (b : Q.B) :
-    (P.sum Q).E (Sum.inr b) = Q.E b := by
-  simp [sum_E]
+    (P.sum Q).E (Sum.inr b) = Q.E b := rfl
 
 variable (P : Poly.{u}) {X : Type v₁} {Y : Type v₂} {Z : Type v₃}
 
@@ -161,8 +162,7 @@ def map (f : X → Y) : P X → P Y :=
 
 @[simp]
 protected theorem map_eq (f : X → Y) (b : P.B) (x : P.E b → X) :
-    P.map f ⟨b, x⟩ = ⟨b, f ∘ x⟩ :=
-  rfl
+    P.map f ⟨b, x⟩ = ⟨b, f ∘ x⟩ := rfl
 
 @[simp]
 theorem fst_map (x : P X) (f : X → Y) : (P.map f x).1 = x.1 := by cases x; rfl
@@ -246,11 +246,7 @@ def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P
 example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
   sorry
 
-
-
 -- def comp.baseEquiv : (comp P Q) Unit ≃ P Q.B := by
-
 -- TODO: classify linear polynomial functors as the ones which preserve colimits.
-
 
 end PolyFunctor
