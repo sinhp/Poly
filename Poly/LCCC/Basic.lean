@@ -43,7 +43,8 @@ cartesian closed categories.
 1. A locally cartesian closed category is a category C such that all
 the slices `Over I` are cartesian closed categories.
 
-2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks such that each base change functor has a right adjoint, called the pushforward functor.
+2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks such that
+each base change functor has a right adjoint, called the pushforward functor.
 
 In this file we prove the equivalence of these conditions.
 
@@ -81,15 +82,12 @@ def pullbackCompositionIsBinaryProduct [HasPullbacks C] {I : C} (f x : Over I) :
   fconstructor
   case lift =>
     intro s
-    fapply Over.homMk
+    apply Over.homMk _ _
     · dsimp
       refine pullback.lift ?f.h ?f.k ?f.w
-      case f.h =>
-        exact ((s.π.app ⟨ .right ⟩).left)
-      case f.k =>
-        exact ((s.π.app ⟨ .left ⟩).left)
-      case f.w =>
-        aesop_cat
+      case f.h => exact ((s.π.app ⟨ .right ⟩).left)
+      case f.k => exact ((s.π.app ⟨ .left ⟩).left)
+      case f.w => aesop_cat
     · simp
   case fac =>
     rintro s ⟨⟨l⟩|⟨r⟩⟩
@@ -99,10 +97,8 @@ def pullbackCompositionIsBinaryProduct [HasPullbacks C] {I : C} (f x : Over I) :
     apply Over.OverMorphism.ext
     dsimp
     refine (pullback.hom_ext ?h.h₀ ?h.h₁)
-    case h.h₀ =>
-      simpa [pullback.lift_fst] using (congr_arg CommaMorphism.left (prf ⟨ .right⟩))
-    case h.h₁ =>
-      simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
+    case h.h₀ => simpa [pullback.lift_fst] using (congr_arg CommaMorphism.left (prf ⟨ .right⟩))
+    case h.h₁ => simpa [pullback.lift_snd] using (congr_arg CommaMorphism.left (prf ⟨ .left⟩))
 
 def OverProdIso [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
     (Over.map f.hom).obj ((baseChange f.hom).obj x) ≅ Limits.prod f x := by
@@ -115,19 +111,20 @@ def OverProdIso.symm [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
 @[simp]
 theorem OverProdIsoLeftInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
     (OverProdIso f x).hom ≫ (OverProdIso.symm f x).hom = 𝟙 _ :=
-  by exact (Iso.hom_comp_eq_id (OverProdIso f x)).mpr rfl
+  (Iso.hom_comp_eq_id (OverProdIso f x)).mpr rfl
 
 @[simp]
 theorem OverProdIsoRightInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
     (OverProdIso.symm f x).hom ≫ (OverProdIso f x).hom = 𝟙 _ :=
-  by exact (Iso.hom_comp_eq_id (OverProdIso.symm f x)).mpr rfl
+  (Iso.hom_comp_eq_id (OverProdIso.symm f x)).mpr rfl
 
 @[simp]
 theorem Triangle_fst [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
     let pbleg1 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ f := homMk pullback.snd rfl
     (OverProdIso f x).hom ≫ prod.fst = pbleg1 :=
-  IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
+  IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x)
+    (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
 
 @[simp]
 theorem Triangle_snd [HasFiniteWidePullbacks C] {I : C}
@@ -135,7 +132,8 @@ theorem Triangle_snd [HasFiniteWidePullbacks C] {I : C}
     let pbleg2 : (Over.map f.hom).obj ((baseChange f.hom).obj x) ⟶ x :=
     Over.homMk (pullback.fst) (by simp [pullback.condition])
     (OverProdIso f x).hom ≫ prod.snd = pbleg2 :=
-  IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x) (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
+  IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x)
+    (Limits.prodIsProd f x) ⟨ WalkingPair.right⟩
 
 @[simp]
 theorem Triangle.symm_fst [HasFiniteWidePullbacks C] {I : C}
@@ -158,11 +156,9 @@ attribute [local instance] monoidalOfHasFiniteProducts
 def NatOverProdIso [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
     (baseChange f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
-  case app =>
-    intro x
-    exact OverProdIso f x
+  case app => exact fun _ ↦ OverProdIso f _
   case naturality =>
-    intros x y u
+    intro x y u
     simp
     ext1
     · simp_rw [assoc, prod.map_fst, comp_id]
@@ -189,13 +185,11 @@ namespace PushforwardAdj
 instance cartesianClosedOfOver
 [HasFiniteWidePullbacks C] [PushforwardAdj C] {I : C} :
     CartesianClosed (Over I) := by
-  refine .mk _ fun f ↦ .mk f (baseChange f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor ) ?adj ?iso )
-  case functor =>
-    exact (baseChange f.hom ⋙ Over.map f.hom)
-  case adj =>
-    exact ((adj f.hom).comp (Over.mapAdjunction f.hom))
-  case iso =>
-    apply NatOverProdIso
+  refine .mk _ fun f ↦ .mk f (baseChange f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor )
+    ?adj ?iso )
+  case functor => exact (baseChange f.hom ⋙ Over.map f.hom)
+  case adj => exact ((adj f.hom).comp (Over.mapAdjunction f.hom))
+  case iso => exact NatOverProdIso _
 
 instance [HasFiniteWidePullbacks C][PushforwardAdj C] :
     OverCC C where
@@ -213,7 +207,8 @@ def pushforwardCospanLeg1 [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
   CartesianClosed.curry prod.fst
 
 def pushforwardCospanLeg2 [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
-    (f : X ⟶ Y) (x : Over X) : ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) :=
+    (f : X ⟶ Y) (x : Over X) :
+    ((Over.mk f) ⟹ ((Over.map f).obj x)) ⟶ ((Over.mk f) ⟹ (Over.mk f)) :=
   (((exp (Over.mk f)).map) (Over.homMk x.hom))
 
 -- @[simps]
@@ -228,15 +223,15 @@ def pushforwardCospanLeg2Map [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
 
 def pushforwardMap [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) (x x' : Over X)
     (u : x ⟶ x') : (pushforwardObj f x) ⟶ (pushforwardObj f x') := by
-  refine pullback.map (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x) (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x') (𝟙 (Over.mk (𝟙 Y))) (pushforwardCospanLeg2Map f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f))
+  refine pullback.map (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x)
+    (pushforwardCospanLeg1 f) (pushforwardCospanLeg2 f x') (𝟙 (Over.mk (𝟙 Y)))
+      (pushforwardCospanLeg2Map f x x' u) (𝟙 (Over.mk f ⟹ Over.mk f))
     ?_ ?_
-  · unfold pushforwardCospanLeg1
-    simp
+  · simp
   · unfold pushforwardCospanLeg2 pushforwardCospanLeg2Map
-    simp
-    rw [← (exp (Over.mk f)).map_comp]
+    simp only [comp_id, ← (exp (Over.mk f)).map_comp]
     congr
-    simp only [map_obj_left, mk_left, map_map_left, homMk_left, w]
+    simp [map_obj_left, mk_left, map_map_left, homMk_left, w]
 
 -- The pushforward functor constructed from cartesian closed slices.
 def pushforwardFunctor [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) :
@@ -249,10 +244,9 @@ def pushforwardFunctor [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X �
       simp
     · unfold pushforwardMap pushforwardCospanLeg2Map
       simp
-      apply id_comp -- FIXME: why is this needed
+      exact id_comp _ -- FIXME: why is this needed
   map_comp := by
-    intros x y z u v
-    apply pullback.hom_ext
+    apply fun x y z u v ↦ pullback.hom_ext _ _
     · unfold pushforwardMap
       simp
     · unfold pushforwardMap pushforwardCospanLeg2Map
@@ -271,7 +265,7 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [OverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y) (u : (baseChange f).obj y ⟶ x) :
     y ⟶ (pushforwardFunctor f).obj x := by
   apply pullback.lift ((mkIdTerminal (X := Y)).from y) (PushforwardObjToLeg f x y u)
-  apply (CartesianClosed.uncurry_injective (A := Over.mk f))
+    ((CartesianClosed.uncurry_injective (A := Over.mk f)) _)
   unfold pushforwardCospanLeg1 PushforwardObjToLeg
   rw [CartesianClosed.uncurry_natural_left, CartesianClosed.uncurry_curry]
   simp [pushforwardCospanLeg2]
@@ -280,18 +274,19 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [OverCC C]
   have conj : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)) =
     (homMk ((baseChange f).obj y).hom : (Over.map f).obj ((baseChange f).obj y) ⟶ Over.mk f) :=
       OverMorphism.ext (by aesop_cat)
-  rw [conj]
-  exact (Triangle.symm_fst (Over.mk f) y).symm
+  exact conj ▸ (Triangle.symm_fst (Over.mk f) y).symm
 
--- It's slightly easier to construct the transposed map f^*y ⟶ x from a cone over the pushforward cospan.
+/- It's slightly easier to construct the transposed map f^*y ⟶ x from a cone over the pushforward
+cospan.-/
 attribute [local instance] monoidalOfHasFiniteProducts
 def PushforwardObjUP [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) (x : Over X) (y : Over Y) (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
-    (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x)) :
-    (baseChange f).obj y ⟶ x := by
+    (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫
+    (pushforwardCospanLeg2 f x)) : (baseChange f).obj y ⟶ x := by
   unfold pushforwardCospanLeg2 at w
   unfold pushforwardCospanLeg1 at w
-  have cw := homEquiv_naturality_right_square (F := MonoidalCategory.tensorLeft (Over.mk f)) (adj := exp.adjunction (Over.mk f)) _ _ _ _ w
+  have cw := homEquiv_naturality_right_square (F := MonoidalCategory.tensorLeft (Over.mk f))
+    (adj := exp.adjunction (Over.mk f)) _ _ _ _ w
   unfold CartesianClosed.curry at cw
   simp at cw
   apply_fun CommaMorphism.left at cw
@@ -312,7 +307,8 @@ def PushforwardObjUP [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
 def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [OverCC C]
     {X Y : C} (f : X ⟶ Y) (x : Over X) (y : Over Y)
     (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
-    (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫ (pushforwardCospanLeg2 f x)) : PushforwardObjToLeg f x y (PushforwardObjUP f x y v w) = v := by
+    (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫
+    (pushforwardCospanLeg2 f x)) : PushforwardObjToLeg f x y (PushforwardObjUP f x y v w) = v := by
   unfold PushforwardObjUP PushforwardObjToLeg
   simp
   apply (CartesianClosed.curry_eq_iff _ v).mpr
@@ -323,8 +319,7 @@ def pushforwardAdjRightInv [HasFiniteWidePullbacks C] [OverCC C]
   apply_fun (Over.forget Y).map at iso
   rw [(Over.forget Y).map_id, (Over.forget Y).map_comp] at iso
   simp at iso
-  rw [iso]
-  exact id_comp (CartesianClosed.uncurry v).left
+  exact iso ▸ id_comp (CartesianClosed.uncurry v).left
 
 -- The pushforward adjunction from cartesian closed slices.
 def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y) :
@@ -352,9 +347,11 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y)
         right_inv := by
           intro v
           apply pullback.hom_ext (IsTerminal.hom_ext mkIdTerminal _ _)
-          let w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = (v ≫ pullback.snd) ≫ (pushforwardCospanLeg2 f x) := by
+          let w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) =
+            (v ≫ pullback.snd) ≫ (pushforwardCospanLeg2 f x) := by
             have w' := v ≫= pullback.condition
-            rw [assoc, ← (IsTerminal.hom_ext mkIdTerminal (v ≫ pullback.fst) (mkIdTerminal.from y)), assoc, w']
+            rw [assoc, ← (IsTerminal.hom_ext mkIdTerminal (v ≫ pullback.fst) (mkIdTerminal.from y)),
+              assoc, w']
           have close := pushforwardAdjRightInv f x y (v ≫ pullback.snd) w
           simp
           unfold PushforwardObjUP PushforwardObjTo PushforwardObjToLeg
@@ -401,7 +398,8 @@ section PushforwardAdjSection
 namespace PushforwardAdj
 
 -- ER: We might prefer to reverse directions in the statement but this simplified the proof.
-def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) := asIso ((conjugateEquiv Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
+def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (baseChange (𝟙 X)) :=
+  asIso ((conjugateEquiv Adjunction.id (mapAdjunction (𝟙 X))) (mapId X).hom)
 
 def idIso [HasFiniteWidePullbacks C] [PushforwardAdj C] (X : C) : (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
   asIso ((conjugateEquiv (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
