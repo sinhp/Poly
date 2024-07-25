@@ -19,7 +19,7 @@ We define the notion of one-variable polynomial functors on the category of sets
 The bundle corresponding to a `P : Poly` is the projection
 `fst : Σ b : P.B, P.E b → P.B`.
 
-In LCCCs, instead of workin with a type family we shall work with a bundle `p : E → B`.
+In LCCCs, instead of working with a type family we shall work with a bundle `p : E → B`.
 
 -/
 
@@ -52,7 +52,7 @@ def monomial (α : Type*) : Poly := ⟨PUnit, fun _ => α⟩
 -/
 def constant (β : Type*) : Poly := ⟨β, fun _ => PEmpty⟩
 
-/-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identiy map `id : α → α`  -/
+/-- A linear polynomial at `α` is a polynomial with base type `α` and the type family given by the identity map `id : α → α`  -/
 @[simps!]
 def linear (α : Type*) : Poly := ⟨α, fun _ => PUnit⟩
 
@@ -224,7 +224,7 @@ variable (P Q : Poly.{u})
 def comp.mk {X : Type} (x : P (Q X)) : Q.comp P X :=
   ⟨⟨x.1, Sigma.fst ∘ x.2⟩, fun z => (x.2 z.1).2 z.2⟩
 
-/-- Functor composition for polynomial functors in the diagramatic order. -/
+/-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P where
   hom := sorry
   inv := sorry
