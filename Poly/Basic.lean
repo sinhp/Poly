@@ -67,8 +67,8 @@ We prove that `μ_ X Y` and `π_ X Y` form a pullback square:
 
 (SH): The definitions `Over.pullback` and `mapPullbackAdj` already existed in mathlib.
 Later, `Over.baseChange` and `Over.mapAdjunction` were added
-which are duplicates, but the latter have additional `simp` lemmas, namely `unit_app` and `counit_app` which makes proving things with
-`simp` easier.
+which are duplicates, but the latter have additional `simp` lemmas, namely `unit_app` and
+`counit_app` which makes proving things with `simp` easier.
 
 We might change instances of `Over.mapAdjunction` to `Over.mapPullbackAdj`.
 
@@ -92,7 +92,8 @@ we no longer will need the lemmas in the namespace `Over.forgetAdjStar`.
 
 Using the notation above, we have
 * `hom_eq_pullback_snd` proves that `(Δ_ f Over.mk p).hom` is `pullback.snd`
-* `natIsoTensorLeft` proves that `Δ_ f` ⋙ `Σ_ f` is isomorphic to the product functor `f × _` in the slice category `Over I`.
+* `natIsoTensorLeft` proves that `Δ_ f` ⋙ `Σ_ f` is isomorphic to the product functor `f × _` in
+the slice category `Over I`.
 
 -/
 
@@ -125,8 +126,8 @@ theorem unit_app_left_eq (X : Over I):
   simp [Over.forgetAdjStar, Adjunction.comp, Equivalence.symm]
 
 @[simp]
-theorem unit_app_eq (X : Over I):
-    (Over.forgetAdjStar I).unit.app X = homMk (V := (Σ_ I ⋙ Δ_ I).obj X) (prod.lift X.hom (𝟙 X.left)) := by
+theorem unit_app_eq (X : Over I): (Over.forgetAdjStar I).unit.app X = homMk
+    (V := (Σ_ I ⋙ Δ_ I).obj X) (prod.lift X.hom (𝟙 X.left)) := by
   ext
   simp
 
@@ -160,9 +161,9 @@ variable {F G : A ⥤ B} {H K : B ⥤ C}
 
 -- Naturality of β implies naturality of whiskering; this is not used.
 @[simp]
-theorem WhiskeringNaturality
-    (α : F ⟶ G) (β : H ⟶ K) :
-    (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by ext; unfold whiskerLeft; simp
+theorem WhiskeringNaturality (α : F ⟶ G) (β : H ⟶ K) :
+    (whiskerRight α H) ≫ (whiskerLeft G β) = (whiskerLeft F β) ≫ (whiskerRight α K) := by
+  ext; simp
 
 end NaturalityOfWhiskering
 
@@ -173,7 +174,6 @@ variable {C : Type u} [Category.{v} C]
 @[simp]
 lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
     pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
-  unfold pullback.map
   ext <;> simp
 
 end
@@ -187,11 +187,8 @@ theorem eqToHom_left {X : C} {U V : Over X} (e : U = V) :
     (eqToHom e).left = eqToHom (e ▸ rfl : U.left = V.left) := by
   subst e; rfl
 
-theorem mapForget_eq {X Y : C} (f : X ⟶ Y) :
-    Σ_ f ⋙ Σ_ Y = Σ_ X := by
-  fapply Functor.ext
-  · dsimp [Over, Over.map]; intro x; exact rfl
-  · intros x y u; simp
+theorem mapForget_eq {X Y : C} (f : X ⟶ Y) : Σ_ f ⋙ Σ_ Y = Σ_ X :=
+  Functor.ext (fun _ ↦ rfl) (fun _ _ _ ↦ by simp)
 
 /--Equality of functors should be avoided if possible, instead we use the isomorphism version.
 For use elsewhere.-/
@@ -199,12 +196,8 @@ def mapForgetIso {X Y : C} (f : X ⟶ Y) :
     Σ_ f ⋙ Σ_ Y ≅ Σ_ X := eqToIso (mapForget_eq f)
 
 theorem mapComp_eq {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    Σ_ f ⋙ Σ_ g = Σ_ (f ≫ g) := by
-  fapply Functor.ext
-  · simp [Over.map, Comma.mapRight]
-  · intro U V k
-    ext
-    simp
+    Σ_ f ⋙ Σ_ g = Σ_ (f ≫ g) :=
+  Functor.ext (by simp [Over.map, Comma.mapRight]) (fun _ _ _ ↦ by ext; simp)
 
 /- Note (SH) : note that `mapComp` already exists in mathlib, and indeed the components of
 of it are `Iso.refl`.
@@ -222,8 +215,7 @@ open Over MonoidalCategory
 
 /-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
 lemma obj_hom_eq_pullback_snd [HasPullbacks C] {I J : C} (f : J ⟶ I) (X : Over I):
-    ((Δ_ f).obj X).hom = pullback.snd := by
-  rfl
+    ((Δ_ f).obj X).hom = pullback.snd := rfl
 
 lemma Over.star_obj_eq_mk_prod_fst [HasBinaryProducts C] (I X : C) :
     (Δ_ I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
@@ -231,7 +223,8 @@ lemma Over.star_obj_eq_mk_prod_fst [HasBinaryProducts C] (I X : C) :
 
 variable [HasPullbacks C]
 
-/-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism. Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
+/-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism.
+Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
 def terminal_from [HasTerminal C] [HasBinaryProducts C] (I : C) (X : Over (⊤_ C)) :
     (Δ_ (terminal.from I)).obj X ≅ (Δ_ I).obj (X.left) := by
   fapply Over.isoMk
@@ -246,8 +239,8 @@ def terminal_from [HasTerminal C] [HasBinaryProducts C] (I : C) (X : Over (⊤_ 
 @[simps!]
 def swapIso {I : C} (X Y : Over I) :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ (Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)  := by
-  fapply Over.isoMk
-  · apply pullbackSymmetry
+  apply Over.isoMk _ _
+  · exact pullbackSymmetry _ _
   · simp [pullback.condition]
 
 @[simp]
@@ -274,7 +267,8 @@ def projFst {I : C} (X Y : Over I) :
 
 local notation "μ_ "  => projFst
 
-/-- For `X Y : Over I`, the map `π := projSnd` is a morphism form the base-change of `X` along `Y` to `X`.
+/-- For `X Y : Over I`, the map `π := projSnd` is a morphism form the base-change of `X` along
+`Y` to `X`.
 ```
   P ---- μ --> •
   |            |
@@ -330,8 +324,8 @@ def isBinaryProduct {I : C} (X Y : Over I) :
   · intro s m h
     apply Over.OverMorphism.ext
     apply pullback.hom_ext <;> simp
-    · apply congr_arg CommaMorphism.left (h ⟨ .right⟩)
-    · apply congr_arg CommaMorphism.left (h ⟨ .left ⟩)
+    · exact congr_arg CommaMorphism.left (h ⟨ .right⟩)
+    · exact congr_arg CommaMorphism.left (h ⟨ .left ⟩)
 
 /-- The object `(Σ_ X.hom) ((Δ_ X.hom) Y)` is isomorphic to the binary product `X × Y`
 in `Over I`. -/
@@ -384,24 +378,26 @@ def natIsoTensorLeft {I : C} (X : Over I) :
       simp
 
 def natIsoTensorLeftOverMk {I J : C} (f : J ⟶ I) :
-    (Δ_ f) ⋙ (Σ_ f) ≅ tensorLeft (Over.mk f) := by
-  apply natIsoTensorLeft (Over.mk f)
+    (Δ_ f) ⋙ (Σ_ f) ≅ tensorLeft (Over.mk f) := natIsoTensorLeft (Over.mk f)
 
 /--
 The isomorphism between the base change functors obtained as the conjugate of the `mapForgetIso`.
 For use elsewhere.-/
 def mapStarIso [HasBinaryProducts C] [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
     Δ_ X ≅ Δ_ Y ⋙ Δ_ f :=
-  conjugateIsoEquiv (Over.forgetAdjStar X) ((mapAdjunction f).comp (Over.forgetAdjStar Y)) (mapForgetIso f)
+  conjugateIsoEquiv (Over.forgetAdjStar X) ((mapAdjunction f).comp (Over.forgetAdjStar Y))
+    (mapForgetIso f)
 
 def id (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ :=
   conjugateIsoEquiv (mapAdjunction (𝟙 I)) Adjunction.id (mapId I).symm
 
-/- Note (SH): This has already been done in `Over.pullbackComp`. What is different in this variant? -/
+/- Note (SH): This has already been done in `Over.pullbackComp`. What is different in this
+variant? -/
 /-- The conjugate isomorphism between pullback functors. -/
 def comp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Δ_ (f ≫ g) ≅ Δ_ g ⋙ Δ_ f :=
-  conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g)) (mapCompIso f g)
+  conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g))
+    (mapCompIso f g)
 
 end baseChange
 
@@ -463,6 +459,7 @@ def toOverTerminalStarIso [HasTerminal C] [HasBinaryProducts C] : Δ_ (⊤_ C) �
 
 def toOverTerminalStarTriangleIso [HasTerminal C] [HasBinaryProducts C] (X : C) :
     Δ_ X ≅ toOverTerminal ⋙ Δ_ (terminal.from X) :=
-  baseChange.mapStarIso (terminal.from X) ≪≫ isoWhiskerRight (toOverTerminalStarIso (C := C)) (Δ_ (terminal.from X))
+  baseChange.mapStarIso (terminal.from X) ≪≫ isoWhiskerRight (toOverTerminalStarIso (C := C))
+    (Δ_ (terminal.from X))
 
-#minimize_imports
+#min_imports
