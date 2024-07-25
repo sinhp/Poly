@@ -18,7 +18,7 @@ import Poly.Basic -- some isos in here
 
 
 /-!
-# Expontentiable morphisms in a category
+# Exponentiable morphisms in a category
 
 We say that a morphism `f : X ⟶ Y` in a category `C` has pushforward if there is
 a right adjoint to the base-change functor along `f`.
