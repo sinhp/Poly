@@ -72,14 +72,16 @@ def pullbackSquareIso [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) :
     baseChange k ⋙ baseChange h ≅ baseChange g ⋙ baseChange f :=
-  conjugateIsoEquiv ((mapAdjunction h).comp (mapAdjunction k)) ((mapAdjunction f).comp (mapAdjunction g)) (mapSquareIso f g h k w)
+  conjugateIsoEquiv ((mapAdjunction h).comp (mapAdjunction k)) ((mapAdjunction f).comp
+    (mapAdjunction g)) (mapSquareIso f g h k w)
 
 /-- The Beck-Chevalley natural transformations in a square of pullbacks and pushforwards.-/
 def pushforwardBeckChevalleyNatTrans [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (gexp : CartesianExponentiable g) (hexp : CartesianExponentiable h)
      : gexp.functor ⋙ baseChange k ⟶ baseChange f ⋙ hexp.functor :=
-  conjugateEquiv ((mapAdjunction k).comp gexp.adj) (hexp.adj.comp (mapAdjunction f)) (pullbackBeckChevalleyNatTrans f g h k w)
+  conjugateEquiv ((mapAdjunction k).comp gexp.adj) (hexp.adj.comp (mapAdjunction f))
+    (pullbackBeckChevalleyNatTrans f g h k w)
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square. -/
 def pushforwardSquareIso [HasPullbacks C] {W X Y Z : C}
@@ -114,7 +116,8 @@ def pullbackNatTrans.app.map [HasPullbacks C] {W X Y Z : C}
 theorem pullbackBeckChevalleyComponent_pullbackMap [HasPullbacks C] {W X Y Z : C}
     (f : W ⟶ X) (g : X ⟶ Z) (h : W ⟶ Y) (k : Y ⟶ Z)
     (w : f ≫ g = h ≫ k) (y : Over Y) :
-    (forget X).map ((pullbackBeckChevalleyNatTrans f g h k w).app y) = pullbackNatTrans.app.map f g h k w y := by
+    (forget X).map ((pullbackBeckChevalleyNatTrans f g h k w).app y) =
+    pullbackNatTrans.app.map f g h k w y := by
   dsimp
   ext <;> unfold pullbackNatTrans.app.map pullback.map
   · simp only [map_obj_left, baseChange_obj_left, id_obj, const_obj_obj, map_obj_hom, comp_id,
@@ -148,7 +151,9 @@ theorem pullbackNatTrans_of_IsPullback_component_is_iso [HasPullbacks C] {W X Y 
   have Q := pullbackIsPullback (y.hom ≫ k) g
   let conemap : (PullbackCone.mk _ _
         (show (pullback.fst : pullback y.hom h ⟶ _) ≫ y.hom ≫ k = ((pullback.snd : pullback y.hom h ⟶ _) ≫ f) ≫ g by
-          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h), Category.assoc, pb.w.symm, Category.assoc])) ⟶ (PullbackCone.mk (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
+          rw [← Category.assoc, pullback.condition (f := y.hom) (g := h),
+            Category.assoc, pb.w.symm, Category.assoc])) ⟶ (PullbackCone.mk
+              (pullback.fst : pullback (y.hom ≫ k) g ⟶ _) pullback.snd pullback.condition) := {
     hom := pullbackNatTrans.app.map f g h k pb.w y
     w := by
       rintro (_|(left|right)) <;>

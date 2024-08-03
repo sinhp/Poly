@@ -62,9 +62,7 @@ attribute [local instance] monoidalOfHasFiniteProducts
 /-- The identity morphisms `𝟙` are exponentiable. -/
 instance id {I : C} : CartesianExponentiable (𝟙 I) where
   functor := 𝟭 (Over I)
-  adj := by
-    fapply ofNatIsoLeft (F:= 𝟭 _) ?adj (baseChange.id I).symm
-    exact Adjunction.id
+  adj := ofNatIsoLeft (F:= 𝟭 _) Adjunction.id (baseChange.id I).symm
 
 instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
     [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :
@@ -81,11 +79,9 @@ def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) 
 instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [CartesianExponentiable f] : Exponentiable (Over.mk f) where
   rightAdj :=  (Δ_ f) ⋙ (Π_ f)
   adj := by
-    fapply ofNatIsoLeft
-    fapply (Δ_ f) ⋙ (Σ_ f)
-    · apply Adjunction.comp
-      · exact CartesianExponentiable.adj
-      · apply Over.mapAdjunction
+    apply ofNatIsoLeft _ _
+    · exact ((Δ_ f) ⋙ (Σ_ f))
+    · exact Adjunction.comp CartesianExponentiable.adj (Over.mapAdjunction _)
     · exact baseChange.natIsoTensorLeftOverMk f
 
 end CartesianExponentiable
