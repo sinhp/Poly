@@ -19,7 +19,7 @@ import Poly.LCCC.BeckChevalley
 
 
 -- TODO: there are various `sorry`-carrying proofs in below which require instances of `CartesianExponentiable`
-for various construcitons on morphisms. They need to be defined in `Poly.Exponentiable`.
+for various constructions on morphisms. They need to be defined in `Poly.Exponentiable`.
 -/
 
 noncomputable section
@@ -97,7 +97,7 @@ variable (I O : C) (P : MvPoly I O)
 
 def apply [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
--- TODO: write a coercion from `MvPoly` to a functor for evalutation of polynomials at a given object.
+-- TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given object.
 
 def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
   hom := by
@@ -171,7 +171,7 @@ to a single variable polynomial `P : UvPoly E B`. -/
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
     (Δ_ E) ⋙ (Π_ P.p) ⋙ (Σ_ B)
 
--- Note (SH): Alternatively, we can define the functor associated to a single variable polyonimal in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
+-- Note (SH): Alternatively, we can define the functor associated to a single variable polynomial in terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.
 def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
   ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
 
@@ -182,7 +182,7 @@ def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
 
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
-/-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponetials. -/
+/-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`. Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
 def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
 
 def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by

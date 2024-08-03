@@ -72,7 +72,7 @@ which are duplicates, but the latter have additional `simp` lemmas, namely `unit
 
 We might change instances of `Over.mapAdjunction` to `Over.mapPullbackAdj`.
 
-(SH) : WIP -- adiding `simp` attributes to `Over.forgetAdjStar`. This means
+(SH) : WIP -- adding `simp` attributes to `Over.forgetAdjStar`. This means
 we no longer will need the lemmas in the namespace `Over.forgetAdjStar`.
 
 
@@ -206,7 +206,7 @@ theorem mapComp_eq {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     ext
     simp
 
-/- Note (SH) : note tha `mapComp` already exists in mathlib, and indeed the components of
+/- Note (SH) : note that `mapComp` already exists in mathlib, and indeed the components of
 of it are `Iso.refl`.
  -/
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
