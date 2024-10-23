@@ -15,6 +15,12 @@ import Poly.LCCC.BeckChevalley
 -- import Poly.LCCC.Basic
 
 /-!
+## References
+
+* [Steve Awodey, Natural models of homotopy type theory][Awodey2017]
+-/
+
+/-!
 # Polynomial Functor
 
 -- TODO: there are various `sorry`-carrying proofs in below which require instances of
@@ -316,6 +322,41 @@ def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.
   let pbE := (Δ_ P.p).obj (Over.mk b)
   let eE : pbE ⟶ (Δ_ E).obj X := (Over.forgetAdjStar E).homEquiv _ _ e
   (P.exp.adj.homEquiv _ _ eE).left
+
+/-! ## Generic pullback -/
+
+/--
+The UP of polynomial functors is mediated by a "generic pullback" [Awodey2017, p. 10, fig. 6].
+
+```
+     X
+     ^
+     | u₂
+   genPb ---------------> E
+ fst | ┘                  | p
+     v                    v
+P.functor.obj X --------> B
+                P.proj X
+```
+-/
+def genPb (P : UvPoly E B) (X : C) : C :=
+  pullback (P.proj X) P.p
+
+def genPb.fst (P : UvPoly E B) (X : C) : P.genPb X ⟶ P.functor.obj X :=
+  pullback.fst (f := P.proj X) (g := P.p)
+
+def genPb.u₂ (P : UvPoly E B) (X : C) : P.genPb X ⟶ X :=
+  have : P.proj X = (P.polyPair <| 𝟙 <| P.functor.obj X).fst :=
+    by simp [polyPair]
+  (pullback.congrHom this rfl).hom ≫ (P.polyPair <| 𝟙 <| P.functor.obj X).snd
+
+/-- The second component of `polyPair` is a comparison map of pullbacks composed with `genPb.u₂`. -/
+theorem genPb.polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
+    (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.proj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫
+                          u₂ P X := by
+  simp only [polyPair, u₂, homEquiv_counit, comp_left, ← assoc]
+  congr 2
+  aesop_cat
 
 /-- Universal property of the polynomial functor. -/
 @[simps]
