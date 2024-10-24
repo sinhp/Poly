@@ -167,17 +167,6 @@ theorem WhiskeringNaturality (α : F ⟶ G) (β : H ⟶ K) :
 
 end NaturalityOfWhiskering
 
-section
-
-variable {C : Type u} [Category.{v} C]
-
-@[simp]
-lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
-    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (pullback f g) := by
-  ext <;> simp
-
-end
-
 noncomputable section
 
 namespace Over
@@ -204,8 +193,6 @@ of it are `Iso.refl`.
  -/
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g)
-
-#check Over.mapComp
 
 end Over
 
@@ -461,5 +448,3 @@ def toOverTerminalStarTriangleIso [HasTerminal C] [HasBinaryProducts C] (X : C) 
     Δ_ X ≅ toOverTerminal ⋙ Δ_ (terminal.from X) :=
   baseChange.mapStarIso (terminal.from X) ≪≫ isoWhiskerRight (toOverTerminalStarIso (C := C))
     (Δ_ (terminal.from X))
-
-#min_imports
