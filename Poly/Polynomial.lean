@@ -387,7 +387,7 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
       simp [pullback.congrHom]
 
 /-- `UvPoly.equiv` is natural in `Γ`. -/
-lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
+lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
     equiv P Δ X (σ ≫ be) = let ⟨b, e⟩ := equiv P Γ X be
                            ⟨σ ≫ b, pullback.lift (pullback.fst ≫ σ) pullback.snd
                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
@@ -401,6 +401,33 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
       simp
     · simp [g, polyPair, ← assoc]
       congr 2
+      ext <;> simp
+
+/-- `UvPoly.equiv` is natural in `X`. -/
+lemma equiv_naturality_right {Γ X Y : C}
+    (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
+    equiv P Γ Y (be ≫ P.functor.map f) =
+      let ⟨b, e⟩ := equiv P Γ X be
+      ⟨b, e ≫ f⟩ := by
+  dsimp
+  congr! 1 with h
+  . simp [polyPair]
+  . set g := (P.polyPair be).snd ≫ f
+    rw [(_ : (P.polyPair (be ≫ P.functor.map f)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair (be ≫ P.functor.map f)).fst = x at h
+      cases h
+      simp
+    · dsimp only [polyPair, g]
+      rw [homMk_comp (f_comp := by simp [proj, functor]) (g_comp := by simp [functor])]
+      simp only [UvPoly.functor, Functor.comp_map, forget_map, left_homMk,
+        homEquiv_naturality_right_symm, comp_left, assoc]
+      rw [show ((Δ_ E).map f).left ≫ prod.snd = prod.snd ≫ f by simp]
+      simp only [← assoc]
+      congr 2
+      simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
+        baseChange_obj_left, mk_left, mk_hom, baseChange_map_left, Over.homMk_left,
+        pullback.congrHom_hom, ← assoc]
+      congr 1
       ext <;> simp
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :

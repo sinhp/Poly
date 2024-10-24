@@ -194,6 +194,16 @@ of it are `Iso.refl`.
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g)
 
+/-- This is useful when `homMk (· ≫ ·)` appears under `Functor.map` or a natural equivalence. -/
+lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left) (fg_comp f_comp g_comp) :
+    homMk (f ≫ g) fg_comp = homMk (V := V) f f_comp ≫ homMk (U := V) g g_comp := by
+  ext; simp
+
+@[simp]
+lemma left_homMk {B : C} {U V : Over B} (f : U ⟶ V) (h) :
+    homMk f.left h = f := by
+  rfl
+
 end Over
 
 namespace baseChange
