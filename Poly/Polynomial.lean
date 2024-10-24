@@ -204,8 +204,12 @@ def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.
   sorry
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
-def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
+def proj (P : UvPoly E B) (X : C) : P.functor.obj X ⟶ B :=
   ((Δ_ E ⋙ Π_ P.p).obj X).hom
+
+@[simp, reassoc (attr := simp)]
+lemma map_proj {X Y : C} (P : UvPoly E B) (f : X ⟶ Y) : P.functor.map f ≫ P.proj Y = P.proj X := by
+  simp [proj, functor]
 
 /-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to
 the square defined by `g`, but you have to compose with various natural isomorphisms. -/
@@ -218,16 +222,13 @@ def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
     (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (baseChange.mapStarIso g).inv (Π_ P.p)))
       (Over.forget B)
 
-/-- Evaluating a single variable polynomial at an object `X` -/
-def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
-
 variable (B)
 /-- The identity polynomial functor in single variable. -/
 @[simps!]
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
 /-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
-def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
+def id_apply (X : C) : (id B).functor.obj X ≅ B ⨯ X where
   hom := 𝟙 (B ⨯ X)
   inv := 𝟙 (B ⨯ X)
 
@@ -309,7 +310,9 @@ def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total
       hom_inv_id := sorry
       inv_hom_id := sorry
 
-def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
+variable {E B : C}
+
+def polyPair {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
     Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
   let b := be ≫ P.proj X
   let be' : Over.mk b ⟶ (Δ_ E ⋙ Π_ P.p).obj X := Over.homMk be
@@ -317,7 +320,7 @@ def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
   let be''' : pullback b P.p ⟶ E ⨯ X := be''.left
   ⟨b, be''' ≫ prod.snd⟩
 
-def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
+def pairPoly {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
     Γ ⟶ P.functor.obj X :=
   let pbE := (Δ_ P.p).obj (Over.mk b)
   let eE : pbE ⟶ (Δ_ E).obj X := (Over.forgetAdjStar E).homEquiv _ _ e
@@ -361,9 +364,9 @@ theorem genPb.polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ �
 /-- Universal property of the polynomial functor. -/
 @[simps]
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback b P.p ⟶ X where
-  toFun := polyPair P Γ X
-  invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
+    (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) where
+  toFun := P.polyPair
+  invFun := fun ⟨b, e⟩ => P.pairPoly b e
   left_inv be := by
     simp_rw [polyPair, pairPoly, ← forgetAdjStar.homEquiv_symm]
     simp
@@ -391,9 +394,9 @@ lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be
   dsimp
   congr! with h
   . simp [polyPair, pairPoly]
-  . set g := _ ≫ (P.polyPair Γ X be).snd
-    rw [(_ : (P.polyPair Δ X (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
-    · generalize (P.polyPair Δ X (σ ≫ be)).fst = x at h
+  . set g := _ ≫ (P.polyPair be).snd
+    rw [(_ : (P.polyPair (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair (σ ≫ be)).fst = x at h
       cases h
       simp
     · simp [g, polyPair, ← assoc]
@@ -405,7 +408,7 @@ def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
   mapSquareIso _ _ _ _ (f.is_pullback.w)
 
 def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
+    (Δ_ f.e) ⋙ (Σ_ P.poly.p) ≅ (Σ_ Q.poly.p) ⋙ (Δ_ f.b) := by
   set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
   have : IsIso l :=
     (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
