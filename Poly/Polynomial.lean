@@ -102,7 +102,7 @@ def functor {I O : C} (P : MvPoly I O) :
 
 variable (I O : C) (P : MvPoly I O)
 
-def apply [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
 
 /-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
 object.-/
@@ -134,19 +134,8 @@ variable {J K : C}
 
 variable (P : MvPoly I J) (Q : MvPoly J K)
 
--- the auxiliary pullback square with `P.o`, `Q.i`
-def pullback_fst :
-    pullback (P.o) (Q.i) ⟶ P.B :=
-  pullback.fst
-
-def pullback_snd :
-    pullback (P.o) (Q.i) ⟶ Q.E :=
-  pullback.snd
-
--- def pullback_fst_pb
-
 def pullback_counit :
-    (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback_snd P Q)) ⟶ (Over.mk <| pullback_snd P Q) :=
+    (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback.snd P.o Q.i)) ⟶ (Over.mk <| pullback.snd P.o Q.i) :=
   adj.counit.app _
 
 def comp (P: MvPoly I J) (Q : MvPoly J K) : MvPoly I K := sorry
@@ -159,8 +148,8 @@ namespace UvPoly
 
 variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
 
-instance : HasBinaryProducts C := by sorry /-infer_instance --not working; we should get this
-from `HasTerminal` and `HasPullbacks`?-/
+instance : HasBinaryProducts C :=
+  hasBinaryProducts_of_hasTerminal_and_pullbacks C
 
 variable {E B : C}
 
@@ -189,14 +178,14 @@ def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
 def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
-  ((Π_ P.p).obj ((baseChange (terminal.from E)).obj X)).left ⟶ B :=
-  ((baseChange (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
+  ((Π_ P.p).obj ((Over.pullback (terminal.from E)).obj X)).left ⟶ B :=
+  ((Over.pullback (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
 
 def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
 
 /-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`.
 Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
-def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙  P.auxFunctor ⋙ equivOverTerminal.inverse
+def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙ P.auxFunctor ⋙ equivOverTerminal.inverse
 
 def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by
   unfold functor' auxFunctor functor MvPoly.functor toMvPoly
@@ -297,6 +286,8 @@ def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
 
 namespace UvPoly
 
+variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
+
 instance : SMul C (Total C) where
   smul S P := Total.of (smul S P.poly)
 
@@ -380,16 +371,30 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     congr! with h
     · simpa [-w] using pairHat.w
     · -- We deal with HEq/dependency by precomposing with an iso
-      rw [show homMk _ _ = eqToHom (by rw [h]) ≫ pairHat by ext; simp,
-        show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by simp [pairHat]]
-      generalize pairHat.left ≫ _ = x at h
+      let i : Over.mk (pairHat.left ≫ P.proj X) ≅ Over.mk b :=
+        Over.isoMk (Iso.refl _) (by simp [h])
+      rw [
+        show homMk _ _ = i.hom ≫ pairHat by ext; simp [i],
+        show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by (
+          simp only [pullback_obj_left,
+          mk_left, mk_hom, star_obj_left, pullback_obj_hom, const_obj_obj, BinaryFan.mk_pt,
+          BinaryFan.π_app_left, BinaryFan.mk_fst, id_eq, homEquiv_unit, id_obj, comp_obj,
+          homEquiv_counit, map_comp, assoc, counit_naturality, left_triangle_components_assoc,
+          comp_left, pullback_map_left, eqToHom_left, eqToHom_refl, homMk_left, prod.comp_lift,
+          limit.lift_π, eq_mpr_eq_cast, PullbackCone.mk_pt, PullbackCone.mk_π_app, comp_id,
+          BinaryFan.π_app_right, BinaryFan.mk_snd, pullback.congrHom_hom, pairHat]
+          congr 1
+          ext <;> simp [i])
+      ]
+      generalize (hasPullbackHorizPaste .. : HasPullback (pairHat.left ≫ P.proj X) P.p) = pf
+      generalize pairHat.left ≫ _ = x at h pf
       cases h
       simp [pullback.congrHom]
 
 /-- `UvPoly.equiv` is natural in `Γ`. -/
 lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
     equiv P Δ X (σ ≫ be) = let ⟨b, e⟩ := equiv P Γ X be
-                           ⟨σ ≫ b, pullback.lift (pullback.fst ≫ σ) pullback.snd
+                           ⟨σ ≫ b, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
   dsimp
   congr! with h
@@ -399,7 +404,9 @@ lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C
     · generalize (P.polyPair (σ ≫ be)).fst = x at h
       cases h
       simp
-    · simp [g, polyPair, ← assoc]
+    · simp only [polyPair, comp_obj, homEquiv_counit, id_obj, comp_left, pullback_obj_left,
+      mk_left, mk_hom, star_obj_left, pullback_map_left, homMk_left, pullback.congrHom_hom, ←
+      assoc, g]
       congr 2
       ext <;> simp
 
@@ -425,7 +432,7 @@ lemma equiv_naturality_right {Γ X Y : C}
       simp only [← assoc]
       congr 2
       simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
-        baseChange_obj_left, mk_left, mk_hom, baseChange_map_left, Over.homMk_left,
+        pullback_obj_left, mk_left, mk_hom, pullback_map_left, Over.homMk_left,
         pullback.congrHom_hom, ← assoc]
       congr 1
       ext <;> simp

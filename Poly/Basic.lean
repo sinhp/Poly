@@ -111,7 +111,7 @@ prefix:90 "Σ_ " => Over.map
 prefix:90 "Σ_ " => Over.forget
 
 @[inherit_doc]
-prefix:90 "Δ_ " => Over.baseChange -- we might change this to `Over.pullback` later.
+prefix:90 "Δ_ " => Over.pullback
 
 @[inherit_doc]
 prefix:90 "Δ_ " => Over.star
@@ -145,7 +145,7 @@ theorem homEquiv (X : Over I) (A : C) (f : X.left ⟶ A) :
   simp
 
 @[simp]
-theorem homEquiv_symm [HasBinaryProducts C] (X : Over I) (A : C) (f : X ⟶ (Δ_ I).obj A) :
+theorem homEquiv_symm (X : Over I) (A : C) (f : X ⟶ (Δ_ I).obj A) :
      ((Over.forgetAdjStar I).homEquiv X A).symm f = f.left ≫ prod.snd := by
    rw [homEquiv_counit, counit_app_eq]
    simp
@@ -171,28 +171,16 @@ noncomputable section
 
 namespace Over
 
-@[simp]
-theorem eqToHom_left {X : C} {U V : Over X} (e : U = V) :
-    (eqToHom e).left = eqToHom (e ▸ rfl : U.left = V.left) := by
-  subst e; rfl
-
-theorem mapForget_eq {X Y : C} (f : X ⟶ Y) : Σ_ f ⋙ Σ_ Y = Σ_ X :=
-  Functor.ext (fun _ ↦ rfl) (fun _ _ _ ↦ by simp)
-
 /--Equality of functors should be avoided if possible, instead we use the isomorphism version.
 For use elsewhere.-/
 def mapForgetIso {X Y : C} (f : X ⟶ Y) :
     Σ_ f ⋙ Σ_ Y ≅ Σ_ X := eqToIso (mapForget_eq f)
 
-theorem mapComp_eq {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    Σ_ f ⋙ Σ_ g = Σ_ (f ≫ g) :=
-  Functor.ext (by simp [Over.map, Comma.mapRight]) (fun _ _ _ ↦ by ext; simp)
-
 /- Note (SH) : note that `mapComp` already exists in mathlib, and indeed the components of
 of it are `Iso.refl`.
  -/
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g)
+    Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g).symm
 
 /-- This is useful when `homMk (· ≫ ·)` appears under `Functor.map` or a natural equivalence. -/
 lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left) (fg_comp f_comp g_comp) :
@@ -212,7 +200,7 @@ open Over MonoidalCategory
 
 /-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
 lemma obj_hom_eq_pullback_snd [HasPullbacks C] {I J : C} (f : J ⟶ I) (X : Over I):
-    ((Δ_ f).obj X).hom = pullback.snd := rfl
+    ((Δ_ f).obj X).hom = pullback.snd X.hom f := rfl
 
 lemma Over.star_obj_eq_mk_prod_fst [HasBinaryProducts C] (I X : C) :
     (Δ_ I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
@@ -223,15 +211,12 @@ variable [HasPullbacks C]
 /-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism.
 Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
 def terminal_from [HasTerminal C] [HasBinaryProducts C] (I : C) (X : Over (⊤_ C)) :
-    (Δ_ (terminal.from I)).obj X ≅ (Δ_ I).obj (X.left) := by
-  fapply Over.isoMk
-  · simp
-    have := prodIsoPullback I X.left
-    have lem := terminal.hom_ext X.hom (terminal.from X.left)
-    rw [← lem] at this
-    exact pullbackSymmetry X.hom (terminal.from I) ≪≫ this.symm
-  · simp
-    sorry
+    (Δ_ (terminal.from I)).obj X ≅ (Δ_ I).obj X.left :=
+  Over.isoMk
+    (pullbackSymmetry X.hom (terminal.from I) ≪≫
+      pullback.congrHom rfl (by rw [terminal.hom_ext X.hom]) ≪≫
+      (prodIsoPullback I X.left).symm)
+    (by simp)
 
 @[simps!]
 def swapIso {I : C} (X Y : Over I) :
@@ -260,7 +245,7 @@ lemma swap_eq_hom {I : C} {X Y : Over I} :
 @[simp]
 def projFst {I : C} (X Y : Over I) :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ⟶ Y :=
-  (mapAdjunction X.hom).counit.app Y
+  (mapPullbackAdj X.hom).counit.app Y
 
 local notation "μ_ "  => projFst
 
@@ -278,26 +263,26 @@ local notation "μ_ "  => projFst
 @[simp]
 def projSnd {I : C} (X Y : Over I) :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ⟶ X :=
-  (swapIso X Y).hom ≫ (mapAdjunction Y.hom).counit.app X
+  (swapIso X Y).hom ≫ (mapPullbackAdj Y.hom).counit.app X
 
 local notation "π_ "  => projSnd
 
 lemma projFst_eq_pullback_fst {I : C} {X Y : Over I} :
     μ_ X Y =
-    Over.homMk (by simp; exact pullback.fst) (by simp [pullback.condition]) := by
+    Over.homMk (pullback.fst Y.hom X.hom) (by simp [pullback.condition]) := by
   simp
 
 lemma projFst_left_eq_pullback_fst {I : C} {X Y : Over I} :
-    (μ_ X Y).left = pullback.fst := by
+    (μ_ X Y).left = pullback.fst _ _ := by
   simp
 
 lemma projSnd_eq_pullback_snd {I : C} {X Y : Over I} :
     π_ X Y =
-    Over.homMk (by simp; exact pullback.snd) (by simp)  := by
+    Over.homMk (pullback.snd Y.hom X.hom) (by simp)  := by
   aesop
 
 lemma projSnd_left_eq_pullback_snd {I : C} {X Y : Over I} :
-    (π_ X Y).left = (pullback.snd) := by
+    (π_ X Y).left = pullback.snd Y.hom X.hom := by
   simp
 
 -- Note (SH): We already know that `(π_ X Y)` and `(μ_ X Y)` are components of a pullback
@@ -382,32 +367,21 @@ The isomorphism between the base change functors obtained as the conjugate of th
 For use elsewhere.-/
 def mapStarIso [HasBinaryProducts C] [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
     Δ_ X ≅ Δ_ Y ⋙ Δ_ f :=
-  conjugateIsoEquiv (Over.forgetAdjStar X) ((mapAdjunction f).comp (Over.forgetAdjStar Y))
+  conjugateIsoEquiv (Over.forgetAdjStar X) ((mapPullbackAdj f).comp (Over.forgetAdjStar Y))
     (mapForgetIso f)
 
 def id (I : C) : Δ_ (𝟙 I) ≅ 𝟭 _ :=
-  conjugateIsoEquiv (mapAdjunction (𝟙 I)) Adjunction.id (mapId I).symm
+  conjugateIsoEquiv (mapPullbackAdj (𝟙 I)) Adjunction.id (mapId I).symm
 
 /- Note (SH): This has already been done in `Over.pullbackComp`. What is different in this
 variant? -/
 /-- The conjugate isomorphism between pullback functors. -/
 def comp [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Δ_ (f ≫ g) ≅ Δ_ g ⋙ Δ_ f :=
-  conjugateIsoEquiv (mapAdjunction (f ≫ g)) ((mapAdjunction f).comp (mapAdjunction g))
+  conjugateIsoEquiv (mapPullbackAdj (f ≫ g)) ((mapPullbackAdj f).comp (mapPullbackAdj g))
     (mapCompIso f g)
 
 end baseChange
-
-namespace Limits
-
-/- Note (SH) : In general, in `Poly` project, we use `IsPullback` instead of `HasPullback`. -/
-@[simp]
-lemma pullback.map_id {W X S : C} (f : W ⟶ S) (g : X ⟶ S) [HasPullback f g] (h) (h') :
-    pullback.map f g f g (𝟙 W) (𝟙 X) (𝟙 S) h h' = 𝟙 (Limits.pullback f g) := by
-  simp only [pullback.map]
-  ext <;> simp
-
-end Limits
 
 variable {C : Type*} [Category C] [HasPullbacks C]
 
