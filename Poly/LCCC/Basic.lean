@@ -4,14 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Steve Awodey, Sina Hazratpour, Emily Riehl
 -/
 
-import Mathlib.CategoryTheory.Category.Basic
-import Mathlib.CategoryTheory.Closed.Monoidal
 import Mathlib.CategoryTheory.Closed.Cartesian
-import Mathlib.CategoryTheory.Adjunction.Mates
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.IsConnected
-import Mathlib.Tactic.ApplyFun
+
 import Poly.Basic
 
 -- All the imports below are transitively imported by the above import.
@@ -465,3 +459,5 @@ instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := 
       f.iteratedSliceEquiv.symm⟩
 
 end LCCC
+
+#min_imports

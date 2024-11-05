@@ -4,9 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emily Riehl
 -/
 
-import Mathlib.CategoryTheory.Category.Basic
-import Mathlib.CategoryTheory.Functor.Category
-import Mathlib.CategoryTheory.EqToHom
+import Mathlib.CategoryTheory.Functor.Basic
 
 /-!
 # Slice categories from scratch
