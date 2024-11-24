@@ -34,38 +34,20 @@ def NatIso.ofComponents₂ {F G : 𝒞 ⥤ 𝒟 ⥤ ℰ}
     (fun Γ => NatIso.ofComponents (app Γ) (fun f => by simpa using naturality_right Γ f))
     (fun σ => by ext X : 2; simpa using naturality_left X σ)
 
--- /-- The bifunctor `(Γ, X) ↦ (b : Γ.unop ⟶ B) × (P.obj (Over.mk b) ⟶ X)`. -/
--- @[simps!]
--- def Functor.Sigma_Over.{v} [Category.{v} 𝒟] {B : 𝒞} (P : Over B ⥤ 𝒟) : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v :=
---   curry.obj {
---     obj := fun (Γ, X) => (b : Γ.unop ⟶ B) × (P.obj (Over.mk b) ⟶ X)
---     map := fun (σ, f) ⟨b, e⟩ =>
---       ⟨σ.unop ≫ b,
---       P.map (Over.homMk (V := Over.mk b) σ.unop (by simp)) ≫ e ≫ f⟩
---     map_id := fun (Γ, X) => by
---       refine funext fun _ => ?_
---       apply Sigma_hom_ext
---       . simp [eqToHom_map]
---       . dsimp
---         intro h
---         rw [← Over.eqToHom_eq_homMk (eq := h)]
---         simp [eqToHom_map]
---     map_comp := fun {_} {_} {Y} (σ, f) (τ, g) => by
---       refine funext fun ⟨b, e⟩ => ?_
---       apply Sigma_hom_ext
---       . simp
---       . dsimp
---         intro h
---         rw [Over.homMk_comp (U := Over.mk ((τ.unop ≫ σ.unop) ≫ b)) (V := Over.mk (σ.unop ≫ b))
---           (f_comp := by simp) (g_comp := by simp)]
---         generalize_proofs -- I <3 generalize_proofs
---         generalize (τ.unop ≫ σ.unop) ≫ b = x at *
---         cases h
---         simp
---   }
+/-! ## Dependent functors -/
 
-/-- A functor into `𝒟` that depends on `F`. -/
--- TODO: does this correspond to a known construction?
+/-- A functor into `𝒟` that depends on `F`.
+
+This is a functor `G : ∫F ⥤ 𝒟` where all the `F(Γ)` are discrete,
+spelled out in elementary terms.
+In the general case, we would have
+`map : ∀ ⦃Γ Δ⦄ ⦃b : F.obj Γ⦄ ⦃c : F.obj Δ⦄
+  (σ : Γ ⟶ Δ) (f : (F.map σ).obj b ⟶ c), obj b ⟶ obj c`.
+
+Equivalently, it is a (lax or strict or something) transformation `F ⟶ const 𝒟`. -/
+-- NOTE: A more mathlib-ready, general approach might use `∫F ⥤ 𝒟`,
+-- and introduce a special-case constructor for discrete `F(Γ)`
+-- with an argument for each field of this structure. -/
 structure DepFunctor (F : 𝒞 ⥤ Type*) (𝒟 : Type*) [Category 𝒟] where
   obj : ∀ ⦃Γ⦄, F.obj Γ → 𝒟
   map : ∀ ⦃Γ Δ⦄ (σ : Γ ⟶ Δ) (b : F.obj Γ), obj b ⟶ obj (F.map σ b)
@@ -86,32 +68,84 @@ def DepFunctor.isoLeft.{v} {F₁ F₂ : 𝒞 ⥤ Type v} {𝒟 : Type*} [Categor
     slice_rhs 2 3 => rw [← eqToHom_naturality _ (by simp [FunctorToTypes.naturality])]
     simp
 
+@[ext]
 structure DepNatTrans {F : 𝒞 ⥤ Type*} {𝒟 : Type*} [Category 𝒟] (G₁ G₂ : DepFunctor F 𝒟) where
-  app : ∀ {Γ} (b : F.obj Γ), G₁.obj b ⟶ G₂.obj b
-  naturality : ∀ {Γ Δ} (σ : Γ ⟶ Δ) (b : F.obj Γ),
-    app b ≫ G₂.map σ b = G₁.map σ b ≫ app (F.map σ b)
+  app : ∀ ⦃Γ⦄ (b : F.obj Γ), G₁.obj b ⟶ G₂.obj b
+  naturality : ∀ ⦃Γ Δ⦄ (σ : Γ ⟶ Δ) (b : F.obj Γ),
+    app b ≫ G₂.map σ b = G₁.map σ b ≫ app (F.map σ b) := by aesop_cat
 
 attribute [reassoc] DepNatTrans.naturality
 
+@[simps]
 instance (F : 𝒞 ⥤ Type*) (𝒟 : Type*) [Category 𝒟] : Category (DepFunctor F 𝒟) where
   Hom := DepNatTrans
-  id G := {
-    app := fun _ => 𝟙 _
-    naturality := by simp
-  }
+  id G := { app := fun _ _ => 𝟙 _ }
   comp η ν := {
-    app := fun b => η.app b ≫ ν.app b
+    app := fun _ b => η.app b ≫ ν.app b
     naturality := by simp [η.naturality_assoc, ν.naturality]
   }
-  id_comp := by simp
-  comp_id := by simp
-  assoc := by simp
 
--- TODO: characterize isos in the above category as these things
-structure DepNatIso (F : 𝒞 ⥤ Type*) {𝒟 : Type*} [Category 𝒟] (G₁ G₂ : DepFunctor F 𝒟) where
-  i : ∀ {Γ} (b : F.obj Γ), G₁.obj b ≅ G₂.obj b
-  i_naturality : ∀ {Γ Δ} (σ : Γ ⟶ Δ) (b : F.obj Γ),
-    (i b).hom ≫ G₂.map σ b = G₁.map σ b ≫ (i (F.map σ b)).hom
+namespace DepNatTrans
+
+variable {F : 𝒞 ⥤ Type*} {𝒟 : Type*} [Category 𝒟] {Γ : 𝒞} (b : F.obj Γ)
+
+@[ext]
+theorem ext' {G₁ G₂ : DepFunctor F 𝒟} {α β : G₁ ⟶ G₂} (w : α.app = β.app) : α = β :=
+  DepNatTrans.ext w
+
+@[simp]
+theorem id_app (G₁ : DepFunctor F 𝒟) : (𝟙 G₁ : G₁ ⟶ G₁).app b = 𝟙 (G₁.obj b) := rfl
+
+@[reassoc (attr := simp)]
+theorem comp_app {G₁ G₂ G₃ : DepFunctor F 𝒟} (α : G₁ ⟶ G₂) (β : G₂ ⟶ G₃) :
+    (α ≫ β).app b = α.app b ≫ β.app b := rfl
+
+@[reassoc]
+theorem naturality_app {ℰ : Type*} [Category ℰ] {G₁ G₂ : DepFunctor F (𝒟 ⥤ ℰ)} (α : G₁ ⟶ G₂)
+    {Γ Δ : 𝒞} (σ : Γ ⟶ Δ) (b : F.obj Γ) (X : 𝒟) :
+    (G₁.map σ b).app X ≫ (α.app (F.map σ b)).app X = (α.app b).app X ≫ (G₂.map σ b).app X :=
+  (congr_fun (congr_arg NatTrans.app (α.naturality σ b)) X).symm
+
+end DepNatTrans
+
+namespace DepNatIso
+
+variable {F : 𝒞 ⥤ Type*} {𝒟 : Type*} [Category 𝒟] {G₁ G₂ : DepFunctor F 𝒟}
+
+@[reassoc (attr := simp)]
+theorem hom_inv_id_app {Γ : 𝒞} (α : G₁ ≅ G₂) (b : F.obj Γ) :
+    α.hom.app b ≫ α.inv.app b = 𝟙 (G₁.obj b) := by
+  simp [← DepNatTrans.comp_app]
+
+@[reassoc (attr := simp)]
+theorem inv_hom_id_app {Γ : 𝒞} (α : G₁ ≅ G₂) (b : F.obj Γ) :
+    α.inv.app b ≫ α.hom.app b = 𝟙 (G₂.obj b) := by
+  simp [← DepNatTrans.comp_app]
+
+instance hom_app_isIso {Γ : 𝒞} (α : G₁ ≅ G₂) (b : F.obj Γ) : IsIso (α.hom.app b) :=
+  ⟨α.inv.app b, by simp⟩
+
+instance inv_app_isIso {Γ : 𝒞} (α : G₁ ≅ G₂) (b : F.obj Γ) : IsIso (α.inv.app b) :=
+  ⟨α.hom.app b, by simp⟩
+
+def ofComponents
+    (app : ∀ {Γ} (b : F.obj Γ), G₁.obj b ≅ G₂.obj b)
+    (naturality : ∀ {Γ Δ} (σ : Γ ⟶ Δ) (b : F.obj Γ),
+      (app b).hom ≫ G₂.map σ b = G₁.map σ b ≫ (app (F.map σ b)).hom) :
+    G₁ ≅ G₂ where
+  hom := { app := fun _ b => (app b).hom }
+  inv := {
+    app := fun _ b => (app b).inv
+    naturality := fun _ _ σ b => by
+      have : (app b).inv ≫ (app b).hom ≫ G₂.map σ b ≫ (app (F.map σ b)).inv =
+             (app b).inv ≫ G₁.map σ b ≫ (app (F.map σ b)).hom ≫ (app (F.map σ b)).inv := by
+        simp [reassoc_of% naturality]
+      simpa using this.symm
+  }
+
+end DepNatIso
+
+/-! ## Dependent sum functors -/
 
 /-- Dependent sum over a type-valued functor.
 This serves to encapsulate dependent sums that vary naturally in their parameters. -/
@@ -129,8 +163,7 @@ def Functor.Sigma.{v} (F : 𝒞 ⥤ Type v) (G : DepFunctor F (𝒟 ⥤ Type v))
       . simp
       . simp only [FunctorToTypes.map_id_apply, DepFunctor.map_id]
         generalize_proofs
-        generalize (eq_lhs% h) = x at *
-        cases h
+        generalize (eq_lhs% h) = x at *; cases h
         simp
     map_comp := fun {_} {_} {Y} (σ, f) (τ, g) => by
       refine funext fun ⟨b, e⟩ => ?_
@@ -139,30 +172,15 @@ def Functor.Sigma.{v} (F : 𝒞 ⥤ Type v) (G : DepFunctor F (𝒟 ⥤ Type v))
       . simp
       . simp only [FunctorToTypes.map_comp_apply, DepFunctor.map_comp]
         generalize_proofs
-        generalize (eq_lhs% h) = x at *
-        cases h
+        generalize (eq_lhs% h) = x at *; cases h
         simp [FunctorToTypes.naturality]
   }
-
--- Not super important, we don't need to treat b as an over-category element ever.
--- @[simps!]
--- def Functor.Sigma_Over'.{v} [Category.{v} 𝒟] {B : 𝒞} (P : Over B ⥤ 𝒟) : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v :=
---   Functor.Sigma (yoneda.obj B) (fun b => coyoneda.obj $ Opposite.op $ P.obj $ Over.mk b)
---     (fun σ b => { app := fun _ e => P.map (Over.homMk (V := Over.mk b) σ.unop (by simp)) ≫ e })
---     (fun b => by
---       ext X b
---       simp only [eqToHom_app, coyoneda_obj_obj, yoneda_obj_map, unop_id] at b ⊢
---       generalize_proofs pf1 pf2
---       sorry
---       -- etc
---     )
---     (fun σ τ b => sorry)
 
 def Functor.Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor F₁ (𝒟 ⥤ Type v))
     (i : F₂ ≅ F₁) : Functor.Sigma F₁ G ≅ Functor.Sigma F₂ (G.isoLeft i) :=
   NatIso.ofComponents₂
     (fun Γ X => Equiv.toIso {
-      toFun := fun ⟨b, e⟩ => ⟨i.inv.app Γ b, cast (by simp) e⟩
+      toFun := fun ⟨b, e⟩ => ⟨i.inv.app Γ b, cast (by simp) e⟩ -- `dcast` could be better here
       invFun := fun ⟨b, e⟩ => ⟨i.hom.app Γ b, e⟩
       left_inv := fun ⟨_, _⟩ => by simp
       right_inv := fun ⟨_, _⟩ => by simp
@@ -201,24 +219,28 @@ def Functor.Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor
       simp)
 
 def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFunctor F (𝒟 ⥤ Type v))
-    (i : ∀ {Γ} (b : F.obj Γ), G₁.obj b ≅ G₂.obj b)
-    (i_naturality : ∀ {Γ Δ} (σ : Γ ⟶ Δ) (b : F.obj Γ),
-      (i b).hom ≫ G₂.map σ b = G₁.map σ b ≫ (i (F.map σ b)).hom) :
+    (i : G₁ ≅ G₂) :
     Functor.Sigma F G₁ ≅ Functor.Sigma F G₂ :=
   NatIso.ofComponents₂
     (fun Γ X => Equiv.toIso {
-      toFun := fun ⟨b, e⟩ => ⟨b, (i b).hom.app X e⟩
-      invFun := fun ⟨b, e⟩ => ⟨b, (i b).inv.app X e⟩
-      left_inv := fun ⟨_, _⟩ => by simp
-      right_inv := fun ⟨_, _⟩ => by simp
+      toFun := fun ⟨b, e⟩ => ⟨b, (i.hom.app b).app X e⟩
+      invFun := fun ⟨b, e⟩ => ⟨b, (i.inv.app b).app X e⟩
+      left_inv := fun ⟨b, e⟩ => by
+        -- simp doesn't finish this. missing simp lemma?
+        have := congr_fun (congr_fun (congr_arg NatTrans.app (DepNatIso.hom_inv_id_app i b)) X) e
+        simp
+        simp only [NatTrans.comp_app] at this
+        simpa using this
+      right_inv := fun ⟨b, e⟩ => by
+        have := congr_fun (congr_fun (congr_arg NatTrans.app (DepNatIso.inv_hom_id_app i b)) X) e
+        simp only [NatTrans.comp_app] at this
+        simpa using this
     })
     (fun X σ => by
       ext ⟨b, e⟩
-      dsimp
-      have := congrFun (congrFun (congrArg NatTrans.app (i_naturality σ b)) X) e
-      simp at this
-      simp [Sigma, this]
-    )
+      have := congr_fun (DepNatTrans.naturality_app i.hom σ b X) e
+      dsimp at this
+      simp [Sigma, this])
     (fun Γ f => by
       ext ⟨b, e⟩
       simp only [Sigma, prod_Hom, curry_obj_obj_obj, curry_obj_obj_map, DepFunctor.map_id,
@@ -226,8 +248,7 @@ def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFuncto
         Sigma.mk.inj_iff, FunctorToTypes.map_id_apply, heq_eq_eq, true_and]
       generalize_proofs
       have := F.map_id Γ
-      generalize (eq_lhs% this) = x at *
-      cases this
+      generalize (eq_lhs% this) = x at *; cases this
       simp [FunctorToTypes.naturality])
 
 @[simps]
