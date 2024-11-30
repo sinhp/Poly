@@ -51,9 +51,9 @@ Equivalently, it is a (lax or strict or something) transformation `F ⟶ const �
 structure DepFunctor (F : 𝒞 ⥤ Type*) (𝒟 : Type*) [Category 𝒟] where
   obj : ∀ ⦃Γ⦄, F.obj Γ → 𝒟
   map : ∀ ⦃Γ Δ⦄ (σ : Γ ⟶ Δ) (b : F.obj Γ), obj b ⟶ obj (F.map σ b)
-  map_id : ∀ ⦃Γ⦄ (b : F.obj Γ), map (𝟙 Γ) b = eqToHom (F.map_id _ ▸ rfl)
+  map_id : ∀ ⦃Γ⦄ (b : F.obj Γ), map (𝟙 Γ) b = eqToHom (F.map_id _ ▸ rfl) := by aesop_cat
   map_comp : ∀ ⦃Γ Δ Θ⦄ (σ : Γ ⟶ Δ) (τ : Δ ⟶ Θ) (b : F.obj Γ),
-    map (σ ≫ τ) b = map σ b ≫ map τ (F.map σ b) ≫ eqToHom (F.map_comp .. ▸ rfl)
+    map (σ ≫ τ) b = map σ b ≫ map τ (F.map σ b) ≫ eqToHom (F.map_comp .. ▸ rfl) := by aesop_cat
 
 attribute [reassoc] DepFunctor.map_comp
 attribute [simp] DepFunctor.map_id DepFunctor.map_comp DepFunctor.map_comp_assoc
@@ -250,6 +250,30 @@ def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFuncto
       have := F.map_id Γ
       generalize (eq_lhs% this) = x at *; cases this
       simp [FunctorToTypes.naturality])
+
+open Limits in
+/-- The functor `(b : Γ ⟶ B) ↦ b*σ`. -/
+noncomputable def pullbackDep.{v} {𝒞 : Type*} [Category.{v} 𝒞] [HasPullbacks 𝒞] {E B : 𝒞} (p : E ⟶ B) :
+    DepFunctor (yoneda.obj B) (𝒞 ⥤ Type v) where
+  obj _ b := coyoneda.obj <| Opposite.op <| pullback b p
+  map _ _ σ _ :=
+    coyoneda.map <| Quiver.Hom.op <|
+      pullback.lift (pullback.fst .. ≫ σ.unop) (pullback.snd ..) (by simp [pullback.condition])
+  map_id _ b := by
+    dsimp
+    -- More `eqToHom` nonsense
+    generalize_proofs
+    have : 𝟙 _  ≫ b = b := by simp
+    generalize (eq_lhs% this) = x at *; cases this
+    simp
+  map_comp _ _ _ σ τ b := by
+    dsimp
+    generalize_proofs
+    have : τ.unop ≫ σ.unop ≫ b = (τ.unop ≫ σ.unop) ≫ b := by simp
+    generalize (eq_lhs% this) = x at *; cases this
+    simp [← Functor.map_comp, ← op_comp]
+    congr 2
+    ext <;> simp
 
 @[simps]
 def bifunctor_comp_snd {𝒟' : Type*} [Category 𝒟'] (F : 𝒟' ⥤ 𝒟) (P : 𝒞 ⥤ 𝒟 ⥤ ℰ) : 𝒞 ⥤ 𝒟' ⥤ ℰ where
