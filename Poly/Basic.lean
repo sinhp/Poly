@@ -4,30 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emily Riehl, Sina Hazratpour
 -/
 
-import Mathlib.CategoryTheory.Adjunction.Mates
 import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-
--- import Mathlib.CategoryTheory.Adjunction.Mates
-
--- import Mathlib.CategoryTheory.Category.Basic
--- import Mathlib.CategoryTheory.Functor.Basic
--- import Mathlib.CategoryTheory.Functor.Category
--- import Mathlib.CategoryTheory.Whiskering
-
--- import Mathlib.CategoryTheory.Limits.Over
--- import Mathlib.CategoryTheory.Adjunction.Over
--- import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-
--- import Mathlib.CategoryTheory.Closed.Monoidal
--- import Mathlib.CategoryTheory.Closed.Cartesian
--- import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-
--- import Mathlib.CategoryTheory.Monad.Products
-
---import Poly.TempMates -- Contains an open mathlib PR redoing the mates file
-
+import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
 
 /-!
 # Some basic equalities and isomorphisms of composition and base change functors

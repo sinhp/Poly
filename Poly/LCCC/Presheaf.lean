@@ -1,4 +1,7 @@
-/-
+import Mathlib.CategoryTheory.Closed.Types
+import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+
+/-!
 The category of presheaves on a (small) cat C is an LCCC:
 (1) the category of presheaves on a (small) cat C is a CCC.
 (2) the category of elements of a presheaf P is the comma category (yoneda, P)
@@ -6,23 +9,6 @@ The category of presheaves on a (small) cat C is an LCCC:
 (4) every slice is a CCC by (1).
 (5) use the results in the file on LCCCs to infer that presheaves is LCC.
 -/
-
-import Mathlib.CategoryTheory.Closed.Types
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Limits.Presheaf
-
-/- the rest of these are apparently dependent on the above -/
---import Mathlib.CategoryTheory.Yoneda
---import Mathlib.CategoryTheory.Category.Basic
---import Mathlib.CategoryTheory.Closed.Monoidal
---import Mathlib.CategoryTheory.Closed.Cartesian
---import Mathlib.CategoryTheory.Adjunction.Mates
---import Mathlib.CategoryTheory.Adjunction.Over
---import Mathlib.CategoryTheory.Opposites
---import Mathlib.CategoryTheory.Elements
---import Mathlib.CategoryTheory.Equivalence
---import Mathlib.CategoryTheory.Comma.Presheaf
---import Mathlib.CategoryTheory.Closed.Cartesian
 
 namespace CategoryTheory
 

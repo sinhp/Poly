@@ -4,17 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emily Riehl, Sina Hazratpour
 -/
 
-import Mathlib.CategoryTheory.Adjunction.Mates
-import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.Category.Basic
-import Mathlib.CategoryTheory.Functor.Basic
-import Mathlib.CategoryTheory.Functor.Category
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Whiskering
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import Mathlib.Tactic.ApplyFun
-
-import Poly.Basic
 import Poly.Exponentiable
 
 /-!

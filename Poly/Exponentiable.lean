@@ -4,18 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
 
-import Mathlib.CategoryTheory.Category.Basic
-import Mathlib.CategoryTheory.Closed.Monoidal
 import Mathlib.CategoryTheory.Closed.Cartesian
-import Mathlib.CategoryTheory.Adjunction.Mates
-import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Adjunction.Over
-import Mathlib.CategoryTheory.IsConnected
-import Mathlib.Tactic.ApplyFun
-import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
-import Poly.Basic -- some isos in here
-
+import Poly.Basic
 
 /-!
 # Exponentiable morphisms in a category
