@@ -20,11 +20,11 @@ universe v u
 
 variable {C D : Type u} [Category.{v} C][Category.{v} D]
 
-theorem LeftIdFunctor (F : C ⥤ D) : (𝟭 C ⋙ F) = F := by 
-  dsimp [Functor.comp] 
+theorem LeftIdFunctor (F : C ⥤ D) : (𝟭 C ⋙ F) = F := by
+  dsimp [Functor.comp]
 
-theorem RightIdFunctor (F : C ⥤ D) : (F ⋙ 𝟭 D) = F := by 
-  dsimp [Functor.comp] 
+theorem RightIdFunctor (F : C ⥤ D) : (F ⋙ 𝟭 D) = F := by
+  dsimp [Functor.comp]
 
 -- ER: What does structure mean?
 structure Slice (X : C) : Type max u v where
@@ -52,7 +52,6 @@ instance sliceCategory (X : C) : Category (Slice X) where
     dom := u.dom ≫ v.dom
     w := by rw [assoc, v.w, u.w]
   }
-#align category_theory.slice_category CategoryTheory.sliceCategory
 
 -- Test of SliceMorphism.ext
 theorem test {X : C} {f g : Slice X} {u v : f ⟶ g}

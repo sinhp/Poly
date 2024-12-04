@@ -28,8 +28,6 @@ namespace CategoryTheory
 
 universe u v w
 
-variable {C : Type*} [Category C]
-
 open Category Limits Functor Adjunction Over Opposite Equivalence Presheaf
 
 /-!
@@ -39,21 +37,19 @@ The category of presheaves on a small category is cartesian closed
 
 noncomputable section
 
-variable (C)
-
 @[simp]
-abbrev Psh  := Cᵒᵖ ⥤ Type*
+abbrev Psh (C : Type u) [Category.{v} C] : Type (max u (v + 1)) := Cᵒᵖ ⥤ Type v
 
-variable {C}
-
-def diagCCC : CartesianClosed (Psh C) :=
+/-- `Psh C` is cartesian closed when `C` is small
+(has hom-types and objects in the same universe). -/
+def diagCCC {C : Type u} [Category.{u} C] : CartesianClosed (Psh C) :=
   CartesianClosed.mk _
     (fun F => by
       letI := FunctorCategory.prodPreservesColimits F
       have := isLeftAdjoint_of_preservesColimits (prod.functor.obj F)
       exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
 
-def presheafCCC {C : Type v₁} [SmallCategory C] : CartesianClosed (Psh C) :=
+def presheafCCC {C : Type u} [SmallCategory C] : CartesianClosed (Psh C) :=
   diagCCC
 
 /-!
@@ -68,9 +64,11 @@ In MathLib the comma category is called the ``costructured arrow category''.
 
 namespace CategoryOfElements
 
-def equivPsh {C D : Type*} [Category C] [Category D] (e : C ≌ D) :
-    (Psh C ≌ Psh D) := by
+
+def equivPsh {C : Type u} {D : Type v} [Category.{w} C] [Category.{w} D] (e : C ≌ D) : Psh C ≌ Psh D := by
   apply congrLeft e.op
+
+variable {C : Type u} [Category.{v} C]
 
 def presheafElementsOpIsPshCostructuredArrow (P : Psh C) : Psh (Elements P)ᵒᵖ ≌ Psh (CostructuredArrow yoneda P) :=
   equivPsh (costructuredArrowYonedaEquivalence P)
@@ -91,13 +89,14 @@ def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D
   MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
 
-def presheafOverCCC (P : Psh C) : CartesianClosed (Over P) :=
+def presheafOverCCC {C : Type u} [Category.{max u v} C] (P : Psh C) : CartesianClosed (Over P) :=
   cartesianClosedOfEquiv overPshIsPshElementsOp.symm
 
-def allPresheafOverCCC : Π (P : Psh C), CartesianClosed (Over P) :=
+def allPresheafOverCCC {C : Type u} [Category.{max u v} C] : Π (P : Psh C), CartesianClosed (Over P) :=
   fun P => (presheafOverCCC P)
 
 end CategoryOfElements
+
 /-!
 # 5. Presheaves is an LCCC
 Use results in the file on locally cartesian closed categories.

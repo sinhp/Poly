@@ -48,7 +48,7 @@ variable {C : Type*} [Category C] [HasPullbacks C]
 class CartesianExponentiable {X Y : C} (f : X ⟶ Y) where
   /-- A functor `C/X ⥤ C/Y` right adjoint to `f*`. -/
   functor : Over X ⥤ Over Y
-  adj : baseChange f ⊣ functor := by infer_instance
+  adj : Over.pullback f ⊣ functor := by infer_instance
 
 @[inherit_doc]
 prefix:90 "Π_ " => CartesianExponentiable.functor
@@ -81,7 +81,7 @@ instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [C
   adj := by
     apply ofNatIsoLeft _ _
     · exact ((Δ_ f) ⋙ (Σ_ f))
-    · exact Adjunction.comp CartesianExponentiable.adj (Over.mapAdjunction _)
+    · exact Adjunction.comp CartesianExponentiable.adj (Over.mapPullbackAdj _)
     · exact baseChange.natIsoTensorLeftOverMk f
 
 end CartesianExponentiable
