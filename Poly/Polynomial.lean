@@ -15,6 +15,12 @@ import Poly.LCCC.BeckChevalley
 -- import Poly.LCCC.Basic
 
 /-!
+## References
+
+* [Steve Awodey, Natural models of homotopy type theory][Awodey2017]
+-/
+
+/-!
 # Polynomial Functor
 
 -- TODO: there are various `sorry`-carrying proofs in below which require instances of
@@ -198,8 +204,12 @@ def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.
   sorry
 
 /-- The projection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
-def proj (P : UvPoly E B) (X : C) : (functor P).obj X ⟶ B :=
+def proj (P : UvPoly E B) (X : C) : P.functor.obj X ⟶ B :=
   ((Δ_ E ⋙ Π_ P.p).obj X).hom
+
+@[simp, reassoc (attr := simp)]
+lemma map_proj {X Y : C} (P : UvPoly E B) (f : X ⟶ Y) : P.functor.map f ≫ P.proj Y = P.proj X := by
+  simp [proj, functor]
 
 /-- Essentially star is just the pushforward Beck-Chevalley natural transformation associated to
 the square defined by `g`, but you have to compose with various natural isomorphisms. -/
@@ -212,16 +222,13 @@ def star (P : UvPoly E B) (Q : UvPoly F B) (g : E ⟶ F) (h : P.p = g ≫ Q.p) :
     (baseChange.id B).symm.hom) ≫ bc)) ≫ (whiskerRight (baseChange.mapStarIso g).inv (Π_ P.p)))
       (Over.forget B)
 
-/-- Evaluating a single variable polynomial at an object `X` -/
-def apply (P : UvPoly E B) (X : C) : C := P.functor.obj X
-
 variable (B)
 /-- The identity polynomial functor in single variable. -/
 @[simps!]
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
 /-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
-def id_apply (X : C) : (id B).apply X ≅ B ⨯ X where
+def id_apply (X : C) : (id B).functor.obj X ≅ B ⨯ X where
   hom := 𝟙 (B ⨯ X)
   inv := 𝟙 (B ⨯ X)
 
@@ -303,7 +310,9 @@ def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total
       hom_inv_id := sorry
       inv_hom_id := sorry
 
-def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
+variable {E B : C}
+
+def polyPair {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
     Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
   let b := be ≫ P.proj X
   let be' : Over.mk b ⟶ (Δ_ E ⋙ Π_ P.p).obj X := Over.homMk be
@@ -311,18 +320,53 @@ def polyPair (P : UvPoly E B) (Γ : C) (X : C) (be : Γ ⟶ P.functor.obj X) :
   let be''' : pullback b P.p ⟶ E ⨯ X := be''.left
   ⟨b, be''' ≫ prod.snd⟩
 
-def pairPoly (P : UvPoly E B) (Γ : C) (X : C) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
+def pairPoly {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
     Γ ⟶ P.functor.obj X :=
   let pbE := (Δ_ P.p).obj (Over.mk b)
   let eE : pbE ⟶ (Δ_ E).obj X := (Over.forgetAdjStar E).homEquiv _ _ e
   (P.exp.adj.homEquiv _ _ eE).left
 
+/-! ## Generic pullback -/
+
+/--
+The UP of polynomial functors is mediated by a "generic pullback" [Awodey2017, p. 10, fig. 6].
+
+```
+     X
+     ^
+     | u₂
+   genPb ---------------> E
+ fst | ┘                  | p
+     v                    v
+P.functor.obj X --------> B
+                P.proj X
+```
+-/
+def genPb (P : UvPoly E B) (X : C) : C :=
+  pullback (P.proj X) P.p
+
+def genPb.fst (P : UvPoly E B) (X : C) : P.genPb X ⟶ P.functor.obj X :=
+  pullback.fst (f := P.proj X) (g := P.p)
+
+def genPb.u₂ (P : UvPoly E B) (X : C) : P.genPb X ⟶ X :=
+  have : P.proj X = (P.polyPair <| 𝟙 <| P.functor.obj X).fst :=
+    by simp [polyPair]
+  (pullback.congrHom this rfl).hom ≫ (P.polyPair <| 𝟙 <| P.functor.obj X).snd
+
+/-- The second component of `polyPair` is a comparison map of pullbacks composed with `genPb.u₂`. -/
+theorem genPb.polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
+    (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.proj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫
+                          u₂ P X := by
+  simp only [polyPair, u₂, homEquiv_counit, comp_left, ← assoc]
+  congr 2
+  aesop_cat
+
 /-- Universal property of the polynomial functor. -/
 @[simps]
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) ≃ Σ b : Γ ⟶ B, pullback b P.p ⟶ X where
-  toFun := polyPair P Γ X
-  invFun := fun ⟨b, e⟩ => pairPoly P Γ X b e
+    (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) where
+  toFun := P.polyPair
+  invFun := fun ⟨b, e⟩ => P.pairPoly b e
   left_inv be := by
     simp_rw [polyPair, pairPoly, ← forgetAdjStar.homEquiv_symm]
     simp
@@ -343,20 +387,47 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
       simp [pullback.congrHom]
 
 /-- `UvPoly.equiv` is natural in `Γ`. -/
-lemma equiv_naturality {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
+lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
     equiv P Δ X (σ ≫ be) = let ⟨b, e⟩ := equiv P Γ X be
                            ⟨σ ≫ b, pullback.lift (pullback.fst ≫ σ) pullback.snd
                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
   dsimp
   congr! with h
   . simp [polyPair, pairPoly]
-  . set g := _ ≫ (P.polyPair Γ X be).snd
-    rw [(_ : (P.polyPair Δ X (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
-    · generalize (P.polyPair Δ X (σ ≫ be)).fst = x at h
+  . set g := _ ≫ (P.polyPair be).snd
+    rw [(_ : (P.polyPair (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair (σ ≫ be)).fst = x at h
       cases h
       simp
     · simp [g, polyPair, ← assoc]
       congr 2
+      ext <;> simp
+
+/-- `UvPoly.equiv` is natural in `X`. -/
+lemma equiv_naturality_right {Γ X Y : C}
+    (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
+    equiv P Γ Y (be ≫ P.functor.map f) =
+      let ⟨b, e⟩ := equiv P Γ X be
+      ⟨b, e ≫ f⟩ := by
+  dsimp
+  congr! 1 with h
+  . simp [polyPair]
+  . set g := (P.polyPair be).snd ≫ f
+    rw [(_ : (P.polyPair (be ≫ P.functor.map f)).snd = (pullback.congrHom h rfl).hom ≫ g)]
+    · generalize (P.polyPair (be ≫ P.functor.map f)).fst = x at h
+      cases h
+      simp
+    · dsimp only [polyPair, g]
+      rw [homMk_comp (f_comp := by simp [proj, functor]) (g_comp := by simp [functor])]
+      simp only [UvPoly.functor, Functor.comp_map, forget_map, left_homMk,
+        homEquiv_naturality_right_symm, comp_left, assoc]
+      rw [show ((Δ_ E).map f).left ≫ prod.snd = prod.snd ≫ f by simp]
+      simp only [← assoc]
+      congr 2
+      simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
+        baseChange_obj_left, mk_left, mk_hom, baseChange_map_left, Over.homMk_left,
+        pullback.congrHom_hom, ← assoc]
+      congr 1
       ext <;> simp
 
 def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
@@ -364,7 +435,7 @@ def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
   mapSquareIso _ _ _ _ (f.is_pullback.w)
 
 def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    ( Δ_ f.e) ⋙ ( Σ_ P.poly.p) ≅ ( Σ_ Q.poly.p) ⋙ ( Δ_ f.b) := by
+    (Δ_ f.e) ⋙ (Σ_ P.poly.p) ≅ (Σ_ Q.poly.p) ⋙ (Δ_ f.b) := by
   set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
   have : IsIso l :=
     (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
