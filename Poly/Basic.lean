@@ -1,12 +1,13 @@
 /-
 Copyright (c) 2024 Emily Riehl. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Emily Riehl, Sina Hazratpour
+Authors: Emily Riehl, Sina Hazratpour, Wojciech Nawrocki
 -/
 
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
-import Mathlib.CategoryTheory.Monoidal.OfHasFiniteProducts
+import Mathlib.CategoryTheory.ChosenFiniteProducts
+import Poly.ForMathlib
 
 /-!
 # Some basic equalities and isomorphisms of composition and base change functors
@@ -26,10 +27,10 @@ Given an object `I : C`,
 
 For `X Y : Over I`,
 * `μ_ X Y` is the projection morphism `(Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ⟶ Y`
-defined via the counit of the adjunction `Σ_ ⊣ Δ_`, namely `(mapAdjunction Y.hom).counit.app`.
+defined via the counit of the adjunction `Σ_ ⊣ Δ_`.
 * `π_ X Y` is the projection morphism `(Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ⟶ X`
 defined via the counit  of the adjunction `Σ_ ⊣ Δ_` and the isomorphism
-`swapIso X Y : (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ (Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)`.
+`(Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ (Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)`.
 
 We prove that `μ_ X Y` and `π_ X Y` form a pullback square:
 
@@ -43,13 +44,6 @@ We prove that `μ_ X Y` and `π_ X Y` form a pullback square:
 ```
 
 ### Implementation Notes
-
-(SH): The definitions `Over.pullback` and `mapPullbackAdj` already existed in mathlib.
-Later, `Over.baseChange` and `Over.mapAdjunction` were added
-which are duplicates, but the latter have additional `simp` lemmas, namely `unit_app` and
-`counit_app` which makes proving things with `simp` easier.
-
-We might change instances of `Over.mapAdjunction` to `Over.mapPullbackAdj`.
 
 (SH) : WIP -- adding `simp` attributes to `Over.forgetAdjStar`. This means
 we no longer will need the lemmas in the namespace `Over.forgetAdjStar`.
@@ -160,16 +154,6 @@ of it are `Iso.refl`.
  -/
 def mapCompIso {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Σ_ f ⋙ Σ_ g ≅ Σ_ (f ≫ g) := eqToIso (mapComp_eq f g).symm
-
-/-- This is useful when `homMk (· ≫ ·)` appears under `Functor.map` or a natural equivalence. -/
-lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left) (fg_comp f_comp g_comp) :
-    homMk (f ≫ g) fg_comp = homMk (V := V) f f_comp ≫ homMk (U := V) g g_comp := by
-  ext; simp
-
-@[simp]
-lemma left_homMk {B : C} {U V : Over B} (f : U ⟶ V) (h) :
-    homMk f.left h = f := by
-  rfl
 
 end Over
 
@@ -295,48 +279,51 @@ def isoProd {I : C} (X Y : Over I) [HasBinaryProduct X Y] :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ Limits.prod X Y := by
   apply IsLimit.conePointUniqueUpToIso (isBinaryProduct X Y) (prodIsProd X Y)
 
-def isoProdmk {I J : C} (f : J ⟶ I) (Y : Over I) [HasBinaryProduct (Over.mk f) Y]:
+def isoProdmk {I J : C} (f : J ⟶ I) (Y : Over I) [HasBinaryProduct (Over.mk f) Y] :
     (Σ_ f).obj ((Δ_ f).obj Y) ≅ Limits.prod (Over.mk f) Y :=
   isoProd (Over.mk f) _
 
-@[simp]
-lemma isoProd_comp_fst {I : C} (X Y : Over I) [HasBinaryProduct X Y]:
-    (isoProd X Y).hom ≫ prod.fst = (π_ X Y) :=
+@[reassoc (attr := simp)]
+lemma isoProd_comp_fst {I : C} (X Y : Over I) [HasBinaryProduct X Y] :
+    (isoProd X Y).hom ≫ prod.fst = π_ X Y :=
   IsLimit.conePointUniqueUpToIso_hom_comp (isBinaryProduct X Y) (Limits.prodIsProd X Y) ⟨.left⟩
 
-@[simp]
+@[reassoc (attr := simp)]
 lemma isoProdmk_comp_fst {I J : C} (f : J ⟶ I) (Y : Over I) [HasBinaryProduct (Over.mk f) Y] :
-    (isoProdmk f Y).hom ≫ prod.fst = (π_ (Over.mk f) Y) :=
+    (isoProdmk f Y).hom ≫ prod.fst = π_ (Over.mk f) Y :=
   isoProd_comp_fst (Over.mk f) Y
 
-@[simp]
+@[reassoc (attr := simp)]
 lemma isoProd_comp_snd {I : C} {X Y : Over I} [HasBinaryProduct X Y] :
-    (isoProd X Y).hom ≫ prod.snd = (μ_ X Y) :=
+    (isoProd X Y).hom ≫ prod.snd = μ_ X Y :=
   IsLimit.conePointUniqueUpToIso_hom_comp (isBinaryProduct X Y) (Limits.prodIsProd X Y) ⟨.right⟩
 
 variable [HasFiniteWidePullbacks C] {I : C}
 
-attribute [local instance] monoidalOfHasFiniteProducts
+attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
 
--- NatOverProdIso
 /-- The functor composition `(baseChange X.hom) ⋙ (Over.map X.hom)` is naturally isomorphic
-to the left tensor product functor `X × _` -/
+to the left tensor product functor `X ⊗ _` -/
 def natIsoTensorLeft {I : C} (X : Over I) :
-    (Δ_ X.hom) ⋙ (Σ_ X.hom) ≅ tensorLeft X := by
-  fapply NatIso.ofComponents
-  · intro Y
-    apply isoProd
-  · intro Y Z f
-    simp
-    ext1 <;> simp_rw [assoc]
-    · simp_rw [prod.map_fst, comp_id]
-      iterate rw [isoProd_comp_fst]
-      ext
-      simp
-    · simp_rw [prod.map_snd]
-      iterate rw [isoProd_comp_snd, ← assoc, isoProd_comp_snd]
-      ext
-      simp
+    (Δ_ X.hom) ⋙ (Σ_ X.hom) ≅ tensorLeft X :=
+  NatIso.ofComponents
+    (app := fun Y => isoProd X Y)
+    (naturality := by
+      intro Y Z f
+      simp only [const_obj_obj, id_obj, comp_obj, tensorLeft_obj, Functor.comp_map, tensorLeft_map]
+      ext <;> (
+        simp only [
+          ChosenFiniteProducts.ofFiniteProducts_fst, ChosenFiniteProducts.ofFiniteProducts_snd,
+          ChosenFiniteProducts.ofFiniteProducts_whiskerLeft,
+          ChosenFiniteProducts.ofFiniteProducts_whiskerRight,
+          assoc, prod.map_fst, prod.map_snd, comp_id ]
+        -- TODO: `simp` fails to index `isoProd_comp_*` correctly in its discrimination tree,
+        -- so turn off indexing.
+        simp (config := { index := false }) only
+          [isoProd_comp_fst, isoProd_comp_snd, isoProd_comp_snd_assoc]
+        simp
+      )
+    )
 
 def natIsoTensorLeftOverMk {I J : C} (f : J ⟶ I) :
     (Δ_ f) ⋙ (Σ_ f) ≅ tensorLeft (Over.mk f) := natIsoTensorLeft (Over.mk f)
