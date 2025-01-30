@@ -12,7 +12,7 @@ The work has been done during the Trimester Program "Prospects of formal mathema
 As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
 
 - [x] Locally cartesian closed categories
-  - [ ] The Beck-Chevalley condition in LCCC
+  - [x] The Beck-Chevalley condition in LCCC
   - [x] LCCC structure on presheaves of types
 
 - [ ] Univariate and Multivariate Polynomial functors in Locally Cartesian Closed Categories
@@ -21,11 +21,11 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [x] Monomials 
   - [x] Linear polynomials
   - [x] Sums of polynomials
-  - [ ] Products of polynomials
+  - [x] Products of polynomials
   - [x] Composition of polynomials
   - [x] The classifying property of polynomial functors
   - [x] The category `C [X]` of univariate polynomial functors
-  - [ ] The category of multivariate polynomial functors
+  - [x] The category of multivariate polynomial functors
   - [ ] The bicategory of polynomial functors
   - [ ] Cartesian closedness of a category of polynomial functors
  
