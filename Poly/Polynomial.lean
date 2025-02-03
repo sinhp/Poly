@@ -28,7 +28,7 @@ variable {C : Type*} [Category C] [HasPullbacks C]
 
 /-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I`,
 output variables in `O`, and with arities `E` dependent on `I`. -/
-structure MvPoly (I O : C) :=
+structure MvPoly (I O : C) where
   (E B : C)
   (i : E ⟶ I)
   (p : E ⟶ B)
@@ -36,7 +36,7 @@ structure MvPoly (I O : C) :=
   (o : B ⟶ O)
 
 /-- `P : UvPoly C` is a polynomial functors in a single variable -/
-structure UvPoly (E B : C) :=
+structure UvPoly (E B : C) where
   (p : E ⟶ B)
   (exp : CartesianExponentiable p := by infer_instance)
 
