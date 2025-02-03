@@ -23,6 +23,8 @@ import Poly.Basic
 # Locally cartesian closed categories
 -/
 
+attribute [local instance] CategoryTheory.ChosenFiniteProducts.ofFiniteProducts
+
 noncomputable section
 
 open CategoryTheory Category Limits Functor Adjunction Over IsConnected
@@ -146,20 +148,21 @@ theorem Triangle.symm_snd [HasFiniteWidePullbacks C] {I : C}
   IsLimit.conePointUniqueUpToIso_hom_comp (Limits.prodIsProd f x)
   (pullbackCompositionIsBinaryProduct f x) ⟨ WalkingPair.right⟩
 
-attribute [local instance] monoidalOfHasFiniteProducts
 def NatOverProdIso [HasFiniteWidePullbacks C] {I : C} (f : Over I) :
     (Over.pullback f.hom).comp (Over.map f.hom) ≅ MonoidalCategory.tensorLeft f := by
   fapply NatIso.ofComponents
   case app => exact fun _ ↦ OverProdIso f _
   case naturality =>
     intro x y u
-    simp
+    simp only [const_obj_obj, id_obj, comp_obj, MonoidalCategory.tensorLeft_obj, Functor.comp_map,
+      MonoidalCategory.tensorLeft_map, ChosenFiniteProducts.ofFiniteProducts_whiskerLeft]
     ext1
-    · simp_rw [assoc, prod.map_fst, comp_id]
+    · simp only
+        [ChosenFiniteProducts.ofFiniteProducts_fst, assoc, prod.map_fst, comp_id]
       rw [Triangle_fst, Triangle_fst]
       ext
       simp
-    · simp_rw [assoc, prod.map_snd]
+    · simp only [ChosenFiniteProducts.ofFiniteProducts_snd, assoc, prod.map_snd]
       rw [Triangle_snd, ← assoc, Triangle_snd]
       ext
       simp
@@ -272,7 +275,6 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [OverCC C]
 
 /- It's slightly easier to construct the transposed map f^*y ⟶ x from a cone over the pushforward
 cospan.-/
-attribute [local instance] monoidalOfHasFiniteProducts
 def PushforwardObjUP [HasFiniteWidePullbacks C] [OverCC C] {X Y : C}
     (f : X ⟶ Y) (x : Over X) (y : Over Y) (v : y ⟶ ((Over.mk f) ⟹ ((Over.map f).obj x)))
     (w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) = v ≫
@@ -365,7 +367,7 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y)
       rw [natiso]
       simp
       rw [CartesianClosed.uncurry_natural_left]
-      simp only [comp_left, map_obj_left]
+      simp only [comp_left, map_obj_left, ChosenFiniteProducts.ofFiniteProducts_whiskerLeft]
     homEquiv_naturality_right := by
       intros y x x' u k
       simp
@@ -459,5 +461,3 @@ instance OverLCC [HasFiniteWidePullbacks C][OverCC C] (I : C) : LCC (Over I) := 
       f.iteratedSliceEquiv.symm⟩
 
 end LCCC
-
-#min_imports
