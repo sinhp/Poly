@@ -126,11 +126,91 @@ variable {J K : C}
 
 variable (P : MvPoly I J) (Q : MvPoly J K)
 
-def pullback_counit :
-    (Δ_ Q.p).obj  ((Π_ Q.p).obj (Over.mk <| pullback.snd P.o Q.i)) ⟶ (Over.mk <| pullback.snd P.o Q.i) :=
-  adj.counit.app _
+open CategoryTheory.Over
 
-def comp (P: MvPoly I J) (Q : MvPoly J K) : MvPoly I K := sorry
+def pullback_counit :
+  (Δ_ Q.p).obj ((Π_ Q.p).obj (.mk <| pullback.snd P.o Q.i)) ⟶
+    (.mk <| pullback.snd P.o Q.i) := adj.counit.app _
+
+def t := P.o
+
+def u := Q.i
+
+def A' : C := pullback (t P) (u Q)
+
+def h : A' P Q ⟶ P.B := by {apply pullback.fst}
+
+def k : A' P Q ⟶ Q.E := by {apply pullback.snd}
+
+def square_I_commutes : h P Q ≫ P.o = k P Q ≫ u Q := by {
+  unfold h k
+  rw [← pullback.condition]
+  exact rfl}
+
+def f := P.p
+
+def B' : C := pullback (f P) (h P Q)
+
+def m : B' P Q ⟶ P.E := by {apply pullback.fst}
+
+def r : B' P Q ⟶ A' P Q := by {apply pullback.snd}
+
+def Square_III_commutes : (m P Q) ≫ (f P) = (r P Q) ≫ (h P Q) := by {
+  unfold m f r h
+  rw [← pullback.condition]
+  exact rfl}
+
+/-- `w` is obtained by applying `Π_g` to `k`. -/
+def w : Over Q.B := (Π_ Q.p).obj (Over.mk <| k P Q)
+
+--def ε' : Over Q.E := (Δ_ Q.p).obj (w P Q)
+def g := Q.p
+
+/-- D' is the pullback of M along g -/
+def D' : C := pullback (g Q) (w P Q).hom
+
+def q : D' P Q ⟶ (w P Q).left := pullback.snd _ _
+
+#check (w P Q).right
+/-- Maybe not necessary. -/
+def ε' : D' P Q ⟶ Q.E := pullback.fst _ _
+
+#check Over.mk <| (k P Q)
+
+/-- The arrow `ε : D′ → A′` is the k-component of the counit of the adjunction `Σ_g ⊣ ∆_g`. -/
+def ε : D' P Q ⟶ P.A' Q := by {
+  unfold D'
+  simp only [id_obj]
+  --trying to understand what this is
+  have := (mapPullbackAdj (k P Q)).counit.app (Over.mk <| ε' P Q)
+  simp only [comp_obj, id_obj] at this
+  --trying to understand what this does
+  have h1 := mapPullbackAdj.counit.app_pullback.fst (k P Q) (Over.mk <| ε' P Q)
+  sorry
+  }
+
+def N  := pullback (r P Q) (ε P Q)
+
+/-- This is `p` in the diagram. -/
+def p' : N P Q ⟶ D' P Q := by {apply pullback.snd}
+
+def n : N P Q  ⟶ B' P Q := by {apply pullback.fst}
+
+def Square_IV_commutes : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := by {
+  unfold n r p' ε
+  rw [← pullback.condition]
+  exact rfl}
+
+/-- Functor composition for polynomial functors in the diagrammatic order. -/
+def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
+  E := pullback (r P Q) (ε P Q) -- N
+  B := (P.w Q).left--M P Q --M
+  i := n P Q ≫ m P Q ≫ P.i
+  p := p' P Q ≫ q P Q
+  exp := sorry
+  o := (w P Q).hom ≫ Q.o
+
+def comp.functor : (P.comp Q).functor ≅ MvPoly.functor P ⋙ MvPoly.functor Q := sorry
 
 end Composition
 
