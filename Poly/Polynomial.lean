@@ -210,6 +210,7 @@ def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
   exp := sorry
   o := (w P Q).hom ≫ Q.o
 
+
 def comp.functor : (P.comp Q).functor ≅ MvPoly.functor P ⋙ MvPoly.functor Q := sorry
 
 end Composition
