@@ -530,6 +530,15 @@ def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     P.poly.functor ⟶ Q.poly.functor := by
   sorry
 
+
+def comp [HasPullbacks C] [HasTerminal C]
+    {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) : UvPoly (pullback Q.p (genPb.u₂ P C)) (P.functor.obj C) :=
+   {
+     p :=  (pullback.snd Q.p (genPb.u₂ P C)) ≫  (genPb.fst P C)
+     exp := by sorry
+   }
+
+
 end UvPoly
 
 end
