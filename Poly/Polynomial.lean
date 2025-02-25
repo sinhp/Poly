@@ -132,33 +132,27 @@ def pullback_counit :
   (Δ_ Q.p).obj ((Π_ Q.p).obj (.mk <| pullback.snd P.o Q.i)) ⟶
     (.mk <| pullback.snd P.o Q.i) := adj.counit.app _
 
-def t := P.o
+abbrev t := P.o
 
-def u := Q.i
+abbrev u := Q.i
 
 def A' : C := pullback (t P) (u Q)
 
-def h : A' P Q ⟶ P.B := by {apply pullback.fst}
+abbrev h : A' P Q ⟶ P.B := by {apply pullback.fst}
 
-def k : A' P Q ⟶ Q.E := by {apply pullback.snd}
+abbrev k : A' P Q ⟶ Q.E := by {apply pullback.snd}
 
-def sq_I_comm : h P Q ≫ P.o = k P Q ≫ u Q := by {
-  unfold h k
-  rw [← pullback.condition]
-  exact rfl}
+def sq_I_comm : h P Q ≫ P.o = k P Q ≫ u Q := pullback.condition
 
-def f := P.p
+abbrev f := P.p
 
 def B' : C := pullback (f P) (h P Q)
 
-def m : B' P Q ⟶ P.E := by {apply pullback.fst}
+abbrev m : B' P Q ⟶ P.E := by {apply pullback.fst}
 
-def r : B' P Q ⟶ A' P Q := by {apply pullback.snd}
+abbrev r : B' P Q ⟶ A' P Q := by {apply pullback.snd}
 
-def sq_III_comm : (m P Q) ≫ (f P) = (r P Q) ≫ (h P Q) := by {
-  unfold m f r h
-  rw [← pullback.condition]
-  exact rfl}
+def sq_III_comm : (m P Q) ≫ (f P) = (r P Q) ≫ (h P Q) := pullback.condition
 
 /-- `w` is obtained by applying `Π_g` to `k`. -/
 def w : Over Q.B := (Π_ Q.p).obj (Over.mk <| k P Q)
@@ -188,14 +182,11 @@ def ε : D' P Q ⟶ P.A' Q := by {
 def N  := pullback (r P Q) (ε P Q)
 
 /-- This is `p` in the diagram. -/
-def p' : N P Q ⟶ D' P Q := by {apply pullback.snd}
+abbrev p' : N P Q ⟶ D' P Q := by {apply pullback.snd}
 
-def n : N P Q  ⟶ B' P Q := by {apply pullback.fst}
+abbrev n : N P Q  ⟶ B' P Q := by {apply pullback.fst}
 
-def sq_IV_comm : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := by {
-  unfold n r p' ε
-  rw [← pullback.condition]
-  exact rfl}
+def sq_IV_comm : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := pullback.condition
 
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
@@ -224,12 +215,13 @@ def s := P.i
 
 /--Σv Πg ∆u Σt Πf ∆s ≅ Σv Πg Σk ∆h Πf ∆s-/
 def first_step_prop_1_12_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.u P.t) :
-  (Δ_ P.i ⋙ Π_ P.p ⋙ Σ_ P.o) ⋙ Δ_ Q.i ⋙ Π_ Q.p ⋙ Σ_ Q.o
+  Δ_ P.i ⋙ Π_ P.p ⋙ (Σ_ P.o ⋙ Δ_ Q.i) ⋙ Π_ Q.p ⋙ Σ_ Q.o
   ≅ Δ_ P.i ⋙ Π_ P.p ⋙ (Δ_ P.h Q ⋙ Σ_ P.k Q) ⋙ Π_ Q.p ⋙ Σ_ Q.o  := by {
   have : Δ_ P.h Q ⋙ Σ_ P.k Q ≅ Σ_ P.o ⋙ Δ_ Q.i := first_BCh_iso P Q hA'
-  have : Δ_ P.h Q ⋙ Σ_ P.k Q = Σ_ P.o ⋙ Δ_ Q.i := sorry
-  rw [this]
-  exact (Δ_ P.i).associator (Π_ P.p) ((Σ_ P.o ⋙ Δ_ Q.i) ⋙ Π_ Q.p ⋙ Σ_ Q.o)}
+  apply isoWhiskerLeft
+  apply isoWhiskerLeft
+  apply isoWhiskerRight
+  exact (first_BCh_iso P Q hA').symm}
 
 instance CEp' : CartesianExponentiable (p' P Q) := sorry
 
@@ -256,8 +248,9 @@ def half_of_3rd_step_prop_1_12_distrib_law (hpb : IsPullback (P.m Q) (P.r Q) P.p
   Δ_ P.i ⋙ (Δ_ P.m Q ⋙ Π_ (r P Q)) ⋙
     (Δ_ P.ε Q ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom) ⋙ Σ_ Q.o := by {
   have : Π_ (P.p) ⋙ Δ_ P.h Q ≅ Δ_ P.m Q ⋙ Π_ (r P Q) := P.BCiii Q hpb
-  have : Π_ (P.p) ⋙ Δ_ P.h Q = Δ_ P.m Q ⋙ Π_ (r P Q) := sorry
-  aesop_cat}
+  apply isoWhiskerLeft
+  apply isoWhiskerRight
+  exact P.BCiii Q hpb}
 
 def bciv_Iso (hpb : IsPullback (P.n Q) (p' P Q) (r P Q) (P.ε Q)) :
    IsIso (pushforwardBeckChevalleyNatTrans (P.n Q) (r P Q) (p' P Q)  (P.ε Q)
@@ -276,11 +269,12 @@ def BCiv (hpb : IsPullback (P.n Q) (p' P Q) (r P Q) (P.ε Q)) :
 def second_half_of_3rd_step_prop_1_12_distrib_law
     (hpb' : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q)) :
   Δ_ P.i ⋙ Δ_ P.m Q ⋙ (Π_ (r P Q) ⋙ Δ_ P.ε Q) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o≅
-  Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q ⋙ Π_ (p' P Q) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
+  Δ_ P.i ⋙ Δ_ P.m Q ⋙ (Δ_ P.n Q ⋙ Π_ (p' P Q)) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
   have : (Π_ (r P Q) ⋙ Δ_ P.ε Q) ≅ Δ_ P.n Q ⋙ Π_ (p' P Q) := BCiv P Q hpb'
-  have : (Π_ (r P Q) ⋙ Δ_ P.ε Q) = Δ_ P.n Q ⋙ Π_ (p' P Q) := sorry
-  rw [this]
-  rfl}
+  apply isoWhiskerLeft
+  apply isoWhiskerLeft
+  apply isoWhiskerRight
+  exact BCiv P Q hpb'}
 
 instance : CartesianExponentiable (P.h Q) := sorry
 
@@ -293,35 +287,25 @@ def from_BC_iii (hpbIII : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
 
 /-- Σv Πg Σk ∆h Πf ∆s ≅ Σv Σw Πq ∆ε ∆h Πf ∆s-/
 def second_step_prop_1_12_distrib_law :
-  Δ_ P.i ⋙ Π_ P.p ⋙ (Δ_ P.h Q ⋙ Σ_ P.k Q) ⋙ Π_ Q.p ⋙ Σ_ Q.o ≅
+  Δ_ P.i ⋙ Π_ P.p ⋙ Δ_ P.h Q ⋙ (Σ_ P.k Q ⋙ Π_ Q.p) ⋙ Σ_ Q.o ≅
   Δ_ P.i ⋙ Π_ P.p ⋙ Δ_ P.h Q ⋙ (Δ_ P.ε Q ⋙ Π_ (q P Q) ⋙ Σ_ (P.w Q).hom) ⋙ Σ_ Q.o := by {
-  have : Σ_ (P.k Q) ⋙ Π_ (Q.p) = (Δ_ P.ε Q ⋙ Π_ (q P Q) ⋙ Σ_ (P.w Q).hom) := sorry
-  change Δ_ P.i ⋙ Π_ P.p ⋙ Δ_ P.h Q ⋙ (Σ_ P.k Q ⋙ Π_ Q.p) ⋙ Σ_ Q.o ≅ _
-  rw [this]}
-
---I have these squares
-def hA' : IsPullback (P.k Q) (P.h Q) Q.u P.t where
-  w := by { rw [← (sq_I_comm P Q)]; rfl}
-  isLimit' := sorry
-
-def hpb : IsPullback (P.m Q) (P.r Q) P.p (P.h Q) where
-  w := by { rw [← (sq_III_comm P Q)]; rfl}
-  isLimit' := sorry
-
-def hpb' : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q) where
-  w := by {rw [← (sq_IV_comm P Q)]; }
-  isLimit' := sorry
+  apply isoWhiskerLeft
+  apply isoWhiskerLeft
+  apply isoWhiskerLeft
+  apply isoWhiskerRight
+  exact from_distrib_diagram_4_page_5 P Q}
 
 def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by {
   unfold MvPoly.functor
   apply Iso.trans
-  exact first_step_prop_1_12_BCh_iso P Q (hA' P Q)
+  exact first_step_prop_1_12_BCh_iso P Q (IsPullback.flip (IsPullback.of_hasPullback P.o Q.i))
   apply Iso.trans
   exact second_step_prop_1_12_distrib_law P Q
   apply Iso.trans
-  exact half_of_3rd_step_prop_1_12_distrib_law P Q (hpb P Q)
+  exact half_of_3rd_step_prop_1_12_distrib_law P Q
+    (IsPullback.of_hasPullback P.f (pullback.fst P.t Q.u))
   apply Iso.trans
-  exact second_half_of_3rd_step_prop_1_12_distrib_law P Q (hpb' P Q)
+  exact second_half_of_3rd_step_prop_1_12_distrib_law P Q (IsPullback.of_hasPullback _ _)
   --pseudo-functoriality
   have hdelta1 : Δ_ (P.m Q ≫ P.i) ≅ Δ_ P.i ⋙ Δ_ P.m Q := by {
     apply pullbackComp}
