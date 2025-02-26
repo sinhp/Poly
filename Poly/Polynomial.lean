@@ -120,9 +120,7 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
 
 section Composition
 
-variable {I}
-
-variable {J K : C}
+variable {I J K : C}
 
 variable (P : MvPoly I J) (Q : MvPoly J K)
 
@@ -136,6 +134,7 @@ abbrev t := P.o
 
 abbrev u := Q.i
 
+--Might not give the same pullback as Δ
 def A' : C := pullback (t P) (u Q)
 
 abbrev h : A' P Q ⟶ P.B := by {apply pullback.fst}
@@ -144,42 +143,37 @@ abbrev k : A' P Q ⟶ Q.E := by {apply pullback.snd}
 
 def sq_I_comm : h P Q ≫ P.o = k P Q ≫ u Q := pullback.condition
 
+
+
 abbrev f := P.p
 
 def B' : C := pullback (f P) (h P Q)
 
 abbrev m : B' P Q ⟶ P.E := by {apply pullback.fst}
 
-abbrev r : B' P Q ⟶ A' P Q := by {apply pullback.snd}
-
-def sq_III_comm : (m P Q) ≫ (f P) = (r P Q) ≫ (h P Q) := pullback.condition
+--check which pullbacks typeclass is the right one
+--since Δ is not the same as pullback in general
 
 /-- `w` is obtained by applying `Π_g` to `k`. -/
 def w : Over Q.B := (Π_ Q.p).obj (Over.mk <| k P Q)
 
---def ε' : Over Q.E := (Δ_ Q.p).obj (w P Q)
 def g := Q.p
 
 /-- D' is the pullback of M along g -/
-def D' : C := pullback (g Q) (w P Q).hom
+def D' : C := ((Δ_ Q.p).obj (w P Q)).left
 
-def q : D' P Q ⟶ (w P Q).left := pullback.snd _ (P.w Q).hom
+def ε' : (Δ_ Q.f).obj (P.w Q) ⟶ (.mk <| k P Q) := adj.counit.app (.mk <| k P Q)
 
-/-- Maybe not necessary. -/
-def ε' : D' P Q ⟶ Q.E := pullback.fst _ _
+abbrev r : B' P Q ⟶ A' P Q := by {apply pullback.snd}
 
-/-- The arrow `ε : D′ → A′` is the k-component of the counit of the adjunction `Σ_g ⊣ ∆_g`. -/
-def ε : D' P Q ⟶ P.A' Q := by {
-  unfold D'
-  simp only [id_obj]
-  --trying to understand what this is
-  have := (mapPullbackAdj (k P Q)).counit.app (Over.mk <| ε' P Q)
-  simp only [comp_obj, id_obj] at this
-  --trying to understand what this does
-  have h1 := mapPullbackAdj.counit.app_pullback.fst (k P Q) (Over.mk <| ε' P Q)
-  sorry}
+def sq_III_comm : (m P Q) ≫ (f P) = (r P Q) ≫ (h P Q) := pullback.condition
 
-def N  := pullback (r P Q) (ε P Q)
+def ε : D' P Q ⟶ A' P Q  := (ε' P Q).left
+
+def N : C  := pullback (r P Q) (ε P Q)
+
+--need to exploit how Δ f is defined
+def q : D' P Q ⟶ (w P Q).left := (pullback.fst (P.w Q).hom Q.p)
 
 /-- This is `p` in the diagram. -/
 abbrev p' : N P Q ⟶ D' P Q := by {apply pullback.snd}
@@ -191,7 +185,7 @@ def sq_IV_comm : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := pullback.conditi
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
   E := pullback (r P Q) (ε P Q) -- N
-  B := (P.w Q).left--M P Q --M
+  B := (P.w Q).left --M
   i := n P Q ≫ m P Q ≫ P.i
   p := p' P Q ≫ q P Q
   exp := sorry
@@ -277,6 +271,35 @@ def second_half_of_3rd_step_prop_1_12_distrib_law
   exact BCiv P Q hpb'}
 
 instance : CartesianExponentiable (P.h Q) := sorry
+
+section distrib_diagram
+
+variable {C' : Type*} [Category C'] [HasPullbacks C']
+  (A B C : C') (u : C ⟶ B) (f : B ⟶ A) [CartesianExponentiable f]
+
+def Mbar : Over A := (Π_ f).obj <| Over.mk u
+
+def M : C' := (Mbar A B C u f).left
+
+def v' : M A B C u f ⟶ A := (Mbar A B C u f).hom
+
+def N' : C' := ((Δ_ f).obj <| Over.mk (v' A B C u f)).left
+
+def w' : N' A B C u f ⟶  B := pullback.snd _ _
+
+def g' : N' A B C u f ⟶ M A B C u f := pullback.fst _ _
+
+def H_pull_back_square : g' A B C u f ≫ v' A B C u f = w' A B C u f ≫ f := pullback.condition
+
+def ε1 : ((Δ_ f).obj ((Π_ f).obj (Over.mk <| u))) ⟶ (.mk <| u) := adj.counit.app (.mk <| u)
+
+def e : N' A B C u f ⟶ C := (ε1 A B C u f).left
+
+instance : CartesianExponentiable (g' A B C u f) := sorry
+
+def foo : Σ_ u ⋙ Π_ f ≅ (Δ_ (e A B C u f) ⋙ Π_ (g' A B C u f ) ⋙ Σ_ (v' A B C u f)) := sorry
+
+end distrib_diagram
 
 --might need to construct this
 def from_distrib_diagram_4_page_5 :
@@ -513,6 +536,7 @@ P.functor.obj X --------> B
                 P.proj X
 ```
 -/
+
 def genPb (P : UvPoly E B) (X : C) : C :=
   pullback (P.proj X) P.p
 
