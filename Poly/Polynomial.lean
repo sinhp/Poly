@@ -56,6 +56,19 @@ def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.i
 
 instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
 
+
+#check pullback
+#check IsPullback
+-- let's prove that the pullback along `initial.to` is isomorphic to the initial object
+example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
+    IsPullback (initial.to Y) (𝟙 _) f (initial.to X) where
+      w := by aesop
+      isLimit' := by
+        refine ⟨?_⟩
+
+
+
+
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
 instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
   functor := {
@@ -63,6 +76,7 @@ instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
     map := sorry
   }
   adj := sorry
+
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
@@ -456,7 +470,11 @@ def comp [HasPullbacks C] [HasTerminal C]
      p :=  (pullback.snd Q.p (genPb.u₂ P C)) ≫  (genPb.fst P C)
      exp := by sorry
    }
-
+@[simps!]
+def compFunctorIso [HasPullbacks C] [HasTerminal C]
+    {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) :
+    P.functor ⋙ Q.functor ≅ (comp P Q).functor := by
+  sorry
 
 end UvPoly
 
