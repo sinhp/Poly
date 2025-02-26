@@ -143,8 +143,6 @@ abbrev k : A' P Q ⟶ Q.E := by {apply pullback.snd}
 
 def sq_I_comm : h P Q ≫ P.o = k P Q ≫ u Q := pullback.condition
 
-
-
 abbrev f := P.p
 
 def B' : C := pullback (f P) (h P Q)
@@ -173,7 +171,7 @@ def ε : D' P Q ⟶ A' P Q  := (ε' P Q).left
 def N : C  := pullback (r P Q) (ε P Q)
 
 --need to exploit how Δ f is defined
-def q : D' P Q ⟶ (w P Q).left := (pullback.fst (P.w Q).hom Q.p)
+def q  : D' P Q ⟶ (w P Q).left := (pullback.fst (P.w Q).hom Q.p)
 
 /-- This is `p` in the diagram. -/
 abbrev p' : N P Q ⟶ D' P Q := by {apply pullback.snd}
@@ -182,13 +180,17 @@ abbrev n : N P Q  ⟶ B' P Q := by {apply pullback.fst}
 
 def sq_IV_comm : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := pullback.condition
 
+instance : CartesianExponentiable (P.q Q) := sorry
+
+instance : CartesianExponentiable (P.p' Q) := sorry
+
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
   E := pullback (r P Q) (ε P Q) -- N
   B := (P.w Q).left --M
   i := n P Q ≫ m P Q ≫ P.i
   p := p' P Q ≫ q P Q
-  exp := sorry
+  exp := CartesianExponentiable.comp (P.p' Q) (P.q Q)
   o := (w P Q).hom ≫ Q.o
 
 def v := Q.o
@@ -208,7 +210,7 @@ def first_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.u P.t) :
 def s := P.i
 
 /--Σv Πg ∆u Σt Πf ∆s ≅ Σv Πg Σk ∆h Πf ∆s-/
-def first_step_prop_1_12_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.u P.t) :
+def first_step_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.u P.t) :
   Δ_ P.i ⋙ Π_ P.p ⋙ (Σ_ P.o ⋙ Δ_ Q.i) ⋙ Π_ Q.p ⋙ Σ_ Q.o
   ≅ Δ_ P.i ⋙ Π_ P.p ⋙ (Δ_ P.h Q ⋙ Σ_ P.k Q) ⋙ Π_ Q.p ⋙ Σ_ Q.o  := by {
   have : Δ_ P.h Q ⋙ Σ_ P.k Q ≅ Σ_ P.o ⋙ Δ_ Q.i := first_BCh_iso P Q hA'
@@ -237,7 +239,7 @@ def BCiii (hpb : IsPullback (P.m Q) (r P Q) (P.p) (P.h Q)) :
 
 instance : CartesianExponentiable (P.q Q) := sorry
 
-def half_of_3rd_step_prop_1_12_distrib_law (hpb : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
+def half_of_3rd_step_distrib_law (hpb : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
   Δ_ P.i ⋙ (Π_ P.p ⋙ Δ_ P.h Q) ⋙ (Δ_ P.ε Q ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom) ⋙ Σ_ Q.o ≅
   Δ_ P.i ⋙ (Δ_ P.m Q ⋙ Π_ (r P Q)) ⋙
     (Δ_ P.ε Q ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom) ⋙ Σ_ Q.o := by {
@@ -260,7 +262,7 @@ def BCiv (hpb : IsPullback (P.n Q) (p' P Q) (r P Q) (P.ε Q)) :
   hom_inv_id := (Classical.choose_spec (bciv_Iso P Q hpb).out).left
   inv_hom_id := (Classical.choose_spec (bciv_Iso P Q hpb).out).right
 
-def second_half_of_3rd_step_prop_1_12_distrib_law
+def second_half__distrib_law
     (hpb' : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q)) :
   Δ_ P.i ⋙ Δ_ P.m Q ⋙ (Π_ (r P Q) ⋙ Δ_ P.ε Q) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o≅
   Δ_ P.i ⋙ Δ_ P.m Q ⋙ (Δ_ P.n Q ⋙ Π_ (p' P Q)) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
@@ -297,51 +299,60 @@ def e : N' A B C u f ⟶ C := (ε1 A B C u f).left
 
 instance : CartesianExponentiable (g' A B C u f) := sorry
 
-def foo : Σ_ u ⋙ Π_ f ≅ (Δ_ (e A B C u f) ⋙ Π_ (g' A B C u f ) ⋙ Σ_ (v' A B C u f)) := sorry
+/-- We need to construct this -/
+def from_distrib_diagram_4_page_5 :
+  Σ_ u ⋙ Π_ f ≅ (Δ_ (e A B C u f) ⋙ Π_ (g' A B C u f ) ⋙ Σ_ (v' A B C u f)) := sorry
 
 end distrib_diagram
-
---might need to construct this
-def from_distrib_diagram_4_page_5 :
- Σ_ (P.k Q) ⋙ Π_ (Q.p) ≅ (Δ_ P.ε Q ⋙ Π_ (q P Q) ⋙ Σ_ (P.w Q).hom):= sorry
 
 def from_BC_iii (hpbIII : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
   Π_ (P.p) ⋙ Δ_ P.h Q ≅ Δ_ P.m Q ⋙ Π_ (r P Q) := BCiii P Q hpbIII
 
 /-- Σv Πg Σk ∆h Πf ∆s ≅ Σv Σw Πq ∆ε ∆h Πf ∆s-/
-def second_step_prop_1_12_distrib_law :
+def second_step_distrib_law :
   Δ_ P.i ⋙ Π_ P.p ⋙ Δ_ P.h Q ⋙ (Σ_ P.k Q ⋙ Π_ Q.p) ⋙ Σ_ Q.o ≅
   Δ_ P.i ⋙ Π_ P.p ⋙ Δ_ P.h Q ⋙ (Δ_ P.ε Q ⋙ Π_ (q P Q) ⋙ Σ_ (P.w Q).hom) ⋙ Σ_ Q.o := by {
   apply isoWhiskerLeft
   apply isoWhiskerLeft
   apply isoWhiskerLeft
   apply isoWhiskerRight
-  exact from_distrib_diagram_4_page_5 P Q}
+  apply from_distrib_diagram_4_page_5}
 
 def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by {
   unfold MvPoly.functor
-  apply Iso.trans
-  exact first_step_prop_1_12_BCh_iso P Q (IsPullback.flip (IsPullback.of_hasPullback P.o Q.i))
-  apply Iso.trans
-  exact second_step_prop_1_12_distrib_law P Q
-  apply Iso.trans
-  exact half_of_3rd_step_prop_1_12_distrib_law P Q
-    (IsPullback.of_hasPullback P.f (pullback.fst P.t Q.u))
-  apply Iso.trans
-  exact second_half_of_3rd_step_prop_1_12_distrib_law P Q (IsPullback.of_hasPullback _ _)
+  apply Iso.trans (first_step_BCh_iso P Q (IsPullback.flip (IsPullback.of_hasPullback P.o Q.i)))
+  apply Iso.trans (second_step_distrib_law P Q)
+  apply Iso.trans (half_of_3rd_step_distrib_law P Q
+    (IsPullback.of_hasPullback P.f (pullback.fst P.t Q.u)))
+  apply Iso.trans (second_half__distrib_law P Q (IsPullback.of_hasPullback _ _))
   --pseudo-functoriality
-  have hdelta1 : Δ_ (P.m Q ≫ P.i) ≅ Δ_ P.i ⋙ Δ_ P.m Q := by {
-    apply pullbackComp}
-  have hdelta2 : Δ_ ((P.n Q ≫ P.m Q) ≫ P.i) ≅ (Δ_ P.i ⋙ Δ_ P.m Q) ⋙ Δ_ P.n Q := sorry
+  have hdelta1 : Δ_ (P.m Q ≫ P.i) ≅ Δ_ P.i ⋙ Δ_ P.m Q := by {apply pullbackComp}
+  have hdelta2 : Δ_ ((P.n Q ≫ P.m Q) ≫ P.i) ≅ Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q := by {
+    simp only [assoc]
+    sorry}
   unfold comp
   simp only [const_obj_obj]
-  have hPi :  Π_ P.p' Q ⋙ Π_ P.q Q ≅ Π_ (P.p' Q ≫ P.q Q) := by {
-    apply pushforwardCompIso}
   change (Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q) ⋙ (Π_ P.p' Q ⋙
    Π_ P.q Q) ⋙ (Σ_ (P.w Q).hom ⋙ Σ_ Q.o) ≅ _
-  have hSigma : (Σ_ (P.w Q).hom ⋙ Σ_ Q.o) ≅ Σ_ ((P.w Q).hom ≫ Q.o) := by{
-     apply mapCompIso}
-  aesop_cat}
+  have iso1 : (Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q)
+   ⋙ (Π_ P.p' Q ⋙ Π_ P.q Q) ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o ≅
+    (Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q)
+   ⋙ Π_ (P.p' Q ≫ P.q Q) ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
+    apply isoWhiskerRight
+    apply isoWhiskerRight
+    exact Iso.refl (Δ_ P.i)}
+  apply Iso.trans iso1
+  have iso2 : (Δ_ P.i ⋙ Δ_ P.m Q ⋙ Δ_ P.n Q)
+     ⋙ Π_ (P.p' Q ≫ P.q Q) ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o ≅
+  Δ_ ((P.n Q ≫ P.m Q) ≫ P.i) ⋙
+    Π_ (P.p' Q ≫ P.q Q) ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
+    apply isoWhiskerRight
+    exact hdelta2.symm}
+  apply Iso.trans iso2
+  simp only [assoc]
+  apply isoWhiskerLeft
+  apply isoWhiskerLeft
+  apply mapCompIso}
 
 end Composition
 
