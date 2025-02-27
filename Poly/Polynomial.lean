@@ -57,16 +57,14 @@ def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.i
 instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
 
 
-#check pullback
-#check IsPullback
+
 -- let's prove that the pullback along `initial.to` is isomorphic to the initial object
 example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
     IsPullback (initial.to Y) (𝟙 _) f (initial.to X) where
       w := by aesop
       isLimit' := by
         refine ⟨?_⟩
-
-
+        sorry
 
 
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
@@ -470,7 +468,8 @@ def comp [HasPullbacks C] [HasTerminal C]
      p :=  (pullback.snd Q.p (genPb.u₂ P C)) ≫  (genPb.fst P C)
      exp := by sorry
    }
-@[simps!]
+
+/-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
     {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) :
     P.functor ⋙ Q.functor ≅ (comp P Q).functor := by
