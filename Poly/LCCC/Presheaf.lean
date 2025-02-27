@@ -29,11 +29,7 @@ abbrev Psh (C : Type u) [Category.{v} C] : Type (max u (v + 1)) := Cᵒᵖ ⥤ T
 /-- `Psh C` is cartesian closed when `C` is small
 (has hom-types and objects in the same universe). -/
 def diagCCC {C : Type u} [Category.{u} C] : CartesianClosed (Psh C) :=
-  CartesianClosed.mk _
-    (fun F => by
-      letI := FunctorCategory.prodPreservesColimits F
-      have := isLeftAdjoint_of_preservesColimits (prod.functor.obj F)
-      exact Exponentiable.mk _ _ (Adjunction.ofIsLeftAdjoint (prod.functor.obj F)))
+  inferInstance
 
 def presheafCCC {C : Type u} [SmallCategory C] : CartesianClosed (Psh C) :=
   diagCCC
@@ -74,6 +70,8 @@ using the following:
 def cartesianClosedOfEquiv (e : C ≌ D) [CartesianClosed C] : CartesianClosed D :=
   MonoidalClosed.ofEquiv (e.inverse.toMonoidalFunctorOfHasFiniteProducts) e.symm.toAdjunction
 -/
+
+attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
 
 def presheafOverCCC {C : Type u} [Category.{max u v} C] (P : Psh C) : CartesianClosed (Over P) :=
   cartesianClosedOfEquiv overPshIsPshElementsOp.symm
