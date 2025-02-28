@@ -352,7 +352,7 @@ def comp [HasPullbacks C] [HasTerminal C]
    }
 
 /-- A helper definition for the domain of the composition of two polynomials. -/
-def comp_domain {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
+def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
   pullback Q.p (genPb.u₂ P A)
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
