@@ -4,4 +4,4 @@ import Poly.LCCC.Presheaf
 import Poly.Type.Univariate
 import Poly.Basic
 import Poly.Exponentiable
-import Poly.Polynomial
+import Poly.UvPolynomial
