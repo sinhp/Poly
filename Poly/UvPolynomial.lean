@@ -343,12 +343,17 @@ def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
   sorry
 
 
+@[simps!]
 def comp [HasPullbacks C] [HasTerminal C]
-    {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) : UvPoly (pullback Q.p (genPb.u₂ P C)) (P.functor.obj C) :=
+    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (pullback Q.p (genPb.u₂ P A)) (P.functor.obj A) :=
    {
-     p :=  (pullback.snd Q.p (genPb.u₂ P C)) ≫  (genPb.fst P C)
+     p :=  (pullback.snd Q.p (genPb.u₂ P A)) ≫  (genPb.fst P A)
      exp := by sorry
    }
+
+/-- A helper definition for the domain of the composition of two polynomials. -/
+def comp_domain {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
+  pullback Q.p (genPb.u₂ P A)
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
