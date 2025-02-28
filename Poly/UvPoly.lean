@@ -5,7 +5,7 @@ Authors: Sina Hazratpour
 -/
 
 import Poly.LCCC.BeckChevalley
-import Poly.MvPolynomial
+import Poly.MvPoly
 
 
 /-!
@@ -342,22 +342,21 @@ def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
     P.poly.functor ⟶ Q.poly.functor := by
   sorry
 
-
-@[simps!]
-def comp [HasPullbacks C] [HasTerminal C]
-    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (pullback Q.p (genPb.u₂ P A)) (P.functor.obj A) :=
-   {
-     p :=  (pullback.snd Q.p (genPb.u₂ P A)) ≫  (genPb.fst P A)
-     exp := by sorry
-   }
-
-/-- A helper function for getting the domain of the composition of two polynomials. -/
+/-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
   pullback Q.p (genPb.u₂ P A)
 
-/-- A helper function for getting the codomain of the composition of two polynomials. -/
+/-- The codomain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compCod {E B D A : C} (P : UvPoly E B) (_ : UvPoly D A) :=
   P.functor.obj A
+
+@[simps!]
+def comp [HasPullbacks C] [HasTerminal C]
+    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (compCod P Q) :=
+   {
+     p :=  (pullback.snd Q.p (genPb.u₂ P A)) ≫ (genPb.fst P A)
+     exp := by sorry
+   }
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
