@@ -4,22 +4,26 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
 
-import Poly.LCCC.BeckChevalley
-import Poly.LCCC.Basic
+-- import Poly.LCCC.BeckChevalley
+-- import Poly.LCCC.Basic
+-- import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
+-- import Poly.ForMathlib.CategoryTheory.Comma.Over.Pullback
+import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
+import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
 
 /-!
 # Polynomial Functor
 
 -- TODO: there are various `sorry`-carrying proofs in below which require instances of
-`CartesianExponentiable` for various constructions on morphisms. They need to be defined in
+`ExponentiableMorphism` for various constructions on morphisms. They need to be defined in
 `Poly.Exponentiable`.
 -/
 
 noncomputable section
 
-open CategoryTheory Category Limits Functor Adjunction Over
+open CategoryTheory Category Limits Functor Adjunction
 
-variable {C : Type*} [Category C] [HasPullbacks C] [  HasFiniteWidePullbacks C] [LCC C]
+variable {C : Type*} [Category C] [HasPullbacks C] [HasFiniteWidePullbacks C]
 
 /-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I`,
 output variables in `O`, and with arities `E` dependent on `I`. -/
@@ -27,12 +31,12 @@ structure MvPoly (I O : C) where
   (E B : C)
   (i : E ⟶ I)
   (p : E ⟶ B)
-  (exp : CartesianExponentiable p := by infer_instance)
+  (exp : ExponentiableMorphism p := by infer_instance)
   (o : B ⟶ O)
 
 namespace MvPoly
 
-open CartesianExponentiable
+open ExponentiableMorphism
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
 
@@ -40,11 +44,9 @@ attribute [instance] MvPoly.exp
 
 /-- The identity polynomial in many variables. -/
 @[simps!]
-def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, CartesianExponentiable.id, 𝟙 I⟩
+def id (I : C) : MvPoly I I := ⟨I, I, 𝟙 I, 𝟙 I, ExponentiableMorphism.id, 𝟙 I⟩
 
-instance (I : C) : CartesianExponentiable ((id I).p) := CartesianExponentiable.id
-
-
+instance (I : C) : ExponentiableMorphism ((id I).p) := ExponentiableMorphism.id
 
 -- let's prove that the pullback along `initial.to` is isomorphic to the initial object
 example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
@@ -56,7 +58,7 @@ example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
 
 
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
-instance [HasInitial C] (X : C) : CartesianExponentiable (initial.to X) where
+instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) where
   functor := {
     obj := sorry
     map := sorry
@@ -69,7 +71,7 @@ def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :
   ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
 /-- The monomial polynomial in many variables. -/
-def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [CartesianExponentiable p]: MvPoly I O :=
+def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [ExponentiableMorphism p]: MvPoly I O :=
   ⟨E, O, i, p, inferInstance, 𝟙 O⟩
 
 /-- The sum of two polynomials in many variables. -/
@@ -79,7 +81,7 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
   exp := {
-    functor := sorry  -- prove that the sum of exponentiables is exponentiable.
+    pushforward := sorry  -- prove that the sum of exponentiables is exponentiable.
     adj := sorry
   }
   o := coprod.desc P.o Q.o
@@ -94,7 +96,7 @@ def functor {I O : C} (P : MvPoly I O) :
 
 variable (I O : C) (P : MvPoly I O)
 
-def apply {I O : C} (P : MvPoly I O) [CartesianExponentiable P.p] : Over I → Over O := (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] : Over I → Over O := (P.functor).obj
 
 /-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
 object.-/
@@ -120,7 +122,7 @@ def id_apply (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
 
 section Composition
 
-variable {I J K : C} (P : MvPoly I J) (Q : MvPoly J K) [LCC C]
+variable {I J K : C} (P : MvPoly I J) (Q : MvPoly J K) [LocallyCartesianClosed C]
 
 open CategoryTheory.Over
 
@@ -171,9 +173,9 @@ abbrev n : N P Q  ⟶ B' P Q := pullback.fst (r P Q) (ε P Q)
 
 def sq_IV_comm : (n P Q) ≫ (r P Q) = (p' P Q) ≫ (ε P Q) := pullback.condition
 
-instance : CartesianExponentiable (P.q Q) := sorry
+instance : ExponentiableMorphism (P.q Q) := sorry
 
-instance CEp' : CartesianExponentiable (P.p' Q) := sorry
+instance CEp' : ExponentiableMorphism (P.p' Q) := sorry
 
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
@@ -181,7 +183,7 @@ def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
   B := (P.w Q).left
   i := n P Q ≫ m P Q ≫ P.i
   p := p' P Q ≫ q P Q
-  exp := CartesianExponentiable.comp (P.p' Q) (P.q Q)
+  exp := ExponentiableMorphism.comp (P.p' Q) (P.q Q)
   o := (w P Q).hom ≫ Q.o
 
 def v := Q.o
@@ -205,7 +207,7 @@ def first_step_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.i P.o) :
   apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ <| _
   exact (first_BCh_iso P Q hA').symm}
 
-instance CEr : CartesianExponentiable (r P Q) := sorry
+instance CEr : ExponentiableMorphism (r P Q) := sorry
 
 def bciii_Iso (hpb : IsPullback (P.m Q) (r P Q) (P.p) (P.h Q)) :
   IsIso (pushforwardBeckChevalleyNatTrans (P.m Q) (P.p) (r P Q) (P.h Q)
@@ -245,12 +247,12 @@ def second_half__distrib_law
   Δ_ P.i ⋙ Δ_ P.m Q ⋙ (Δ_ P.n Q ⋙ Π_ (p' P Q)) ⋙ Π_ P.q Q ⋙ Σ_ (P.w Q).hom ⋙ Σ_ Q.o := by {
   apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ _; exact BCiv P Q hpb'}
 
-instance : CartesianExponentiable (P.h Q) := sorry
+instance : ExponentiableMorphism (P.h Q) := sorry
 
 section distrib_diagram
 
 variable --{C' : Type*} [Category C'] [HasPullbacks C']
-  (A B C' : C) (u : C' ⟶ B) (f : B ⟶ A) [CartesianExponentiable f]
+  (A B C' : C) (u : C' ⟶ B) (f : B ⟶ A) [ExponentiableMorphism f]
 
 def Mbar : Over A := (Π_ f).obj <| Over.mk u
 
@@ -271,7 +273,7 @@ def ε1 : ((Δ_ f).obj ((Π_ f).obj (Over.mk <| u))) ⟶ (.mk <| u) := adj.couni
 
 def e : N'  A B C'  u f ⟶ C' := (ε1  A B C'  u f).left
 
-instance : CartesianExponentiable (g'  A B C'  u f) := sorry
+instance : ExponentiableMorphism (g'  A B C'  u f) := sorry
 
 def from_distrib_diagram_4_page_5_map :
   Σ_ u ⋙ Π_ f ⟶ (Δ_ (e  A B C'  u f) ⋙ Π_ (g'  A B C'  u f ) ⋙ Σ_ (v'  A B C'  u f)) := sorry
