@@ -3,6 +3,8 @@ import Mathlib.CategoryTheory.Functor.Currying
 import Poly.Util
 import Poly.Tactic.BanishCasts
 
+import SEq.Tactic.DepRewrite
+
 /-! # Bifunctors
 
 We define some constructions on bifunctors (aka profunctors),
@@ -16,7 +18,7 @@ F(X) ⟶ G(Y)
 H(X) ⟶ I(Y)
 ```
 would be a natural isomorphism of bifunctors `𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v`
-given by `(X,Y) ↦ F(X) ⟶ G(Y)` and `(X, Y) ↦ H(X) ⟶ I(Y)`. -/
+given by `(X, Y) ↦ F(X) ⟶ G(Y)` and `(X, Y) ↦ H(X) ⟶ I(Y)`. -/
 
 namespace CategoryTheory
 
@@ -36,13 +38,13 @@ def NatIso.ofComponents₂ {F G : 𝒞 ⥤ 𝒟 ⥤ ℰ}
 
 /-! ## Dependent functors -/
 
-/-- A functor into `𝒟` that depends on `F`.
-
-This is a functor `G : ∫F ⥤ 𝒟` where all the `F(Γ)` are discrete,
+/-- A functor into `𝒟` that depends on `F`,
+in other words `∫F ⥤ 𝒟` where all the `F(Γ)` are discrete,
 spelled out in elementary terms.
-In the general case, we would have
+
+(In the general case, we would have
 `map : ∀ ⦃Γ Δ⦄ ⦃b : F.obj Γ⦄ ⦃c : F.obj Δ⦄
-  (σ : Γ ⟶ Δ) (f : (F.map σ).obj b ⟶ c), obj b ⟶ obj c`.
+  (σ : Γ ⟶ Δ) (f : F.map σ b ⟶ c), obj b ⟶ obj c`.)
 
 Equivalently, it is a (lax or strict or something) transformation `F ⟶ const 𝒟`. -/
 -- NOTE: A more mathlib-ready, general approach might use `∫F ⥤ 𝒟`,
@@ -147,40 +149,39 @@ end DepNatIso
 
 /-! ## Dependent sum functors -/
 
-/-- Dependent sum over a type-valued functor.
-This serves to encapsulate dependent sums that vary naturally in their parameters. -/
+
+/-- Given functors `F : 𝒞 ⥤ Type v` and `G : ∫F ⥤ 𝒟 ⥤ Type v`,
+produce the functor `(X, Y) ↦ (b : F(X)) × G((X, b))(Y)`.
+This is a dependent sum that varies naturally in its parameters `X, Y`. -/
 @[simps!]
-def Functor.Sigma.{v} (F : 𝒞 ⥤ Type v) (G : DepFunctor F (𝒟 ⥤ Type v)) : 𝒞 ⥤ 𝒟 ⥤ Type v :=
+def Functor.Sigma.{v} {F : 𝒞 ⥤ Type v} (G : DepFunctor F (𝒟 ⥤ Type v)) : 𝒞 ⥤ 𝒟 ⥤ Type v :=
   curry.obj {
     obj := fun (Γ, X) => (b : F.obj Γ) × ((G.obj b).obj X)
     map := fun (σ, f) ⟨b, e⟩ =>
       ⟨F.map σ b, (G.map σ b).app _ ((G.obj b).map f e)⟩
     map_id := fun (Γ, X) => by
-      dsimp
       refine funext fun ⟨b, e⟩ => ?_
-      dsimp at *
+      dsimp
       congr! 1 with h
       . simp
       . simp only [FunctorToTypes.map_id_apply, DepFunctor.map_id]
-        generalize_proofs
-        generalize (eq_lhs% h) = x at *; cases h
+        rw! [h]
         simp
     map_comp := fun {_} {_} {Y} (σ, f) (τ, g) => by
       refine funext fun ⟨b, e⟩ => ?_
-      dsimp at *
+      dsimp
       congr! 1 with h
       . simp
       . simp only [FunctorToTypes.map_comp_apply, DepFunctor.map_comp]
-        generalize_proofs
-        generalize (eq_lhs% h) = x at *; cases h
+        rw! [h]
         simp [FunctorToTypes.naturality]
   }
 
 def Functor.Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor F₁ (𝒟 ⥤ Type v))
-    (i : F₂ ≅ F₁) : Functor.Sigma F₁ G ≅ Functor.Sigma F₂ (G.isoLeft i) :=
+    (i : F₂ ≅ F₁) : Functor.Sigma G ≅ Functor.Sigma (G.isoLeft i) :=
   NatIso.ofComponents₂
     (fun Γ X => Equiv.toIso {
-      toFun := fun ⟨b, e⟩ => ⟨i.inv.app Γ b, cast (by simp) e⟩ -- `dcast` could be better here
+      toFun := fun ⟨b, e⟩ => ⟨i.inv.app Γ b, cast (by simp) e⟩
       invFun := fun ⟨b, e⟩ => ⟨i.hom.app Γ b, e⟩
       left_inv := fun ⟨_, _⟩ => by simp
       right_inv := fun ⟨_, _⟩ => by simp
@@ -191,14 +192,10 @@ def Functor.Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor
         FunctorToTypes.comp, curry_obj_obj_obj, curry_obj_map_app, FunctorToTypes.map_id_apply,
         Equiv.toIso_hom, Equiv.coe_fn_mk, types_comp_apply, eqToHom_app, Sigma.mk.inj_iff,
         FunctorToTypes.naturality, true_and]
-      generalize_proofs -- TODO: banish_casts tactic
       have : (i.hom.app _ (F₂.map σ (i.inv.app _ b))) = F₁.map σ b := by
         simp [FunctorToTypes.naturality]
-      generalize (eq_lhs% this) = x at *; cases this
-      have := FunctorToTypes.inv_hom_id_app_apply _ _ i _ (F₁.map σ b)
-      generalize (eq_lhs% this) = x at *; cases this
-      have := FunctorToTypes.inv_hom_id_app_apply _ _ i _ b
-      generalize (eq_lhs% this) = x at *; cases this
+      rw! (castMode := .all) [this, FunctorToTypes.inv_hom_id_app_apply _ _ i _ (F₁.map σ b),
+        FunctorToTypes.inv_hom_id_app_apply _ _ i _ b]
       simp)
     (fun Γ f => by
       ext ⟨b,e⟩
@@ -206,21 +203,15 @@ def Functor.Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor
         FunctorToTypes.comp, curry_obj_obj_obj, curry_obj_obj_map, DepFunctor.map_id, eqToHom_app,
         Equiv.toIso_hom, Equiv.coe_fn_mk, types_comp_apply, Sigma.mk.inj_iff,
         FunctorToTypes.map_id_apply, true_and]
-      generalize_proofs
-      have : F₁.map (𝟙 Γ) b = b := by simp
-      generalize (eq_lhs% this) = x at *; cases this
-      have : i.hom.app Γ (i.inv.app Γ b) = b := by simp
-      generalize (eq_lhs% this) = x at *; cases this
-      have : i.hom.app Γ (F₂.map (𝟙 Γ) (i.inv.app Γ b)) = b :=
-        by simp [FunctorToTypes.naturality]
-      generalize (eq_lhs% this) = x at *; cases this
-      have : F₁.map (𝟙 Γ) b = b := by simp
-      generalize (eq_lhs% this) = x at *; cases this
+      rw! (castMode := .all) [show F₁.map (𝟙 Γ) b = b by simp,
+        show i.hom.app Γ (i.inv.app Γ b) = b by simp,
+        show i.hom.app Γ (F₂.map (𝟙 Γ) (i.inv.app Γ b)) = b by simp [FunctorToTypes.naturality],
+        show F₁.map (𝟙 Γ) b = b by simp]
       simp)
 
 def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFunctor F (𝒟 ⥤ Type v))
     (i : G₁ ≅ G₂) :
-    Functor.Sigma F G₁ ≅ Functor.Sigma F G₂ :=
+    Functor.Sigma G₁ ≅ Functor.Sigma G₂ :=
   NatIso.ofComponents₂
     (fun Γ X => Equiv.toIso {
       toFun := fun ⟨b, e⟩ => ⟨b, (i.hom.app b).app X e⟩
@@ -228,7 +219,6 @@ def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFuncto
       left_inv := fun ⟨b, e⟩ => by
         -- simp doesn't finish this. missing simp lemma?
         have := congr_fun (congr_fun (congr_arg NatTrans.app (DepNatIso.hom_inv_id_app i b)) X) e
-        simp
         simp only [NatTrans.comp_app] at this
         simpa using this
       right_inv := fun ⟨b, e⟩ => by
@@ -246,13 +236,11 @@ def Functor.Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFuncto
       simp only [Sigma, prod_Hom, curry_obj_obj_obj, curry_obj_obj_map, DepFunctor.map_id,
         eqToHom_app, Iso.app_hom, Iso.app_inv, Equiv.toIso_hom, Equiv.coe_fn_mk, types_comp_apply,
         Sigma.mk.inj_iff, FunctorToTypes.map_id_apply, heq_eq_eq, true_and]
-      generalize_proofs
-      have := F.map_id Γ
-      generalize (eq_lhs% this) = x at *; cases this
+      rw! [F.map_id Γ]
       simp [FunctorToTypes.naturality])
 
 open Limits in
-/-- The functor `(b : Γ ⟶ B) ↦ b*σ`. -/
+/-- The functor `(b : Γ ⟶ B) ↦ Hom(dom(b*p), -)`. -/
 noncomputable def pullbackDep.{v} {𝒞 : Type*} [Category.{v} 𝒞] [HasPullbacks 𝒞] {E B : 𝒞} (p : E ⟶ B) :
     DepFunctor (yoneda.obj B) (𝒞 ⥤ Type v) where
   obj _ b := coyoneda.obj <| Opposite.op <| pullback b p
@@ -261,18 +249,14 @@ noncomputable def pullbackDep.{v} {𝒞 : Type*} [Category.{v} 𝒞] [HasPullbac
       pullback.lift (pullback.fst .. ≫ σ.unop) (pullback.snd ..) (by simp [pullback.condition])
   map_id _ b := by
     dsimp
-    -- More `eqToHom` nonsense
-    generalize_proofs
-    have : 𝟙 _  ≫ b = b := by simp
-    generalize (eq_lhs% this) = x at *; cases this
+    rw! [show 𝟙 _ ≫ b = b by simp]
     simp
   map_comp _ _ _ σ τ b := by
+    ext
     dsimp
-    generalize_proofs
-    have : τ.unop ≫ σ.unop ≫ b = (τ.unop ≫ σ.unop) ≫ b := by simp
-    generalize (eq_lhs% this) = x at *; cases this
-    simp [← Functor.map_comp, ← op_comp]
-    congr 2
+    rw! [show τ.unop ≫ σ.unop ≫ b = (τ.unop ≫ σ.unop) ≫ b by simp]
+    simp only [← Category.assoc]
+    congr 1
     ext <;> simp
 
 @[simps]
