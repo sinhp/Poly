@@ -126,8 +126,8 @@ abbrev k := pullback.snd P.o Q.i
 
 abbrev m := pullback.fst P.p (h P Q)
 
-/-- `w` is obtained by applying `pushforwardg` to `k`. -/
-abbrev w :=  v Q.p (k P Q)  --(functor Q.p).obj (Over.mk <| k P Q)
+/-- `w` is obtained by applying `pushforward g` to `k`. -/
+abbrev w := v Q.p (k P Q)  --(functor Q.p).obj (Over.mk <| k P Q)
 
 abbrev r := pullback.snd P.p (h P Q)
 
@@ -152,92 +152,107 @@ def comp (P : MvPoly I J) (Q : MvPoly J K) : MvPoly I K where
   exp := ExponentiableMorphism.comp (P.p' Q) (P.q Q)
   o := (w P Q) ≫ Q.o
 
+/-- Δ h ⋙ Σ k ≅ Σ t ⋙ Δ Q.i -/
 def first_BCh_iso (hA'_pb : IsPullback (P.k Q) (P.h Q) Q.i P.o) :
     Over.pullback (P.h Q) ⋙ Over.map (P.k Q) ≅ Over.map P.o ⋙ Over.pullback Q.i := by
   letI := pullbackBeckChevalleySquare_of_isPullback_isIso hA'_pb
   apply asIso (pullbackBeckChevalleySquare (P.h Q) (P.k Q) Q.i P.o hA'_pb.toCommSq)
 
-def BCiii (hpb : IsPullback (r P Q) (P.m Q) (P.h Q) P.p) :
-    Over.map P.p ⋙ Over.pullback (P.h Q) ≅ Over.pullback (P.m Q) ⋙ Over.map (r P Q) := by {
-  letI := pullbackBeckChevalleySquare_of_isPullback_isIso hpb
-  apply (asIso (pullbackBeckChevalleySquare (P.m Q) (P.r Q) (P.h Q) P.p _)).symm}
+/-- Π r ⋙ Σ ε ≅ Σ n ⋙ Π p' -/
+def BCiv (hpb : IsPullback (P.n Q) (p' P Q) (r P Q) (P.ε Q)) :
+  pushforward (r P Q) ⋙ Over.pullback (P.ε Q) ≅
+  Over.pullback (P.n Q) ⋙ pushforward (p' P Q) := by
+    letI := (pushforwardBeckChevalleySquare_of_isPullback_isIso hpb)
+    let f := (pushforwardBeckChevalleySquare (P.p' Q) (P.n Q) (r P Q) (P.ε Q) hpb.toCommSq)
+    exact asIso f
 
+/-- Π P.p ⋙ Δ h ≅ Δ m ⋙ Π r -/
+def BCiii (hpb : IsPullback (P.m Q) (P.r Q) (P.p) (P.h Q)) :
+  pushforward P.p ⋙ Over.pullback (P.h Q) ≅
+  Over.pullback (P.m Q) ⋙ pushforward (P.r Q) := by
+  letI := (pushforwardBeckChevalleySquare_of_isPullback_isIso hpb)
+  let f := (pushforwardBeckChevalleySquare (P.r Q) (P.m Q) (P.p) (P.h Q) hpb.toCommSq)
+  exact asIso f
+
+/-- Σ v Π g (∆ u Σ t) Π P.p ∆ s ≅ = Σ v Π g (Σ k ∆ h) Π P.p ∆ s -/
 def first_step_BCh_iso (hA' : IsPullback (P.k Q) (P.h Q) Q.i P.o) :
+  Over.pullback P.i ⋙ pushforward P.p ⋙ (Over.pullback (P.h Q) ⋙
+  Over.map (P.k Q)) ⋙ pushforward Q.p ⋙ Over.map Q.o ≅
   Over.pullback P.i ⋙ pushforward P.p ⋙
-    (Over.map P.o ⋙ Over.pullback Q.i) ⋙ pushforward Q.p ⋙ Over.map Q.o ≅
-    Over.pullback P.i ⋙ pushforward P.p ⋙ (Over.pullback (P.h Q) ⋙
-    Over.map (P.k Q)) ⋙ pushforward Q.p ⋙ Over.map Q.o  := by {
+  (Over.map P.o ⋙ Over.pullback Q.i) ⋙ pushforward Q.p ⋙ Over.map Q.o := by
   apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ <| _
-  exact (first_BCh_iso P Q hA').symm}
+  exact (first_BCh_iso P Q hA')
 
+/--Σv (Σw Πq) ∆ε ∆h Πf ∆s ≅ Σv (Πg Σk) ∆h Πf ∆s -/
 def half_of_3rd_step_distrib_law (hpb : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
     Over.pullback P.i ⋙ (pushforward P.p ⋙ Over.pullback (P.h Q)) ⋙
     (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o ≅
     Over.pullback P.i ⋙ (Over.pullback (P.m Q) ⋙ pushforward (r P Q)) ⋙
-    (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o := by {
+    (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o := by
   apply isoWhiskerLeft _ <| isoWhiskerRight _ <| _
-  sorry
-  --exact P.BCiii Q hpb.flip
-  }
+  exact BCiii P Q hpb
 
-def BCiv (hpb : IsPullback (P.n Q) (p' P Q) (r P Q) (P.ε Q)) :
-    pushforward (r P Q) ⋙ Over.pullback (P.ε Q) ≅
-    Over.pullback (P.n Q) ⋙ pushforward (p' P Q) := by {
-    letI := (pushforwardBeckChevalleySquare_of_isPullback_isIso hpb)
-    let f := (pushforwardBeckChevalleySquare (P.p' Q) (P.n Q) (r P Q) (P.ε Q) hpb.toCommSq)
-    exact asIso f}
-
-def second_half__distrib_law
-    (hpb' : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q)) :
+def second_half__distrib_law (hpb' : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q)) :
   Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ (pushforward (r P Q) ⋙ Over.pullback (P.ε Q))
   ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o ≅
   Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ (Over.pullback (P.n Q) ⋙ pushforward (p' P Q))
-  ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o := by {
-  apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ _; exact BCiv P Q hpb'}
+  ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o := by
+  apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ _; exact BCiv P Q hpb'
 
-#check pentagonIso
--- def second_step_distrib_law :
---     Over.pullback P.i ⋙ pushforward P.p ⋙ Over.pullback (P.h Q) ⋙
---     (Over.map (P.k Q) ⋙ pushforward Q.p) ⋙ Over.map Q.o ≅
---     Over.pullback P.i ⋙ pushforward P.p ⋙ Over.pullback (P.h Q) ⋙
---     (Over.pullback (e P Q) ⋙ pushforward Q.p) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o := by {
---       sorry
---    --apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ <| _
---    --exact pentagonIso Q.p (P.k Q)
---     }
+def pentagon : Over.pullback P.i ⋙ pushforward P.p ⋙ Over.pullback (P.h Q) ⋙
+(Over.map (P.k Q) ⋙ pushforward Q.p) ⋙ Over.map Q.o ≅
+  Over.pullback P.i ⋙ pushforward P.p ⋙ Over.pullback (P.h Q) ⋙
+  (Over.pullback (e Q.p (P.k Q)) ⋙ pushforward (g Q.p (P.k Q)) ⋙
+   Over.map (v Q.p (P.k Q))) ⋙ Over.map Q.o := by
+    apply isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerLeft _ <| isoWhiskerRight _ <| _
+    have := pentagonIso Q.p (P.k Q)
+    -- (instExponentiableMorphism Q.p) ≠ what the pentagon infers
+    --exact this
+    --wrong instance of ExponentiableMorphism
+    sorry
 
 def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by {
   unfold MvPoly.functor
-  apply Iso.trans (first_step_BCh_iso P Q ((IsPullback.of_hasPullback P.o Q.i).flip))
+  apply Iso.trans (first_step_BCh_iso P Q ((IsPullback.of_hasPullback P.o Q.i).flip)).symm
+  apply Iso.trans (pentagon P Q)
+  apply Iso.trans (half_of_3rd_step_distrib_law P Q
+    (IsPullback.of_hasPullback P.p (pullback.fst P.o Q.i)))
+  apply Iso.trans (second_half__distrib_law P Q (IsPullback.of_hasPullback _ _))
+  have hdelta2 : Over.pullback ((P.n Q ≫ P.m Q) ≫ P.i) ≅
+  Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q) := by
+    apply Iso.trans (pullbackComp ((P.n Q) ≫ (P.m Q)) P.i)
+    apply isoWhiskerLeft
+    exact pullbackComp (P.n Q) (P.m Q)
+  unfold comp
+  simp only [const_obj_obj]
+  have iso1 : (Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q))
+   ⋙ (pushforward (P.p' Q) ⋙ pushforward (P.q Q)) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o ≅
+    (Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q))
+   ⋙ pushforward (P.p' Q ≫ P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o := by
+    apply isoWhiskerLeft;
+    apply isoWhiskerRight
+    apply Iso.symm
+    have := pushforwardCompIso (P.p' Q) (P.q Q)
+    sorry
+    --(instExponentiableMorphism (P.p' Q ≫ P.q Q)) ≠
+   --(ExponentiableMorphism.comp (P.p' Q) (P.q Q))
+    --exact this
+  apply Iso.trans iso1
+  have iso2 : (Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q))
+  ⋙ pushforward (P.p' Q ≫ P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o ≅
+      Over.pullback ((P.n Q ≫ P.m Q) ≫ P.i) ⋙ pushforward (P.p' Q ≫ P.q Q)
+      ⋙ Over.map (P.w Q) ⋙ Over.map Q.o := isoWhiskerRight hdelta2.symm
+    ((pushforward (P.p' Q ≫ P.q Q)) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o)
+  apply Iso.trans iso2
+  simp only [assoc]
+  apply isoWhiskerLeft
+  --wrong instance of ExponentiableMorphism
+  --(instExponentiableMorphism (P.p' Q ≫ P.q Q)) ≠
+   --(ExponentiableMorphism.comp (P.p' Q) (P.q Q))
   sorry
-  --apply Iso.trans (second_step_distrib_law P Q)
-  -- apply Iso.trans (half_of_3rd_step_distrib_law P Q
-  --   (IsPullback.of_hasPullback P.f (pullback.fst P.o Q.i)))
-  -- apply Iso.trans (second_half__distrib_law P Q (IsPullback.of_hasPullback _ _))
-  -- --pseudo-functoriality
-  -- have hdelta2 : Over.pullback ((P.n Q ≫ P.m Q) ≫ P.i) ≅
-  -- Over.pullback P.i ⋙ Over.pullback P.m Q ⋙ Over.pullback P.n Q := by {
-  --   apply Iso.trans (pullbackComp ((P.n Q) ≫ (P.m Q)) P.i)
-  --   apply isoWhiskerLeft
-  --   exact pullbackComp (P.n Q) (P.m Q)}
-  -- unfold comp
-  -- simp only [const_obj_obj]
-  -- have iso1 : (Over.pullback P.i ⋙ Over.pullback P.m Q ⋙ Over.pullback P.n Q)
-  --  ⋙ (pushforward P.p' Q ⋙ pushforward P.q Q) ⋙ Over.map (P.w Q).hom ⋙ Over.map Q.o ≅
-  --   (Over.pullback P.i ⋙ Over.pullback P.m Q ⋙ Over.pullback P.n Q)
-  --  ⋙ pushforward (P.p' Q ≫ P.q Q) ⋙ Over.map (P.w Q).hom ⋙ Over.map Q.o := by
-  --   apply isoWhiskerRight; exact Iso.refl _
-  -- apply Iso.trans iso1
-  -- have iso2 : (Over.pullback P.i ⋙ Over.pullback P.m Q ⋙ Over.pullback P.n Q)
-  -- ⋙ pushforward (P.p' Q ≫ P.q Q) ⋙ Over.map (P.w Q).hom ⋙ Over.map Q.o ≅
-  --     Over.pullback ((P.n Q ≫ P.m Q) ≫ P.i) ⋙ pushforward (P.p' Q ≫ P.q Q)
-  --     ⋙ Over.map (P.w Q).hom ⋙ Over.map Q.o :=
-  --   isoWhiskerRight hdelta2.symm ((pushforward (P.p' Q ≫ P.q Q)) ⋙ Over.map (P.w Q).hom ⋙ Over.map Q.o)
-  -- apply Iso.trans iso2
   --simp only [assoc]
-  -- apply isoWhiskerLeft
-  -- apply isoWhiskerLeft
-  -- apply mapCompIso
+  --apply isoWhiskerLeft
+  --apply mapCompIso
   }
 
 end Composition
