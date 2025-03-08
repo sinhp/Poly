@@ -249,7 +249,7 @@ theorem pullback.map_isIso_of_pullback_right_of_comm_cube {W X Y Z S T : C}
       (sq_left := sq_left) (pb_back := (IsPullback.of_hasPullback f₁ f₂).flip)
       (pb_front := (IsPullback.of_hasPullback g₁ g₂).flip)
       (pb_right := pb_right)
-  have is_iso : IsIso m := sorry --IsPullback.isIso_fst_of_isIso pb'
+  have is_iso : IsIso m := sorry -- IsPullback.isIso_fst_of_isIso pb'
   exact is_iso
 
 end IsPullback
@@ -295,7 +295,7 @@ instance pullbackBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g 
   exact ReflectsIsomorphisms.reflects (forget Z)
     ((pullbackBeckChevalleySquare f h g k pb.toCommSq).app A)
 
-/-- The pushforward Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
+/-- The functor Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
 instance pushforwardBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g k)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
     IsIso (pushforwardBeckChevalleySquare f h g k pb.toCommSq) := by

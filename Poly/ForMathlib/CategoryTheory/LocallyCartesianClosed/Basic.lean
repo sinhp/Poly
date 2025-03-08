@@ -71,13 +71,15 @@ attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
 has a right adjoint. -/
 class ExponentiableMorphism [HasPullbacks C] {I J : C} (f : I ⟶ J) where
   /-- The pushforward functor -/
-  pushforward : Over I ⥤ Over J
+  functor : Over I ⥤ Over J
   /-- The pushforward functor is right adjoint to the pullback functor -/
-  adj : pullback f ⊣ pushforward := by infer_instance
+  adj : pullback f ⊣ functor := by infer_instance
 
 namespace ExponentiableMorphism
 
 variable [HasPullbacks C]
+
+abbrev pushforward {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] := functor f
 
 instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
     ExponentiableMorphism (Over.mk f).hom := by
@@ -87,27 +89,33 @@ instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
 /-- The identity morphisms `𝟙` are exponentiable. -/
 @[simps]
 instance id {I : C} : ExponentiableMorphism (𝟙 I) where
-  pushforward := 𝟭 (Over I)
+  functor := 𝟭 (Over I)
   adj := ofNatIsoLeft (F:= 𝟭 _) Adjunction.id (pullbackId).symm
 
 /-- The conjugate iso between the pushforward of the identity and the identity of the
 pushforward. -/
-def pushfowardIdIso {I : C} : (id : ExponentiableMorphism (𝟙 I)).pushforward ≅ 𝟭 (Over I) :=
+def pushfowardIdIso {I : C} : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
   conjugateIsoEquiv Adjunction.id id.adj pullbackId
 
 /-- The composition of exponentiable morphisms is exponentiable. -/
 def comp {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
-  [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-  ExponentiableMorphism (f ≫ g) where
-  pushforward := (pushforward f) ⋙ (pushforward g)
+    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    ExponentiableMorphism (f ≫ g) where
+  functor := (pushforward f) ⋙ (pushforward g)
   adj := ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackComp f g).symm
 
 /-- The conjugate isomorphism between pushforward of the composition and the composition of
 pushforward functors. -/
-def pushforwardCompIso {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
-  [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-  (comp f g).pushforward ≅ fexp.pushforward ⋙ gexp.pushforward  :=
+def pushforwardCompIso' {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
+    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    (comp f g).functor ≅ fexp.functor ⋙ gexp.functor  :=
   conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackComp f g)
+
+def pushforwardCompIso {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
+    [ExponentiableMorphism f] [ExponentiableMorphism g] :
+    let _ := comp f g
+    pushforward (f ≫ g) ≅ pushforward f ⋙ pushforward g :=
+  pushforwardCompIso' f g
 
 /-- A morphism with a pushforward is an exponentiable object in the slice category. -/
 def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
@@ -124,7 +132,7 @@ def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
 morphism `X.hom`. -/
 def ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Exponentiable X] :
     ExponentiableMorphism X.hom where
-  pushforward := X.iteratedSliceEquiv.inverse ⋙ sections X
+  functor := X.iteratedSliceEquiv.inverse ⋙ sections X
   adj := by
     refine ofNatIsoLeft (Adjunction.comp ?_ ?_) (starIteratedSliceForwardIsoPullback X.hom)
     · exact starSectionsAdj X
@@ -145,21 +153,9 @@ open Over ExponentiableMorphism
 
 variable {C} [HasFiniteWidePullbacks C] [HasPushforwards C]
 
-/-- The pushforward functor along a morphism `f : I ⟶ J` in a category `C` with pushforwards. -/
-def pushforward {I J : C} (f : I ⟶ J) :
-    Over I ⥤ Over J :=
-  (exponentiable f).pushforward
-
-/-- `Pi X Y` is the dependent product of `Y` along `X` in the slice category `Over I`. This
-is analogous to the dependent function type `Π x : X, Y x` in type theory. See `Over.Sigma`
-and `Over.Reindex` for related constructions. -/
-abbrev Pi {I : C} (X : Over I) (Y : Over X.left) : Over I :=
-  (pushforward X.hom).obj Y
-
 /-- In a category where pushforwards exists along all morphisms, every slice category `Over I` is
 cartesian closed. -/
-instance cartesianClosedOver
-    [HasFiniteWidePullbacks C] [HasPushforwards C] (I : C) :
+instance cartesianClosedOver (I : C) :
     CartesianClosed (Over I) where
   closed X := @exponentiableOverMk _ _ _ _ _ _ X.hom (HasPushforwards.exponentiable X.hom)
 
@@ -222,7 +218,7 @@ class LocallyCartesianClosed [HasFiniteWidePullbacks C] extends
 
 namespace LocallyCartesianClosed
 
-open Over Sigma Reindex HasPushforwards
+open Over Sigma Reindex ExponentiableMorphism HasPushforwards
 
 variable {C} [HasFiniteWidePullbacks C]
 
@@ -236,6 +232,22 @@ instance mkOfCartesianClosedOver [Π (I : C), CartesianClosed (Over I)] :
   LocallyCartesianClosed C where
 
 variable [LocallyCartesianClosed C]
+
+/-- Every morphism in a locally cartesian closed category is exponentiable. -/
+instance {I J : C} (f : I ⟶ J) : ExponentiableMorphism f := HasPushforwards.exponentiable f
+
+/-- `Pi X Y` is the dependent product of `Y` along `X`. This is analogous to the dependent function
+type `Π x : X, Y x` in type theory. See `Over.Sigma` and `Over.Reindex` for related constructions.
+-/
+abbrev Pi {I : C} (X : Over I) (Y : Over X.left) : Over I :=
+  (pushforward X.hom).obj Y
+
+/-- `Pi'` is a variant of `Pi` which takes as input morphisms and outputs morphisms. -/
+abbrev Pi' {I X Y : C} (f : X ⟶ I) (u : Y ⟶ X) : (Pi (Over.mk f) (Over.mk u)).left ⟶ I :=
+  Comma.hom <| Pi (Over.mk f) (Over.mk u)
+
+theorem Pi'_def {I X Y : C} (f : X ⟶ I) (u : Y ⟶ X) :
+  Pi' f u = ((pushforward f).obj (Over.mk u)).hom := rfl
 
 /-- The dependent evaluation natural transformation as the counit of the adjunction. -/
 abbrev ev {X I : C} (f : X ⟶ I) : pushforward f ⋙ Over.pullback f ⟶ 𝟭 _ :=
