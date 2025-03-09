@@ -5,6 +5,7 @@ Authors: Sina Hazratpour, Emily Riehl
 -/
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
 /-!
 # Pentagon distributivity
 
@@ -53,13 +54,10 @@ namespace ExponentiableMorphism
 /-- The pullback of exponentiable morphisms is exponentiable. -/
 def pullback {I J K : C} (f : I ⟶ J) (g : K ⟶ J)
     [gexp : ExponentiableMorphism g] :
-    ExponentiableMorphism (pullback.fst f g ) where
-  functor := sorry
-  adj := sorry
+    ExponentiableMorphism (pullback.fst f g ) :=
+  sorry
 
 end ExponentiableMorphism
-
-
 
 def w := pullback.snd (v f u) f
 

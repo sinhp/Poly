@@ -173,12 +173,6 @@ theorem sections_uncurry_curry {X : Over I} {A : C} {u : (star I).obj A ⟶ X} :
   ext
   simp
 
--- from Over.Basic
-lemma Over.homMk_comp {X : C} {U V W : Over X} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left)
-    (w_f w_g) : Over.homMk (f ≫ g) (by aesop) = Over.homMk f w_f ≫ Over.homMk g w_g := by
-   ext
-   simp
-
 /-- An auxiliary definition which is used to define the adjunction between the star functor
 and the sections functor. See starSectionsAdjunction`. -/
 def coreHomEquiv : CoreHomEquiv (star I) (sections I) where
@@ -192,7 +186,7 @@ def coreHomEquiv : CoreHomEquiv (star I) (sections I) where
     intro A' A X g v
     dsimp [sectionsCurry, sectionsUncurry, curryId]
     simp only [star_map]
-    rw [← Over.homMk_comp]
+    rw [← Over.homMk_comp]  -- note: in a newer version of mathlib this is `Over.homMk_eta`
     congr 1
     simp [CartesianClosed.uncurry_natural_left]
   homEquiv_naturality_right := by
