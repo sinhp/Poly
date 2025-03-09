@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour, Emily Riehl
 -/
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Sections
+import Mathlib.CategoryTheory.MorphismProperty.Composition
 
 /-!
 # Locally cartesian closed categories
@@ -98,7 +99,8 @@ def pushfowardIdIso {I : C} : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
   Iso.symm <| conjugateIsoEquiv Adjunction.id (id.adj) pullbackId
 
 /-- The composition of exponentiable morphisms is exponentiable. -/
-def comp {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
+@[simps]
+instance comp {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
     ExponentiableMorphism (f ≫ g) :=
   ⟨pushforward f ⋙ pushforward g, ⟨ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackComp f g).symm⟩⟩
@@ -110,6 +112,10 @@ def pushforwardCompIso {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
     let _ := comp f g
     pushforward (f ≫ g) ≅ pushforward f ⋙ pushforward g :=
   Iso.symm <| conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackComp f g)
+
+instance isMultiplicative : (ExponentiableMorphism (C:= C)).IsMultiplicative where
+  id_mem _ := by infer_instance
+  comp_mem f g fexp gexp := by infer_instance
 
 /-- A morphism with a pushforward is an exponentiable object in the slice category. -/
 def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
@@ -125,12 +131,11 @@ def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
 /-- An exponentibale object `X` in the slice category `Over I` gives rise to an exponentiable
 morphism `X.hom`. -/
 def ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Exponentiable X] :
-    ExponentiableMorphism X.hom where
-  functor := X.iteratedSliceEquiv.inverse ⋙ sections X
-  adj := by
+    ExponentiableMorphism X.hom :=
+  ⟨X.iteratedSliceEquiv.inverse ⋙ sections X, ⟨by
     refine ofNatIsoLeft (Adjunction.comp ?_ ?_) (starIteratedSliceForwardIsoPullback X.hom)
     · exact starSectionsAdj X
-    · apply (Over.mk X.hom).iteratedSliceEquiv.toAdjunction
+    · apply (Over.mk X.hom).iteratedSliceEquiv.toAdjunction⟩⟩
 
 end ExponentiableMorphism
 
