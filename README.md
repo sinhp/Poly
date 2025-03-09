@@ -2,40 +2,52 @@
 
 # Lean4 Formalization Of Polynomial Functors
 
-This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions. 
+This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions.
 
-## Acknowledgment 
-The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn. 
+## Acknowledgment
+The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn.
 
 ## Content (under development)
 
-As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
+As part of this formalization, we also formalize locally cartesian closed categories in Lean4.
 
 - [x] Locally cartesian closed categories
   - [x] The Beck-Chevalley condition in LCCC
+  - [x] LCCC structure on types
   - [x] LCCC structure on presheaves of types
 
-- [ ] Univariate and Multivariate Polynomial functors in Locally Cartesian Closed Categories
-  - [x] Definition of univariate and multivariate polynomials 
-  - [x] The construction of associated polynomial functors for univariate and multivariate polynomials
-  - [x] Monomials 
+- [ ] Univariate Polynomial Functors
+  - [x] Definition of univariate polynomial functors
+  - [x] The construction of associated polynomial functors
+  - [x] Monomials
   - [x] Linear polynomials
   - [x] Sums of polynomials
-  - [x] Products of polynomials
+  - [ ] Products of polynomials
   - [x] Composition of polynomials
   - [x] The classifying property of polynomial functors
-  - [x] The category `C [X]` of univariate polynomial functors
-  - [x] The category of multivariate polynomial functors
+  - [x] The monoidal category `C [X]` of univariate polynomial functors
   - [ ] The bicategory of polynomial functors
   - [ ] Cartesian closedness of a category of polynomial functors
- 
+
+- [ ] Multivariate Polynomial Functors
+  - [x] Definition of multivariate polynomial functors
+  - [x] The construction of associated polynomial functors
+  - [x] Monomials
+  - [x] Linear polynomials
+  - [ ] Sums of polynomials
+  - [ ] Products of polynomials
+  - [ ] Composition of polynomials
+  - [ ] The classifying property of polynomial functors
+  - [ ] The bicategory of multivariate polynomial functors
+  - [ ] The double category of polynomial functors
+
 - [ ] Polynomial functors and the semantics of linear logic
-    - [ ] A relational presentation of polynomial functors. 
-    - [ ] The differential calculus of polynomials
+  - [ ] A relational presentation of polynomial functors
+  - [ ] The differential calculus of polynomials
 
 - [ ] Polynomial functors and generalized combinatorial species
-  
-### Resources 
+
+### Resources
 
 # Main references used in the formalization
 
@@ -72,8 +84,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 > Steve Awodey, Natural models of homotopy type theory, Mathematical Structures in Computer Science, 28 2 (2016) 241-286, arXiv:1406.3219.
 
 > Sean K. Moss and Tamara von Glehn. Dialectica models of type theory, LICS 2018.
-    
+
 > Thorsten Altenkirch, Neil Ghani, Peter Hancock, Conor McBride, Peter Morris. Indexed containers. Journal of Functional Programming 25, 2015.
 
 > Jakob Vidmar (2018): Polynomial functors and W-types for groupoids. Ph.D. thesis, University of Leeds.
-
