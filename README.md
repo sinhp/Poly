@@ -1,10 +1,15 @@
-[Proofs Verified with Lean4 (leanprover/lean4:v4.8.0-rc1)](https://github.com/sinhp/LeanHomotopyFrobenius/blob/master/lean-toolchain)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-lightblue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Documentation](https://img.shields.io/badge/Documentation-Passing-green)](https://sinhp.github.io/groupoid_model_in_lean4/docs/Poly/UvPoly.html)
+[![Paper](https://img.shields.io/badge/Paper-WIP-blue)](https://sinhp.github.io/groupoid_model_in_lean4/blueprint/sect0005.html)
+
+[Proofs Verified with Lean4 (leanprover/lean4:v4.18.0-rc1)](https://github.com/sinhp/LeanHomotopyFrobenius/blob/master/lean-toolchain)
 
 # Lean4 Formalization Of Polynomial Functors
 
 This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions.
 
 ## Acknowledgment
+
 The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn.
 
 ## Content (under development)
@@ -34,12 +39,16 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [x] The construction of associated polynomial functors
   - [x] Monomials
   - [x] Linear polynomials
+  - [ ] Symmetric polynomials
   - [ ] Sums of polynomials
   - [ ] Products of polynomials
   - [ ] Composition of polynomials
   - [ ] The classifying property of polynomial functors
   - [ ] The bicategory of multivariate polynomial functors
   - [ ] The double category of polynomial functors
+  - [ ] Differentiation
+
+- [ ] Induction, Well-foundedtrees, Transfinite Induction
 
 - [ ] Polynomial functors and the semantics of linear logic
   - [ ] A relational presentation of polynomial functors
