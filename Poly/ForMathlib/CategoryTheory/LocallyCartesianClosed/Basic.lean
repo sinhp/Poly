@@ -83,6 +83,11 @@ abbrev pushforward {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] :=
 def adj {I J : C} {f : I ⟶ J} (fexp : ExponentiableMorphism f) :=
   Adjunction.ofIsLeftAdjoint (Over.pullback f)
 
+/-- The dependent evaluation natural transformation as the counit of the adjunction. -/
+abbrev ev {I J : C} (f : I ⟶ J) [fexp : ExponentiableMorphism f] :
+    pushforward f ⋙ Over.pullback f ⟶ 𝟭 _ :=
+  fexp.adj.counit
+
 instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
     ExponentiableMorphism (Over.mk f).hom := by
   dsimp
@@ -247,10 +252,6 @@ abbrev Pi' {I X Y : C} (f : X ⟶ I) (u : Y ⟶ X) : (Pi (Over.mk f) (Over.mk u)
 
 theorem Pi'_def {I X Y : C} (f : X ⟶ I) (u : Y ⟶ X) :
   Pi' f u = ((pushforward f).obj (Over.mk u)).hom := rfl
-
-/-- The dependent evaluation natural transformation as the counit of the adjunction. -/
-abbrev ev {X I : C} (f : X ⟶ I) : pushforward f ⋙ Over.pullback f ⟶ 𝟭 _ :=
-(exponentiable f).adj.counit
 
 /-- The dependent evaluation morphisms. -/
 abbrev ev' {I : C} (X : Over I) (Y : Over X.left) : Reindex X (Pi X Y) ⟶ Y :=

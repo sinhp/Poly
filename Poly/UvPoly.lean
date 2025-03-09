@@ -75,8 +75,16 @@ lemma map_fstProj {X Y : C} (P : UvPoly E B) (f : X ⟶ Y) :
     P.functor.map f ≫ P.fstProj Y = P.fstProj X := by
   simp [fstProj, functor]
 
-/-- The natural transformation `Q.functor ⟶ P.functor ` induced by a triangle `ρ : P.p ⟶ Q.p`
-is obtained by pasting the following 2-cells
+/-- A vertical map `ρ : P.p ⟶ Q.p` of polynomials (i.e. a commutative triangle)
+```
+    ρ
+E ----> F
+ \     /
+  \   /
+   \ /
+    B
+```
+induces a natural transformation `Q.functor ⟶ P.functor ` obtained by pasting the following 2-cells
 ```
               Q.p
 C --- >  C/F ----> C/B -----> C
@@ -96,6 +104,22 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
   simpa using (cellLeftMidPasted ≫ₕ (vId (forget B)))
 
+/-- A cartesian map of polynomials
+```
+           P.p
+      E -------->  B
+      |            |
+   φ  |            | δ
+      v            v
+      F -------->  D
+           Q.p
+```
+induces a natural transformation between their associated functors. -/
+def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
+    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
+    P.functor ⟶ Q.functor := by
+  sorry
+
 variable (B)
 
 /-- The identity polynomial functor in single variable. -/
@@ -103,9 +127,7 @@ variable (B)
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
 /-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
-def id_apply (X : C) : (id B) @ X ≅ B ⨯ X where
-  hom := 𝟙 (B ⨯ X)
-  inv := 𝟙 (B ⨯ X)
+def id_apply (X : C) : (id B) @ X ≅ B ⨯ X := sorry
 
 variable {B}
 
@@ -240,23 +262,21 @@ namespace genericPullback
 def fst (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ P @ X :=
   pullback.fst (P.fstProj X) P.p
 
-def ev (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ X := by
-  let ε :=
-
+def ε (P : UvPoly E B) (X : C) : genericPullback P X ⟶ E ⨯ X :=
+  ((ExponentiableMorphism.ev P.p).app ((Over.star E).obj X)).left
 
 -- u₂ previously
-def ev (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ X :=
-  have : P.fstProj X = (P.polyPair <| 𝟙 <| P.functor.obj X).fst :=
-    by simp [polyPair]
-  (pullback.congrHom this rfl).hom ≫ (P.polyPair <| 𝟙 <| P.functor.obj X).snd
+def ev (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ X := (ε P X) ≫ prod.snd
 
 /-- The second component of `polyPair` is a comparison map of pullbacks composed with `genPb.u₂`. -/
-theorem genPb.polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
+theorem polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
     (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.fstProj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫
-                          u₂ P X := by
-  simp only [polyPair, u₂, homEquiv_counit, comp_left, ← assoc]
+                          ev P X := by
+  simp only [polyPair, ev, homEquiv_counit, comp_left, ← assoc]
   congr 2
-  aesop_cat
+  sorry --aesop_cat
+
+end genericPullback
 
 /-- Universal property of the polynomial functor. -/
 @[simps]
@@ -270,7 +290,7 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
   right_inv := by
     intro ⟨b, e⟩
     dsimp [polyPair, pairPoly]
-    have := Over.forgetAdjStar.homEquiv (X := (pullback P.p).obj (Over.mk b)) (f := e)
+    have := Over.forgetAdjStar.homEquiv (X := (Over.pullback P.p).obj (Over.mk b)) (f := e)
     simp at this
     rw [this]
     set pairHat := P.exp.adj.homEquiv _ _ _
@@ -331,41 +351,22 @@ lemma equiv_naturality_right {Γ X Y : C}
       cases h
       simp
     · dsimp only [polyPair, g]
-      rw [homMk_comp (f_comp := by simp [fstProj, functor]) (g_comp := by simp [functor])]
-      simp only [UvPoly.functor, Functor.comp_map, forget_map, left_homMk,
+      rw [homMk_comp (w_f := by simp [fstProj, functor]) (w_g := by simp [functor])]
+      simp only [UvPoly.functor, Functor.comp_map, forget_map, homMk_eta,
         homEquiv_naturality_right_symm, comp_left, assoc]
-      rw [show ((pullback E).map f).left ≫ prod.snd = prod.snd ≫ f by simp]
-      simp only [← assoc]
-      congr 2
-      simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
-        pullback_obj_left, mk_left, mk_hom, pullback_map_left, Over.homMk_left,
-        pullback.congrHom_hom, ← assoc]
-      congr 1
-      ext <;> simp
-
-def foo [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (Over.map P.poly.p) ⋙ (Over.map f.b) ≅ (Over.map f.e) ⋙ (Over.map Q.poly.p) :=
-  mapSquareIso _ _ _ _ (f.is_pullback.w)
-
-def bar [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (pullback f.e) ⋙ (Σ_ P.poly.p) ≅ (Σ_ Q.poly.p) ⋙ (pullback f.b) := by
-  set l := pullbackBeckChevalleyNatTrans P.poly.p f.b f.e Q.poly.p (f.is_pullback.w)
-  have : IsIso l :=
-    (pullbackBeckChevalleyNatTrans_of_IsPullback_is_iso P.poly.p f.b f.e Q.poly.p f.is_pullback)
-  exact asIso l
-
-def bar' [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    (pullback P.poly.p) ⋙ (Σ_ f.e) ≅ (Σ_ f.b) ⋙ (pullback Q.poly.p) := by
-  sorry
-
-/-- A map of polynomials induces a natural transformation between their associated functors. -/
-def naturality [HasBinaryProducts C] {P Q : UvPoly.Total C} (f : P ⟶ Q) :
-    P.poly.functor ⟶ Q.poly.functor := by
-  sorry
+      admit
+      --rw [show ((Over.pullback E).map f).left ≫ prod.snd = prod.snd ≫ f by simp]
+      -- simp only [← assoc]
+      -- congr 2
+      -- simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
+      --   pullback_obj_left, mk_left, mk_hom, pullback_map_left, Over.homMk_left,
+      --   pullback.congrHom_hom, ← assoc]
+      -- congr 1
+      -- ext <;> simp
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
-  pullback Q.p (genPb.u₂ P A)
+  pullback Q.p (genericPullback.ev P A)
 
 /-- The codomain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compCod {E B D A : C} (P : UvPoly E B) (_ : UvPoly D A) :=
@@ -375,7 +376,7 @@ def compCod {E B D A : C} (P : UvPoly E B) (_ : UvPoly D A) :=
 def comp [HasPullbacks C] [HasTerminal C]
     {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (compCod P Q) :=
    {
-     p :=  (pullback.snd Q.p (genPb.u₂ P A)) ≫ (genPb.fst P A)
+     p :=  (pullback.snd Q.p (genericPullback.ev P A)) ≫ (genericPullback.fst P A)
      exp := by sorry
    }
 
