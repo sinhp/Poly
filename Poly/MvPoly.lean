@@ -12,6 +12,8 @@ import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Distributivity
 
+import Poly.UvPoly
+
 /-!
 # Polynomial Functor
 
@@ -243,5 +245,33 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by {
 end Composition
 
 end MvPoly
+
+namespace UvPoly
+
+/-Note (SH): Alternatively, we can define the functor associated to a single variable polynomial in
+terms of `MvPoly.functor` and then reduce the proofs of statements about single variable polynomials
+to the multivariable case using the equivalence between `Over (⊤_ C)` and `C`.-/
+def toMvPoly (P : UvPoly E B) : MvPoly (⊤_ C) (⊤_ C) :=
+  ⟨E, B, terminal.from E, P.p, P.exp, terminal.from B⟩
+
+/-- The projection morphism from `∑ b : B, X ^ (E b)` to `B`. -/
+def proj' (P : UvPoly E B) (X : Over (⊤_ C)) :
+  ((Π_ P.p).obj ((Over.pullback (terminal.from E)).obj X)).left ⟶ B :=
+  ((Over.pullback (terminal.from _) ⋙ (Π_ P.p)).obj X).hom
+
+def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.functor P.toMvPoly
+
+/-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`.
+Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
+def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙ P.auxFunctor ⋙ equivOverTerminal.inverse
+
+def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by
+  unfold functor' auxFunctor functor MvPoly.functor toMvPoly
+  simp
+  sorry
+
+end UvPoly
+
+
 
 end
