@@ -210,10 +210,10 @@ polynomial `P`. -/
 @[simps!]
 def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total C) :
     S • P ≅ Total.of ((const S).prod P.poly) where
-      hom := sorry
-      inv := sorry
-      hom_inv_id := sorry
-      inv_hom_id := sorry
+  hom := sorry
+  inv := sorry
+  hom_inv_id := sorry
+  inv_hom_id := sorry
 
 variable {E B : C}
 
