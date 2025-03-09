@@ -69,18 +69,17 @@ attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
 
 /-- A morphism `f : I ⟶ J` is exponentiable if the pullback functor `Over J ⥤ Over I`
 has a right adjoint. -/
-abbrev ExponentiableMorphism [HasPullbacks C] : MorphismProperty C :=
-  fun _ _ f ↦ IsLeftAdjoint (Over.pullback f)
+class ExponentiableMorphism [HasPullbacks C] {I J : C} (f : I ⟶ J) where
+  /-- The pushforward functor -/
+  functor : Over I ⥤ Over J
+  /-- The pushforward functor is right adjoint to the pullback functor -/
+  adj : pullback f ⊣ functor := by infer_instance
 
 namespace ExponentiableMorphism
 
 variable [HasPullbacks C]
 
-abbrev pushforward {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] :=
-  rightAdjoint (Over.pullback f)
-
-def adj {I J : C} {f : I ⟶ J} (fexp : ExponentiableMorphism f) :=
-  Adjunction.ofIsLeftAdjoint (Over.pullback f)
+abbrev pushforward {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] := functor f
 
 instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
     ExponentiableMorphism (Over.mk f).hom := by
@@ -89,13 +88,14 @@ instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
 
 /-- The identity morphisms `𝟙` are exponentiable. -/
 @[simps]
-instance id {I : C} : ExponentiableMorphism (𝟙 I) :=
-  ⟨𝟭 _, ⟨ofNatIsoLeft (F:= 𝟭 _) Adjunction.id (pullbackId).symm⟩⟩
+instance id {I : C} : ExponentiableMorphism (𝟙 I) where
+  functor := 𝟭 (Over I)
+  adj := ofNatIsoLeft (F:= 𝟭 _) Adjunction.id (pullbackId).symm
 
 /-- The conjugate iso between the pushforward of the identity and the identity of the
 pushforward. -/
 def pushfowardIdIso {I : C} : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
-  Iso.symm <| conjugateIsoEquiv Adjunction.id (id.adj) pullbackId
+  conjugateIsoEquiv Adjunction.id id.adj pullbackId
 
 /-- The composition of exponentiable morphisms is exponentiable. -/
 def comp {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
