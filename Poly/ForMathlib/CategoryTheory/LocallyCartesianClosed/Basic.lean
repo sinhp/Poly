@@ -100,32 +100,26 @@ def pushfowardIdIso {I : C} : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
 /-- The composition of exponentiable morphisms is exponentiable. -/
 def comp {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-    ExponentiableMorphism (f ≫ g) where
-  functor := (pushforward f) ⋙ (pushforward g)
-  adj := ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackComp f g).symm
+    ExponentiableMorphism (f ≫ g) :=
+  ⟨pushforward f ⋙ pushforward g, ⟨ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackComp f g).symm⟩⟩
 
 /-- The conjugate isomorphism between pushforward of the composition and the composition of
 pushforward functors. -/
-def pushforwardCompIso' {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
-    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-    (comp f g).functor ≅ fexp.functor ⋙ gexp.functor  :=
-  conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackComp f g)
-
 def pushforwardCompIso {I J K : C} (f : I ⟶ J) (g : J ⟶ K)
-    [ExponentiableMorphism f] [ExponentiableMorphism g] :
+    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
     let _ := comp f g
     pushforward (f ≫ g) ≅ pushforward f ⋙ pushforward g :=
-  pushforwardCompIso' f g
+  Iso.symm <| conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackComp f g)
 
 /-- A morphism with a pushforward is an exponentiable object in the slice category. -/
 def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
-    [ExponentiableMorphism f] :
+    [fexp : ExponentiableMorphism f] :
     Exponentiable (Over.mk f) where
   rightAdj := pullback f ⋙ pushforward f
   adj := by
     apply ofNatIsoLeft _ _
     · exact Over.pullback f ⋙ Over.map f
-    · exact Adjunction.comp ExponentiableMorphism.adj (Over.mapPullbackAdj _)
+    · exact Adjunction.comp fexp.adj (Over.mapPullbackAdj _)
     · exact sigmaReindexNatIsoTensorLeft (Over.mk f)
 
 /-- An exponentibale object `X` in the slice category `Over I` gives rise to an exponentiable
