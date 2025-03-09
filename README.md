@@ -58,7 +58,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 
 ### Resources
 
-# Main references used in the formalization
+#### Main references used in the formalization
 
 > - [Wellfounded Trees and Dependent Polynomial Functors, Nicola Gambino⋆ and Martin Hyland](https://www.dpmms.cam.ac.uk/~martin/Research/Publications/2004/gh04.pdf)
 > - [Tutorial on Polynomial Functors and Type Theory, Steve Awodey](https://www.cmu.edu/dietrich/philosophy/hott/slides/polytutorial.pdf)
@@ -66,7 +66,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 > - [Notes on Locally Cartesian Closed Categories, Sina Hazratpour](https://sinhp.github.io/files/CT/notes_on_lcccs.pdf)
 > - [Notes on Polynomial Functors, Joachim Kock](https://mat.uab.cat/~kock/cat/polynomial.pdf)
 
-## Additional references on polynomial functors
+#### Additional references on polynomial functors
 
 > Nicola Gambino, Martin Hyland. Wellfounded trees and dependent polynomial functors.  Types for proofs and programs. International workshop, TYPES 2003, Torino, Italy, 2003. Revised selected papers. Springer Berlin, 2004. p. 210-225.
 
