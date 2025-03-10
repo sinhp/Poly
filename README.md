@@ -1,43 +1,64 @@
-[Proofs Verified with Lean4 (leanprover/lean4:v4.8.0-rc1)](https://github.com/sinhp/LeanHomotopyFrobenius/blob/master/lean-toolchain)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-lightblue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Documentation](https://img.shields.io/badge/Documentation-Passing-green)](https://sinhp.github.io/groupoid_model_in_lean4/docs/Poly/UvPoly.html)
+[![Paper](https://img.shields.io/badge/Paper-WIP-blue)](https://sinhp.github.io/groupoid_model_in_lean4/blueprint/sect0005.html)
+
+[Proofs Verified with Lean4 (leanprover/lean4:v4.18.0-rc1)](https://github.com/sinhp/LeanHomotopyFrobenius/blob/master/lean-toolchain)
 
 # Lean4 Formalization Of Polynomial Functors
 
-This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions. 
+This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions.
 
-## Acknowledgment 
-The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn. 
+## Acknowledgment
+
+The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn.
 
 ## Content (under development)
 
-As part of this formalization, we also formalize locally cartesian closed categories in Lean4. 
+As part of this formalization, we also formalize locally cartesian closed categories in Lean4.
 
 - [x] Locally cartesian closed categories
   - [x] The Beck-Chevalley condition in LCCC
+  - [x] LCCC structure on types
   - [x] LCCC structure on presheaves of types
 
-- [ ] Univariate and Multivariate Polynomial functors in Locally Cartesian Closed Categories
-  - [x] Definition of univariate and multivariate polynomials 
-  - [x] The construction of associated polynomial functors for univariate and multivariate polynomials
-  - [x] Monomials 
+- [ ] Univariate Polynomial Functors
+  - [x] Definition of univariate polynomial functors
+  - [x] The construction of associated polynomial functors
+  - [x] Monomials
   - [x] Linear polynomials
   - [x] Sums of polynomials
-  - [x] Products of polynomials
+  - [ ] Products of polynomials
   - [x] Composition of polynomials
   - [x] The classifying property of polynomial functors
-  - [x] The category `C [X]` of univariate polynomial functors
-  - [x] The category of multivariate polynomial functors
+  - [x] The monoidal category `C [X]` of univariate polynomial functors
   - [ ] The bicategory of polynomial functors
   - [ ] Cartesian closedness of a category of polynomial functors
- 
+
+- [ ] Multivariate Polynomial Functors
+  - [x] Definition of multivariate polynomial functors
+  - [x] The construction of associated polynomial functors
+  - [x] Monomials
+  - [x] Linear polynomials
+  - [ ] Symmetric polynomials
+  - [ ] Sums of polynomials
+  - [ ] Products of polynomials
+  - [ ] Composition of polynomials
+  - [ ] The classifying property of polynomial functors
+  - [ ] The bicategory of multivariate polynomial functors
+  - [ ] The double category of polynomial functors
+  - [ ] Differentiation
+
+- [ ] Induction, Well-foundedtrees, Transfinite Induction
+
 - [ ] Polynomial functors and the semantics of linear logic
-    - [ ] A relational presentation of polynomial functors. 
-    - [ ] The differential calculus of polynomials
+  - [ ] A relational presentation of polynomial functors
+  - [ ] The differential calculus of polynomials
 
 - [ ] Polynomial functors and generalized combinatorial species
-  
-### Resources 
 
-# Main references used in the formalization
+### Resources
+
+#### Main references used in the formalization
 
 > - [Wellfounded Trees and Dependent Polynomial Functors, Nicola Gambino⋆ and Martin Hyland](https://www.dpmms.cam.ac.uk/~martin/Research/Publications/2004/gh04.pdf)
 > - [Tutorial on Polynomial Functors and Type Theory, Steve Awodey](https://www.cmu.edu/dietrich/philosophy/hott/slides/polytutorial.pdf)
@@ -45,7 +66,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 > - [Notes on Locally Cartesian Closed Categories, Sina Hazratpour](https://sinhp.github.io/files/CT/notes_on_lcccs.pdf)
 > - [Notes on Polynomial Functors, Joachim Kock](https://mat.uab.cat/~kock/cat/polynomial.pdf)
 
-## Additional references on polynomial functors
+#### Additional references on polynomial functors
 
 > Nicola Gambino, Martin Hyland. Wellfounded trees and dependent polynomial functors.  Types for proofs and programs. International workshop, TYPES 2003, Torino, Italy, 2003. Revised selected papers. Springer Berlin, 2004. p. 210-225.
 
@@ -72,8 +93,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
 > Steve Awodey, Natural models of homotopy type theory, Mathematical Structures in Computer Science, 28 2 (2016) 241-286, arXiv:1406.3219.
 
 > Sean K. Moss and Tamara von Glehn. Dialectica models of type theory, LICS 2018.
-    
+
 > Thorsten Altenkirch, Neil Ghani, Peter Hancock, Conor McBride, Peter Morris. Indexed containers. Journal of Functional Programming 25, 2015.
 
 > Jakob Vidmar (2018): Polynomial functors and W-types for groupoids. Ph.D. thesis, University of Leeds.
-
