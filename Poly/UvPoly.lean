@@ -143,7 +143,6 @@ C --- >  C/E ---->  C/B ----> C
 def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
     (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
     P.functor ⟶ Q.functor := by
-  unfold functor
   have sq : CommSq φ P.p Q.p δ := pb.toCommSq.flip
   let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
     (Over.starPullbackIsoStar φ).inv
