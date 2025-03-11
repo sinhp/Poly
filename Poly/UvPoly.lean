@@ -112,7 +112,6 @@ C --- >  C/E ---->  C/B ----> C
 -/
 def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h : P.p = ρ ≫ Q.p) :
     Q.functor ⟶ P.functor := by
-  unfold functor
   have sq : CommSq ρ P.p Q.p (𝟙 _) := by simp [h]
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
   let cellMid := (pushforwardBeckChevalleySquare ρ P.p Q.p (𝟙 _) sq)
@@ -129,11 +128,30 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
       F -------->  D
            Q.p
 ```
-induces a natural transformation between their associated functors. -/
+induces a natural transformation between their associated functors obtained by pasting the following
+2-cells
+```
+              Q.p
+C --- >  C/F ----> C/D -----> C
+|         |          |        |
+|   ↗     | φ*  ≅    | δ* ↗   |
+|         v          v        |
+C --- >  C/E ---->  C/B ----> C
+              P.p
+```
+-/
 def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
     (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
     P.functor ⟶ Q.functor := by
-  sorry
+  unfold functor
+  have sq : CommSq φ P.p Q.p δ := pb.toCommSq.flip
+  let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
+    (Over.starPullbackIsoStar φ).inv
+  let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
+    (pushforwardBeckChevalleySquareIso pb.flip).inv
+  let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
+    pullbackForgetBeckChevalleySquare δ
+  simpa using cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram

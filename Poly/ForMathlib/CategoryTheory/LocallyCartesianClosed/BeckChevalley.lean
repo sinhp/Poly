@@ -104,11 +104,15 @@ Special case of the Beck-Chevalley natural transformation above:
           Over Y --.forget Y -> C
 ```
 -/
-def pullbackForgetBeckChevalleyTriangle :
-    pullback f ⋙ forget X ⟶ forget Y := by
+def pullbackForgetBeckChevalleySquare :
+    pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C := by
   let iso := (mapForget f).inv
   rw [← Functor.comp_id (forget X)] at iso
   exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+
+def pullbackForgetBeckChevalleyTriangle :
+    pullback f ⋙ forget X ⟶ forget Y :=
+  pullbackForgetBeckChevalleySquare f
 
 def pullbackMapBeckChevalleyTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
     pullback f ⋙ map h ⟶ map h' := by
@@ -310,12 +314,25 @@ instance pullbackBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g 
   exact ReflectsIsomorphisms.reflects (forget Z)
     ((pullbackBeckChevalleySquare h f g k pb.toCommSq).app A)
 
+/-- The pullback-map exchange isomorphism. -/
+def pullbackBeckChevalleySquareIso (pb : IsPullback h f g k) :
+    pullback f ⋙ map h ≅ Over.map k ⋙ Over.pullback g := by
+  refine @asIso _ _ _ _ (pullbackBeckChevalleySquare h f g k pb.toCommSq) ?_
+  exact pullbackBeckChevalleySquare_of_isPullback_isIso pb
+
 /-- The functor Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
 instance pushforwardBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g k)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
     IsIso (pushforwardBeckChevalleySquare h f g k pb.toCommSq) := by
   have := pullbackBeckChevalleySquare_of_isPullback_isIso pb
   apply conjugateEquiv_iso
+
+/-- The pullback-pushforward exchange isomorphism. -/
+def pushforwardBeckChevalleySquareIso (pb : IsPullback h f g k)
+    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    pushforward g ⋙ pullback k ≅ pullback h ⋙ pushforward f := by
+  refine @asIso _ _ _ _ (pushforwardBeckChevalleySquare h f g k pb.toCommSq) ?_
+  exact pushforwardBeckChevalleySquare_of_isPullback_isIso pb
 
 end BeckChevalleyComponents
 
