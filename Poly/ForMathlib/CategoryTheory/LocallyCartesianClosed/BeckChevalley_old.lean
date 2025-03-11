@@ -16,6 +16,7 @@ repeated applications of the mate construction in the vertical and horizontal di
 
 - `Over.mapSquareIso`: The isomorphism between the functors `Over.map h ⋙ Over.map g` and
   `Over.map f ⋙ Over.map k` for a commutative square of morphisms `h ≫ g = f ≫ k`.
+
 - `Over.pullbackBeckChevalleySquare`: The Beck-Chevalley natural transformation for a commutative
   square of morphisms `h ≫ g = f ≫ k` in the slice category `Over Y`.
 - `Over.pullbackBeckChevalleyTriangle`: The Beck-Chevalley natural transformation for the identity
@@ -71,7 +72,7 @@ theorem map_square_eq {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y} {g : Z ⟶ W} {k
 ```
 The Beck Chevalley transformations are iterated mates of this isomorphism in the
 horizontal and vertical directions. -/
-def mapSquareIso {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
+def mapIsoSquare {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
     (sq : CommSq h f g k := by aesop) :
     Over.map h ⋙ Over.map g ≅ Over.map f ⋙ Over.map k :=
   eqToIso (map_square_eq sq)
@@ -92,7 +93,7 @@ variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
 -/
 def pullbackBeckChevalleySquare :
     pullback f ⋙ map h ⟶ map k ⋙ pullback g :=
-  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapSquareIso sq).hom
+  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
 
 /--
 Special case of the Beck-Chevalley natural transformation above:
@@ -133,7 +134,7 @@ conjugate of the `mapSquareIso`.
 -/
 def pullbackSquareIso : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h :=
   conjugateIsoEquiv ((mapPullbackAdj f).comp (mapPullbackAdj k))
-  ((mapPullbackAdj h).comp (mapPullbackAdj g)) (mapSquareIso sq)
+  ((mapPullbackAdj h).comp (mapPullbackAdj g)) (mapIsoSquare sq)
 
 /-- The Beck-Chevalley natural transformations in a square of pullbacks and pushforwards.
 ```
@@ -289,7 +290,7 @@ theorem pullbackBeckChevalleySquare_app :
     (pullbackBeckChevalleySquare h f g k sq).app A =
     Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
   ext
-  simp only [homMk_left, pullbackBeckChevalleySquare, mapSquareIso]
+  simp only [homMk_left, pullbackBeckChevalleySquare, mapIsoSquare]
   aesop
 
 theorem forget_map_pullbackBeckChevalleySquare :

@@ -14,16 +14,20 @@ repeated applications of the mate construction in the vertical and horizontal di
 
 ## Main declarations
 
-- `Over.mapSquareIso`: The isomorphism between the functors `Over.map h ⋙ Over.map g` and
+- `Over.mapIsoSquare`: The isomorphism between the functors `Over.map h ⋙ Over.map g` and
   `Over.map f ⋙ Over.map k` for a commutative square of morphisms `h ≫ g = f ≫ k`.
-- `Over.pullbackMapTwoSquare`: The Beck-Chevalley natural transformation for a commutative
-  square of morphisms `h ≫ g = f ≫ k` in the slice category `Over Y`.
-- `Over.pullbackBeckChevalleyTriangle`: The Beck-Chevalley natural transformation for the identity
-  morphism `f : X ⟶ Y` in the slice category `Over Y`.
-- `Over.pullbackSquareIso`: The isomorphism between the pullbacks along a commutative square of
+
+- `Over.pullbackMapTwoSquare`: The Beck-Chevalley natural transformation of a commutative
+  square of morphisms `h ≫ g = f ≫ k`.
+
+- `Over.pullbackForgetTriangle`: The natural transformation `pullback f ⋙ forget X ⟶ forget Y`.
+
+- `Over.pullbackIsoSquare`: The isomorphism between the pullbacks along a commutative square of
   morphisms `h ≫ g = f ≫ k`.
+
 - `Over.pushforwardBeckChevalleySquare`: The Beck-Chevalley natural transformation for a commutative
   square of morphisms `h ≫ g = f ≫ k` in the slice category `Over Y`.
+
 - `Over.pushforwardSquareIso`: The isomorphism between the pushforwards along a commutative
   square of morphisms `h ≫ g = f ≫ k`.
 
@@ -71,7 +75,7 @@ theorem map_square_eq {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y} {g : Z ⟶ W} {k
 ```
 The Beck Chevalley transformations are iterated mates of this isomorphism in the
 horizontal and vertical directions. -/
-def mapSquareIso {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
+def mapIsoSquare {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
     (sq : CommSq h f g k := by aesop) :
     Over.map h ⋙ Over.map g ≅ Over.map f ⋙ Over.map k :=
   eqToIso (map_square_eq sq)
@@ -82,7 +86,7 @@ variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
 (sq : CommSq h f g k)
 
 /-- The Beck-Chevalley natural transformation `pullback f ⋙ map h ⟶ map k ⋙ pullback g`
-constructed as a mate of `mapSquareIso`:
+constructed as a mate of `mapIsoSquare`:
 ```
           Over X -- .map h -> Over Z
              ↑                  ↑
@@ -93,7 +97,7 @@ constructed as a mate of `mapSquareIso`:
 -/
 --pullbackBeckChevalleySquare
 def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :=
-  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapSquareIso sq).hom
+  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
 
 /--
 The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as the mate the isomorphism
@@ -129,7 +133,7 @@ def pullbackMapTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
   exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
 
 /-- The isomorphism between the pullbacks along a commutative square.  This is constructed as the
-conjugate of the `mapSquareIso`.
+conjugate of the `mapIsoSquare`.
 ```
           Over X ←--.pullback h-- Over Z
              ↑                       ↑
@@ -141,7 +145,7 @@ conjugate of the `mapSquareIso`.
 --pullbackSquareIso
 def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h :=
   conjugateIsoEquiv ((mapPullbackAdj f).comp (mapPullbackAdj k))
-  ((mapPullbackAdj h).comp (mapPullbackAdj g)) (mapSquareIso sq)
+  ((mapPullbackAdj h).comp (mapPullbackAdj g)) (mapIsoSquare sq)
 
 /-- The Beck-Chevalley natural transformation
 `pushforward g ⋙ pullback k ⟶ pullback h ⋙ pushforward f` constructed as a mate of
@@ -301,7 +305,7 @@ theorem pullbackMapTwoSquare_app :
     (pullbackMapTwoSquare h f g k sq).app A =
     Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
   ext
-  simp only [homMk_left, pullbackMapTwoSquare, mapSquareIso]
+  simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare]
   aesop
 
 theorem forget_map_pullbackMapTwoSquare :
