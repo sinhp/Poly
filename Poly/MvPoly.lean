@@ -12,7 +12,7 @@ import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Distributivity
 
-import Poly.UvPoly
+-- import Poly.UvPoly
 
 /-!
 # Polynomial Functor
@@ -60,12 +60,8 @@ example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
         sorry
 
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
-instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) where
-  functor := {
-    obj := sorry
-    map := sorry
-  }
-  adj := sorry
+instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) := sorry
+
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
@@ -81,10 +77,7 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
-  exp := {
-    functor := sorry  -- prove that the sum of exponentiables is exponentiable.
-    adj := sorry
-  }
+  exp := sorry
   o := coprod.desc P.o Q.o
 
 /-- The product of two polynomials in many variables. -/
@@ -142,6 +135,8 @@ abbrev p' := pullback.snd (r P Q) (ε P Q)
 
 -- N P Q  ⟶ B' P Q
 abbrev n := pullback.fst (r P Q) (ε P Q)
+
+#exit
 
 open LocallyCartesianClosed
 

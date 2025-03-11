@@ -100,7 +100,7 @@ instance id {I : C} : ExponentiableMorphism (𝟙 I) :=
 
 /-- The conjugate iso between the pushforward of the identity and the identity of the
 pushforward. -/
-def pushfowardIdIso {I : C} : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
+def pushforwardIdIso (I : C) : pushforward (𝟙 I) ≅ 𝟭 (Over I) :=
   Iso.symm <| conjugateIsoEquiv Adjunction.id (id.adj) pullbackId
 
 /-- The composition of exponentiable morphisms is exponentiable. -/

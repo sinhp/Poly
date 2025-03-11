@@ -66,6 +66,21 @@ def apply (P : UvPoly E B) : C → C := (P.functor).obj
 @[inherit_doc]
 infix:90 " @ " => UvPoly.apply
 
+variable (B)
+
+/-- The identity polynomial functor in single variable. -/
+@[simps!]
+def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
+
+/-- The functor associated to the identity polynomial is isomorphic to the identity functor. -/
+def idIso : (UvPoly.id B).functor ≅ star B ⋙ forget B :=
+  isoWhiskerRight (isoWhiskerLeft _ (pushforwardIdIso B)) (forget B)
+
+/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
+def idApplyIso (X : C) : (id B) @ X ≅ B ⨯ X := sorry
+
+variable {B}
+
 /-- The fstProjection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
 def fstProj (P : UvPoly E B) (X : C) : P @ X ⟶ B :=
   ((Over.star E ⋙ pushforward P.p).obj X).hom
@@ -119,17 +134,6 @@ def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : U
     (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
     P.functor ⟶ Q.functor := by
   sorry
-
-variable (B)
-
-/-- The identity polynomial functor in single variable. -/
-@[simps!]
-def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
-
-/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
-def id_apply (X : C) : (id B) @ X ≅ B ⨯ X := sorry
-
-variable {B}
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram
