@@ -15,7 +15,7 @@ import Mathlib.Tactic.ApplyFun
 import Mathlib.CategoryTheory.Limits.Shapes.BinaryProducts
 
 -- import Poly.Basic -- some isos in here
-import Poly.TempMates
+-- import Poly.TempMates
 
 /-!
 # Expontentiable morphisms in a category

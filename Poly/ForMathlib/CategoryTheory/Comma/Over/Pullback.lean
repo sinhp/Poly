@@ -16,7 +16,7 @@ universe v₁ v₂ u₁ u₂
 
 namespace CategoryTheory
 
-open Category Limits Comonad
+open Category Limits Comonad MonoidalCategory
 
 variable {C : Type u₁} [Category.{v₁} C]
 
@@ -187,8 +187,9 @@ def equivOverTerminal [HasTerminal C] : Over (⊤_ C) ≌ C :=
 
 namespace Over
 
-variable {C}
+open MonoidalCategory
 
+variable {C}
 
 lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
     (star X).map f = Over.homMk (prod.map (𝟙 X) f) (by aesop) := by
@@ -196,12 +197,30 @@ lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
 
 variable (X : C)
 
-
 /-- Note that the binary products assumption is necessary: the existence of a right adjoint to
 `Over.forget X` is equivalent to the existence of each binary product `X ⨯ -`.
 -/
 instance [HasBinaryProducts C] : (forget X).IsLeftAdjoint  :=
   ⟨_, ⟨forgetAdjStar X⟩⟩
+
+attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
+attribute [local instance] monoidalOfChosenFiniteProducts
+
+lemma whiskerLeftProdMapId [HasFiniteLimits C] {X : C} {A A' : C} {g : A ⟶ A'} :
+    X ◁ g = prod.map (𝟙 X) g := by
+  ext
+  · simp only [ChosenFiniteProducts.whiskerLeft_fst]
+    exact (Category.comp_id _).symm.trans (prod.map_fst (𝟙 X) g).symm
+  · simp only [ChosenFiniteProducts.whiskerLeft_snd]
+    exact (prod.map_snd (𝟙 X) g).symm
+
+def starForgetIsoTensorLeft [HasFiniteLimits C] :
+    (Over.star X ⋙ forget X) ≅ tensorLeft X := by
+  fapply NatIso.ofComponents
+  · intro Z
+    exact Iso.refl _
+  · intro Z Z' f
+    simp [whiskerLeftProdMapId]
 
 namespace forgetAdjStar
 

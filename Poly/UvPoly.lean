@@ -66,6 +66,21 @@ def apply (P : UvPoly E B) : C → C := (P.functor).obj
 @[inherit_doc]
 infix:90 " @ " => UvPoly.apply
 
+variable (B)
+
+/-- The identity polynomial functor in single variable. -/
+@[simps!]
+def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
+
+/-- The functor associated to the identity polynomial is isomorphic to the identity functor. -/
+def idIso : (UvPoly.id B).functor ≅ star B ⋙ forget B :=
+  isoWhiskerRight (isoWhiskerLeft _ (pushforwardIdIso B)) (forget B)
+
+/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
+def idApplyIso (X : C) : (id B) @ X ≅ B ⨯ X := sorry
+
+variable {B}
+
 /-- The fstProjection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
 def fstProj (P : UvPoly E B) (X : C) : P @ X ⟶ B :=
   ((Over.star E ⋙ pushforward P.p).obj X).hom
@@ -97,10 +112,9 @@ C --- >  C/E ---->  C/B ----> C
 -/
 def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h : P.p = ρ ≫ Q.p) :
     Q.functor ⟶ P.functor := by
-  unfold functor
   have sq : CommSq ρ P.p Q.p (𝟙 _) := by simp [h]
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
-  let cellMid := (pushforwardBeckChevalleySquare ρ P.p Q.p (𝟙 _) sq)
+  let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
   simpa using (cellLeftMidPasted ≫ₕ (vId (forget B)))
 
@@ -114,22 +128,29 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
       F -------->  D
            Q.p
 ```
-induces a natural transformation between their associated functors. -/
+induces a natural transformation between their associated functors obtained by pasting the following
+2-cells
+```
+              Q.p
+C --- >  C/F ----> C/D -----> C
+|         |          |        |
+|   ↗     | φ*  ≅    | δ* ↗   |
+|         v          v        |
+C --- >  C/E ---->  C/B ----> C
+              P.p
+```
+-/
 def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
     (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
     P.functor ⟶ Q.functor := by
-  sorry
-
-variable (B)
-
-/-- The identity polynomial functor in single variable. -/
-@[simps!]
-def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
-
-/-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
-def id_apply (X : C) : (id B) @ X ≅ B ⨯ X := sorry
-
-variable {B}
+  have sq : CommSq φ P.p Q.p δ := pb.toCommSq.flip
+  let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
+    (Over.starPullbackIsoStar φ).inv
+  let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
+    (pushforwardPullbackIsoSquare pb.flip).inv
+  let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
+    pullbackForgetTwoSquare δ
+  simpa using cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram
@@ -172,10 +193,12 @@ end Hom
 /-- Bundling up the the polynomials over different bases to form the underlying type of the
 category of polynomials. -/
 structure Total (C : Type*) [Category C] [HasPullbacks C] where
-  (E B : C)
+  {E B : C}
   (poly : UvPoly E B)
 
-def Total.of (P : UvPoly E B) : Total C := ⟨E, B, P⟩
+#check Total.mk
+
+def Total.of (P : UvPoly E B) : Total C := Total.mk P
 
 end UvPoly
 
@@ -386,7 +409,21 @@ def compFunctorIso [HasPullbacks C] [HasTerminal C]
     P.functor ⋙ Q.functor ≅ (comp P Q).functor := by
   sorry
 
+instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.Total C) where
+  tensorObj X Y := ⟨comp X.poly Y.poly⟩
+  whiskerLeft X Y₁ Y₂ := sorry
+  whiskerRight := sorry
+  tensorUnit := sorry
+  associator := sorry
+  leftUnitor := sorry
+  rightUnitor := sorry
+
 end UvPoly
+
+
+
+
+
 
 end CategoryTheory
 
