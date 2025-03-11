@@ -1,19 +1,12 @@
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
-import Mathlib.CategoryTheory.Comma.Over
+import Mathlib.CategoryTheory.Comma.Over.Basic
 
 /-! Miscellaneous results that don't fit anywhere else. -/
 
 namespace CategoryTheory
 
 variable {𝒞 𝒟 : Type*} [Category 𝒞] [Category 𝒟]
-
-/-! ## Pullbacks -/
-
-@[simp]
-lemma Limits.pullback.lift_fst_snd {X Y Z : 𝒞} {f : X ⟶ Z} {g : Y ⟶ Z} [HasPullback f g] (eq) :
-    pullback.lift (pullback.fst f g) (pullback.snd f g) eq = 𝟙 (pullback f g) := by
-  ext <;> simp
 
 /-! ## `eqToHom` -/
 
@@ -56,42 +49,27 @@ lemma Over.eqToHom_eq_homMk {E B : 𝒞} (f g : E ⟶ B) (eq : f = g)  :
 
 namespace Over
 
+/-- A variant of `homMk_comp` that can trigger in `simp`. -/
 @[simp]
-lemma homMk_comp {X Y Z W : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_comp) :
+lemma homMk_comp' {X Y Z W : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_comp) :
     homMk (U := mk (f ≫ g ≫ h)) (f ≫ g) fgh_comp =
     homMk f ≫ homMk (U := mk (g ≫ h)) (V := mk h) g :=
   rfl
 
 @[simp]
-lemma homMk_comp_assoc {X Y Z W : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_comp) :
+lemma homMk_comp'_assoc {X Y Z W : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_comp) :
     homMk (U := mk ((f ≫ g) ≫ h)) (f ≫ g) fgh_comp =
     homMk f ≫ homMk (U := mk (g ≫ h)) (V := mk h) g :=
-  rfl
-
-/-- This is useful when `homMk (· ≫ ·)` appears under `Functor.map` or a natural equivalence. -/
-lemma homMk_comp' {B : 𝒞} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left)
-    (fg_comp f_comp g_comp) :
-    homMk (f ≫ g) fg_comp = homMk (V := V) f f_comp ≫ homMk (U := V) g g_comp :=
-  rfl
-
-@[simp]
-lemma left_homMk {B : 𝒞} {U V : Over B} (f : U ⟶ V) (h) : homMk f.left h = f :=
   rfl
 
 @[simp]
 lemma homMk_id {B : 𝒞} (U : Over B) (h) : homMk (𝟙 U.left) h = 𝟙 U :=
   rfl
 
+/-- A variant of `homMk_id` that `simp` can use when `X ≢ U.left` syntactically. -/
 @[simp]
--- `homMk_id` does not trigger if `X ≢ U.left` syntactically
 lemma homMk_id' {B : 𝒞} (f : X ⟶ B) (h) : homMk (𝟙 X) h = 𝟙 (mk f) :=
   rfl
-
--- -- Probably bad as a simp lemma?
--- lemma homMk_id' {E B : 𝒞} {f g : E ⟶ B} (h) :
---     homMk (U := Over.mk f) (V := Over.mk g) (𝟙 E) h =
---       (Over.isoMk (Iso.refl E) (by simpa using h)).hom := by
---   ext; simp
 
 end Over
 end CategoryTheory
