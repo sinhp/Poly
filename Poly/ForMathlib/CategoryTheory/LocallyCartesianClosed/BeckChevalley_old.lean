@@ -16,7 +16,7 @@ repeated applications of the mate construction in the vertical and horizontal di
 
 - `Over.mapSquareIso`: The isomorphism between the functors `Over.map h ⋙ Over.map g` and
   `Over.map f ⋙ Over.map k` for a commutative square of morphisms `h ≫ g = f ≫ k`.
-- `Over.pullbackMapTwoSquare`: The Beck-Chevalley natural transformation for a commutative
+- `Over.pullbackBeckChevalleySquare`: The Beck-Chevalley natural transformation for a commutative
   square of morphisms `h ≫ g = f ≫ k` in the slice category `Over Y`.
 - `Over.pullbackBeckChevalleyTriangle`: The Beck-Chevalley natural transformation for the identity
   morphism `f : X ⟶ Y` in the slice category `Over Y`.
@@ -81,8 +81,7 @@ variable [HasBinaryProducts C] [HasPullbacks C]
 variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
 (sq : CommSq h f g k)
 
-/-- The Beck-Chevalley natural transformation `pullback f ⋙ map h ⟶ map k ⋙ pullback g`
-constructed as a mate of `mapSquareIso`:
+/-- The Beck-Chevalley natural transformation constructed as a mate of `mapSquareIso`:
 ```
           Over X -- .map h -> Over Z
              ↑                  ↑
@@ -91,13 +90,12 @@ constructed as a mate of `mapSquareIso`:
           Over Y -- .map k -> Over W
 ```
 -/
---pullbackBeckChevalleySquare
-def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :=
+def pullbackBeckChevalleySquare :
+    pullback f ⋙ map h ⟶ map k ⋙ pullback g :=
   mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapSquareIso sq).hom
 
 /--
-The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as the mate the isomorphism
-`mapForget f`:
+Special case of the Beck-Chevalley natural transformation above:
 ```
           Over X --.forget X -> C
              ↑                  |
@@ -106,22 +104,17 @@ The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as 
           Over Y --.forget Y -> C
 ```
 -/
---pullbackForgetBeckChevalleySquare
-def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) := by
+def pullbackForgetBeckChevalleySquare :
+    pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C := by
   let iso := (mapForget f).inv
   rw [← Functor.comp_id (forget X)] at iso
   exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
 
-/-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
-`pullbackForgetTwoSquare`. -/
---pullbackForgetBeckChevalleyTriangle
-def pullbackForgetTriangle :
+def pullbackForgetBeckChevalleyTriangle :
     pullback f ⋙ forget X ⟶ forget Y :=
-  pullbackForgetTwoSquare f
+  pullbackForgetBeckChevalleySquare f
 
-/-- The natural transformation `pullback f ⋙ map h ⟶ map h'` for a triangle `f : h ⟶ h'`. -/
---pullbackMapBeckChevalleyTriangle
-def pullbackMapTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
+def pullbackMapBeckChevalleyTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
     pullback f ⋙ map h ⟶ map h' := by
   let iso := (mapComp f h').hom
   rw [w] at iso
@@ -138,14 +131,11 @@ conjugate of the `mapSquareIso`.
           Over Y ←--.pullback k-- Over W
 ```
 -/
---pullbackSquareIso
-def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h :=
+def pullbackSquareIso : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h :=
   conjugateIsoEquiv ((mapPullbackAdj f).comp (mapPullbackAdj k))
   ((mapPullbackAdj h).comp (mapPullbackAdj g)) (mapSquareIso sq)
 
-/-- The Beck-Chevalley natural transformation
-`pushforward g ⋙ pullback k ⟶ pullback h ⋙ pushforward f` constructed as a mate of
-`pullbackMapTwoSquare`.
+/-- The Beck-Chevalley natural transformations in a square of pullbacks and pushforwards.
 ```
               Over X ←-.pullback h-- Over Z
                 |                     |
@@ -154,18 +144,16 @@ def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h 
               Over Y ←-.pullback k-- Over W
 ```
 -/
---pushforwardBeckChevalleySquare
-def pushforwardPullbackTwoSquare
+def pushforwardBeckChevalleySquare
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-    TwoSquare (pushforward g) (pullback h) (pullback k) (pushforward f) :=
+    pushforward g ⋙ pullback k ⟶ pullback h ⋙ pushforward f :=
   conjugateEquiv ((mapPullbackAdj k).comp gexp.adj) (fexp.adj.comp (mapPullbackAdj h))
-    (pullbackMapTwoSquare h f g k sq)
+    (pullbackBeckChevalleySquare h f g k sq)
 
 /--
-A variant of `pushforwardTwoSquare` involving `star` instead of `pullback`.
+A variant of `pushforwardBeckChevalleySquare` involving `star` instead of `pullback`.
 -/
---pushforwardStarBeckChevalleySquare
-def starPushforwardTriangle
+def pushforwardStarBeckChevalleySquare
     [fexp : ExponentiableMorphism f]  :
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
@@ -181,10 +169,10 @@ def starPushforwardTriangle
             Over Y --.pushforward k -→ Over W
 ```
 -/
-def pushforwardIsoSquare [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g]
+def pushforwardSquareIso [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g]
     [hexp : ExponentiableMorphism h] [kexp : ExponentiableMorphism k] :
     pushforward h ⋙ pushforward g ≅ pushforward f ⋙ pushforward k :=
-  conjugateIsoEquiv (gexp.adj.comp hexp.adj) (kexp.adj.comp fexp.adj) (pullbackIsoSquare h f g k sq)
+  conjugateIsoEquiv (gexp.adj.comp hexp.adj) (kexp.adj.comp fexp.adj) (pullbackSquareIso h f g k sq)
 
 end BeckChevalleyTrans
 
@@ -297,54 +285,54 @@ theorem mapPullbackAdj.counit_app_left  :
   simp only [mapPullbackAdj_counit_app, homMk_left]
 
 @[simp]
-theorem pullbackMapTwoSquare_app :
-    (pullbackMapTwoSquare h f g k sq).app A =
+theorem pullbackBeckChevalleySquare_app :
+    (pullbackBeckChevalleySquare h f g k sq).app A =
     Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
   ext
-  simp only [homMk_left, pullbackMapTwoSquare, mapSquareIso]
+  simp only [homMk_left, pullbackBeckChevalleySquare, mapSquareIso]
   aesop
 
-theorem forget_map_pullbackMapTwoSquare :
-    (forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =
+theorem forget_map_pullbackBeckChevalleySquare :
+    (forget Z).map ((pullbackBeckChevalleySquare h f g k sq).app A) =
     pullback.map _ _ _ _ (𝟙 _) h k (id_comp _).symm sq.w.symm := by
-  simp only [forget_map, pullbackMapTwoSquare_app, homMk_left]
+  simp only [forget_map, pullbackBeckChevalleySquare_app, homMk_left]
 
-theorem isIso_forgetMappullbackMapTwoSquare_of_isPullback (pb : IsPullback h f g k) :
-    IsIso ((forget Z).map ((pullbackMapTwoSquare h f g k pb.toCommSq).app A)) := by
-  rw [forget_map_pullbackMapTwoSquare (sq:= pb.toCommSq)]
+theorem isIso_forgetMapPullbackBeckChevalleySquare_of_isPullback (pb : IsPullback h f g k) :
+    IsIso ((forget Z).map ((pullbackBeckChevalleySquare h f g k pb.toCommSq).app A)) := by
+  rw [forget_map_pullbackBeckChevalleySquare (sq:= pb.toCommSq)]
   let paste_horiz_pb := paste_horiz (IsPullback.of_hasPullback f A.hom) pb
   apply pullback.map_isIso_of_pullback_right_of_comm_cube
   assumption'
   aesop
 
 /-- The pullback Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
-instance pullbackMapTwoSquare_of_isPullback_isIso (pb : IsPullback h f g k) :
-    IsIso (pullbackMapTwoSquare h f g k pb.toCommSq) := by
+instance pullbackBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g k) :
+    IsIso (pullbackBeckChevalleySquare h f g k pb.toCommSq) := by
   apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
   intro A
-  have := isIso_forgetMappullbackMapTwoSquare_of_isPullback A pb
+  have := isIso_forgetMapPullbackBeckChevalleySquare_of_isPullback A pb
   exact ReflectsIsomorphisms.reflects (forget Z)
-    ((pullbackMapTwoSquare h f g k pb.toCommSq).app A)
+    ((pullbackBeckChevalleySquare h f g k pb.toCommSq).app A)
 
 /-- The pullback-map exchange isomorphism. -/
-def pullbackMapIsoSquare (pb : IsPullback h f g k) :
+def pullbackBeckChevalleySquareIso (pb : IsPullback h f g k) :
     pullback f ⋙ map h ≅ Over.map k ⋙ Over.pullback g := by
-  refine @asIso _ _ _ _ (pullbackMapTwoSquare h f g k pb.toCommSq) ?_
-  exact pullbackMapTwoSquare_of_isPullback_isIso pb
+  refine @asIso _ _ _ _ (pullbackBeckChevalleySquare h f g k pb.toCommSq) ?_
+  exact pullbackBeckChevalleySquare_of_isPullback_isIso pb
 
 /-- The functor Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
-instance pushforwardPullbackTwoSquare_of_isPullback_isIso (pb : IsPullback h f g k)
+instance pushforwardBeckChevalleySquare_of_isPullback_isIso (pb : IsPullback h f g k)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
-    IsIso (pushforwardPullbackTwoSquare h f g k pb.toCommSq) := by
-  have := pullbackMapTwoSquare_of_isPullback_isIso pb
+    IsIso (pushforwardBeckChevalleySquare h f g k pb.toCommSq) := by
+  have := pullbackBeckChevalleySquare_of_isPullback_isIso pb
   apply conjugateEquiv_iso
 
 /-- The pullback-pushforward exchange isomorphism. -/
-def pushforwardPullbackIsoSquare (pb : IsPullback h f g k)
+def pushforwardBeckChevalleySquareIso (pb : IsPullback h f g k)
     [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
     pushforward g ⋙ pullback k ≅ pullback h ⋙ pushforward f := by
-  refine @asIso _ _ _ _ (pushforwardPullbackTwoSquare h f g k pb.toCommSq) ?_
-  exact pushforwardPullbackTwoSquare_of_isPullback_isIso pb
+  refine @asIso _ _ _ _ (pushforwardBeckChevalleySquare h f g k pb.toCommSq) ?_
+  exact pushforwardBeckChevalleySquare_of_isPullback_isIso pb
 
 end BeckChevalleyComponents
 

@@ -114,7 +114,7 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
     Q.functor ⟶ P.functor := by
   have sq : CommSq ρ P.p Q.p (𝟙 _) := by simp [h]
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
-  let cellMid := (pushforwardBeckChevalleySquare ρ P.p Q.p (𝟙 _) sq)
+  let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
   simpa using (cellLeftMidPasted ≫ₕ (vId (forget B)))
 
@@ -147,9 +147,9 @@ def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : U
   let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
     (Over.starPullbackIsoStar φ).inv
   let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
-    (pushforwardBeckChevalleySquareIso pb.flip).inv
+    (pushforwardPullbackIsoSquare pb.flip).inv
   let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
-    pullbackForgetBeckChevalleySquare δ
+    pullbackForgetTwoSquare δ
   simpa using cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
@@ -193,10 +193,12 @@ end Hom
 /-- Bundling up the the polynomials over different bases to form the underlying type of the
 category of polynomials. -/
 structure Total (C : Type*) [Category C] [HasPullbacks C] where
-  (E B : C)
+  {E B : C}
   (poly : UvPoly E B)
 
-def Total.of (P : UvPoly E B) : Total C := ⟨E, B, P⟩
+#check Total.mk
+
+def Total.of (P : UvPoly E B) : Total C := Total.mk P
 
 end UvPoly
 
@@ -407,7 +409,21 @@ def compFunctorIso [HasPullbacks C] [HasTerminal C]
     P.functor ⋙ Q.functor ≅ (comp P Q).functor := by
   sorry
 
+instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.Total C) where
+  tensorObj X Y := ⟨comp X.poly Y.poly⟩
+  whiskerLeft X Y₁ Y₂ := sorry
+  whiskerRight := sorry
+  tensorUnit := sorry
+  associator := sorry
+  leftUnitor := sorry
+  rightUnitor := sorry
+
 end UvPoly
+
+
+
+
+
 
 end CategoryTheory
 
