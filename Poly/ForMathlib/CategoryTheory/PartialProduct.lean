@@ -5,6 +5,7 @@ Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Comma.Over.Pullback
+import Mathlib.CategoryTheory.Closed.Cartesian
 
 /-! ## Partial Products
 A partial product is a simultaneous generalization of a product and an exponential object.
@@ -135,7 +136,7 @@ def getLimitFan [HasPartialProduct s X] : LimitFan s X :=
 
 end PartialProduct
 
-open PartialProduct
+open PartialProduct MonoidalCategory
 
 variable {E B : C} (s : E ⟶ B) (X : C)
 
@@ -171,9 +172,23 @@ theorem partialProd.lift_fst {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pull
     partialProd.lift f g ≫ partialProd.fst s X = f :=
   ((partialProd.isLimit s X)).fac_left (Fan.mk f g)
 
-#exit
+-- @[reassoc]
+-- theorem partialProd.lift_snd {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pullback f s ⟶ X) :
+--     comparison (partialProd.lift f g) _ ≫ partialProd.snd s X = g :=
+--   ((partialProd.isLimit s X)).fac_right (Fan.mk f g)
 
-@[reassoc]
-theorem partialProd.lift_snd {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pullback f s ⟶ X) :
-    comparison (partialProd.lift f g) _ ≫ partialProd.snd s X = g :=
-  ((partialProd.isLimit s X)).fac_right (Fan.mk f g)
+/-- The partial product of `X` and the identity morphism `𝟙 : B ⟶ B` is the exponential object
+`B ⨯ X`. -/
+instance hasPartialProduct.id [HasBinaryProduct B X] : HasPartialProduct (𝟙 B) X := by sorry
+
+def partialProd.id [HasBinaryProduct B X] : partialProd (𝟙 B) X ≅ B ⨯ X := sorry
+
+instance hasPartialProduct.prod [HasTerminal C] [HasBinaryProduct B X] :
+    HasPartialProduct (terminal.from B) X := by
+  sorry
+
+attribute [local instance] CategoryTheory.ChosenFiniteProducts.ofFiniteProducts
+
+def partialProd.prod [HasFiniteProducts C] [Exponentiable X] :
+    partialProd (terminal.from B) X ≅ X ⟹ B := by
+  sorry
