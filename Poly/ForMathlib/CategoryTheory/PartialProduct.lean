@@ -57,11 +57,9 @@ theorem Fan.fst_mk {pt : C} (f : pt ⟶ B) (g : pullback f s ⟶ X) :
 
 variable {s X}
 
-@[simp]
 def comparison {P} {c : Fan s X} (f : P ⟶ c.pt) : pullback (f ≫ c.fst) s ⟶ pullback c.fst s :=
   pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
 
-@[simp]
 def pullbackMap {c' c : Fan s X} (f : c'.pt ⟶ c.pt)
     (_ : f ≫ c.fst = c'.fst := by aesop_cat) :
     pullback c'.fst s ⟶ pullback c.fst s :=
@@ -69,7 +67,6 @@ def pullbackMap {c' c : Fan s X} (f : c'.pt ⟶ c.pt)
   -- exact pullbackPreComp f
   pullback.map c'.fst s c.fst s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
 
-@[simp]
 theorem pullbackMap_comparison {P} {c : Fan s X} (f : P ⟶ c.pt) :
     pullbackMap (c' := Fan.mk (f ≫ c.fst) (comparison f ≫ c.snd)) (c := c) f = comparison f := by
   rfl
@@ -92,7 +89,7 @@ attribute [reassoc (attr := simp)] Fan.Hom.w_left Fan.Hom.w_right
   @[simps]
   instance category : Category (Fan s X) where
     Hom := Fan.Hom
-    id c := ⟨𝟙 c.pt, by aesop_cat, by aesop_cat⟩
+    id c := ⟨𝟙 c.pt, by aesop_cat, by simp [pullbackMap]⟩
     comp {X Y Z} f g := ⟨f.hom ≫ g.hom, by simp [g.w_left, f.w_left], by sorry
       --have := pullback.map_comp (i₁:= 𝟙 E ) (j₁:= 𝟙 E ) (i₂:= f.hom) (j₂:= g.hom) (i₃:= 𝟙 B) (j₃ := 𝟙 B)
       -- have : 𝟙 E ≫ 𝟙 E = 𝟙 E := by simp
@@ -189,7 +186,7 @@ variable {s X}
 theorem partialProd.hom_ext {W : C} [HasPartialProduct s X] {f g : W ⟶ partialProd s X}
     (h₁ : f ≫ partialProd.fst s X = g ≫ partialProd.fst s X)
     (h₂ : comparison f ≫ partialProd.snd s X =
-    (pullback.congrHom h₁ rfl).hom  ≫ comparison g ≫ partialProd.snd s X) :
+    (pullback.congrHom h₁ rfl).hom ≫ comparison g ≫ partialProd.snd s X) :
     f = g := by
   sorry
 
@@ -206,8 +203,11 @@ theorem partialProd.lift_fst {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pull
 
 @[reassoc]
 theorem partialProd.lift_snd {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pullback f s ⟶ X) :
-    (pullbackMap (partialProd.lift f g) _) ≫ (partialProd.snd s X) = g :=
-  ((partialProd.isLimit s X)).fac_right (Fan.mk f g)
+    (comparison (partialProd.lift f g)) ≫ (partialProd.snd s X) =
+    (pullback.congrHom (partialProd.lift_fst f g) rfl).hom ≫ g := by
+  let h := ((partialProd.isLimit s X)).fac_right (Fan.mk f g)
+  rw [← pullbackMap_comparison]
+  sorry
 
 /-- The partial product of `X` and the identity morphism `𝟙 : B ⟶ B` is the exponential object
 `B ⨯ X`. -/
