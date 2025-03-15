@@ -185,11 +185,11 @@ noncomputable abbrev partialProd.snd [HasPartialProduct s X] :
 
 variable {s X}
 
-@[ext 1100]
-theorem partialProd.hom_ext [HasPartialProduct s X] {f g : W ⟶ partialProd s X}
+-- note that @[ext] does not work becasue h₂ depends on h₁.
+theorem partialProd.hom_ext {W : C} [HasPartialProduct s X] {f g : W ⟶ partialProd s X}
     (h₁ : f ≫ partialProd.fst s X = g ≫ partialProd.fst s X)
     (h₂ : comparison f ≫ partialProd.snd s X =
-    eqToHom (by simp_rw [h₁]) ≫ comparison g ≫ partialProd.snd s X) :
+    (pullback.congrHom h₁ rfl).hom  ≫ comparison g ≫ partialProd.snd s X) :
     f = g := by
   sorry
 
