@@ -4,167 +4,119 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Wojciech Nawrocki
 -/
 
+import Lean.Elab.Tactic.DiscrTreeKey
+import Mathlib.CategoryTheory.Elements
+import Mathlib.CategoryTheory.Functor.Currying
+import Mathlib.CategoryTheory.Functor.Category
+
 import SEq.Tactic.DepRewrite
-
-import Poly.DepFunctor.Basic
+import Poly.ForMathlib.CategoryTheory.Elements
 import Poly.ForMathlib.CategoryTheory.NatIso
+import Poly.ForMathlib.CategoryTheory.Types
 
-namespace CategoryTheory
+open private mkKey from Lean.Elab.Tactic.DiscrTreeKey in
+open Lean Meta Elab Tactic in
+/-- Print the `DiscrTree` key of the current `conv` mode target. -/
+macro "discr_tree_key" : conv =>
+  `(conv| tactic => run_tac do
+    let g ← Conv.getLhs
+    logInfo <| ← DiscrTree.keysAsPattern <| ← mkKey g false)
 
-variable {𝒞 𝒟 ℰ : Type*} [Category 𝒞] [Category 𝒟] [Category ℰ]
+open private mkKey from Lean.Elab.Tactic.DiscrTreeKey in
+open Lean Meta Elab Tactic Conv in
+/-- Attempt to match the current `conv` mode target
+against the LHS of the specified theorem. -/
+elab "discr_tree_match" n:ident : conv => do
+  let c ← realizeGlobalConstNoOverloadWithInfo n
+  let ci ← getConstInfo c
+  let e ← Conv.getLhs
+  let ciKey ← mkKey ci.type true
+  let gKey ← mkKey e false
+  logInfo m!"{ciKey.zip gKey |>.map fun (a, b) => m!"{a} := {b}"}"
+  logInfo m!"{← DiscrTree.keysAsPattern ciKey} := {← DiscrTree.keysAsPattern gKey}"
 
-/-! ## Dependent sum functor -/
+namespace CategoryTheory.Functor
 
-namespace DepFunctor
+variable {𝒞 𝒟 : Type*} [Category 𝒞] [Category 𝒟]
 
 /-- Given functors `F : 𝒞 ⥤ Type v` and `G : ∫F ⥤ 𝒟 ⥤ Type v`,
-produce the functor `(X, Y) ↦ (b : F(X)) × G((X, b))(Y)`.
+produce the functor `(C, D) ↦ (a : F(C)) × G((C, a))(D)`.
 
 This is a dependent sum that varies naturally
-in a parameter `X` of the first component,
-and a parameter `Y` of the second component.
+in a parameter `C` of the first component,
+and a parameter `D` of the second component.
 
 We use this to package and compose natural equivalences
-where one (or both) sides is a dependent sum, e.g.
+where one side (or both) is a dependent sum, e.g.
 ```
-H(X) ⟶ I(Y)
+H(C) ⟶ I(D)
 =========================
-(b : F(X)) × (G(X, b)(Y))
+(a : F(C)) × (G(C, a)(D))
 ```
 is a natural isomorphism of bifunctors `𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v`
-given by `(X, Y) ↦ H(X) ⟶ I(Y)` and `G.Sigma`. -/
+given by `(C, D) ↦ H(C) ⟶ I(D)` and `G.Sigma`. -/
 @[simps!]
-def Sigma.{v} {F : 𝒞 ⥤ Type v} (G : DepFunctor F (𝒟 ⥤ Type v)) : 𝒞 ⥤ 𝒟 ⥤ Type v := by
+/- Q: Is it necessary to special-case bifunctors?
+(1) General case `G : F.Elements ⥤ Type v` needs
+a functor `F'` s.t. `F'.Elements ≅ F.Elements × 𝒟`; very awkward.
+(2) General case `F : 𝒞 ⥤ 𝒟`, `G : ∫F ⥤ 𝒟`:
+- what conditions are needed on `𝒟` for `∫F` to make sense?
+- what about for `ΣF. G : 𝒞 ⥤ 𝒟` to make sense?
+- known concrete instances are `𝒟 ∈ {Type, Cat, Grpd}` -/
+def Sigma.{v,u} {F : 𝒞 ⥤ Type v} (G : F.Elements ⥤ 𝒟 ⥤ Type u) : 𝒞 ⥤ 𝒟 ⥤ Type (max v u) := by
   refine curry.obj {
-    obj := fun (Γ, X) => (b : F.obj Γ) × ((G.obj b).obj X)
-    map := fun (σ, f) ⟨b, e⟩ =>
-      ⟨F.map σ b, (G.map σ b _ rfl).app _ ((G.obj b).map f e)⟩
+    obj := fun (C, D) => (a : F.obj C) × (G.obj ⟨C, a⟩).obj D
+    map := fun (f, g) ⟨a, b⟩ =>
+      ⟨F.map f a, (G.map ⟨f, rfl⟩).app _ ((G.obj ⟨_, a⟩).map g b)⟩
     map_id := ?_
     map_comp := ?_
-  } <;> (
+  } <;> {
     intros
-    ext ⟨b, e⟩ : 1
+    ext ⟨a, b⟩ : 1
     dsimp
     congr! 1 with h
     . simp
     . rw! [h]; simp [FunctorToTypes.naturality]
-  )
+  }
 
-def Sigma.isoCongrLeft.{v} (F₁ F₂ : 𝒞 ⥤ Type v) (G : DepFunctor F₁ (𝒟 ⥤ Type v))
-    (i : F₂ ≅ F₁) : G.Sigma ≅ (G.isoLeft i).Sigma := by
+def Sigma.isoCongrLeft.{v,u} {F₁ F₂ : 𝒞 ⥤ Type v}
+    /- Q: What kind of map `F₂.Elements ⥤ F₁.Elements`
+    could `NatTrans.mapElements i.hom` generalize to?
+    We need to send `x ∈ F₂(C)` to something in `F₁(C)`;
+    so maybe the map has to at least be over `𝒞`. -/
+    (G : F₁.Elements ⥤ 𝒟 ⥤ Type u) (i : F₂ ≅ F₁) :
+    Sigma (NatTrans.mapElements i.hom ⋙ G) ≅ Sigma G := by
   refine NatIso.ofComponents₂
-    (fun Γ X => Equiv.toIso {
-      toFun := fun ⟨b, e⟩ => ⟨i.inv.app Γ b, cast (by simp) e⟩
-      invFun := fun ⟨b, e⟩ => ⟨i.hom.app Γ b, e⟩
+    (fun C D => Equiv.toIso {
+      toFun := fun ⟨a, b⟩ => ⟨i.hom.app C a, b⟩
+      invFun := fun ⟨a, b⟩ => ⟨i.inv.app C a, cast (by simp) b⟩
       left_inv := fun ⟨_, _⟩ => by simp
       right_inv := fun ⟨_, _⟩ => by simp
-    }) ?_ ?_ <;> (
+    }) ?_ ?_ <;> {
       intros
       ext : 1
       dsimp
       apply let h := ?_; Sigma.ext h ?_
       . simp [FunctorToTypes.naturality]
       . dsimp [Sigma] at h ⊢
-        rw! [
-          ← h,
-          FunctorToTypes.inv_hom_id_app_apply,
-          FunctorToTypes.inv_hom_id_app_apply,
-        ]
-        simp
-    )
+        rw! [← h]
+        simp [NatTrans.mapElements]
+    }
 
-def Sigma.isoCongrRight.{v} (F : 𝒞 ⥤ Type v) (G₁ G₂ : DepFunctor F (𝒟 ⥤ Type v))
-    (i : G₁ ≅ G₂) :
-    G₁.Sigma ≅ G₂.Sigma :=
-  NatIso.ofComponents₂
-    (fun Γ X => Equiv.toIso {
-      toFun := fun ⟨b, e⟩ => ⟨b, (i.hom.app b).app X e⟩
-      invFun := fun ⟨b, e⟩ => ⟨b, (i.inv.app b).app X e⟩
-      left_inv := fun ⟨b, e⟩ => by simp
-      right_inv := fun ⟨b, e⟩ => by simp
-    })
-    (fun X σ => by
-      ext ⟨b, e⟩
-      have := congr_fun (DepNatTrans.naturality_app i.hom σ b _ rfl X) e
-      dsimp at this
-      simp [Sigma, this])
-    (fun Γ f => by
-      ext ⟨b, e⟩
+def Sigma.isoCongrRight.{v,u} {F : 𝒞 ⥤ Type v} {G₁ G₂ : F.Elements ⥤ 𝒟 ⥤ Type u} (i : G₁ ≅ G₂) :
+    Sigma G₁ ≅ Sigma G₂ := by
+  refine NatIso.ofComponents₂
+    (fun C D => Equiv.toIso {
+      toFun := fun ⟨a, b⟩ => ⟨a, (i.hom.app ⟨C, a⟩).app D b⟩
+      invFun := fun ⟨a, b⟩ => ⟨a, (i.inv.app ⟨C, a⟩).app D b⟩
+      left_inv := fun ⟨_, _⟩ => by simp
+      right_inv := fun ⟨_, _⟩ => by simp
+    }) ?_ ?_ <;> {
+      intros
+      ext : 1
       dsimp
-      simp only [Sigma, prod_Hom, curry_obj_obj_map, Sigma.mk.injEq, FunctorToTypes.map_id_apply,
-        heq_eq_eq, true_and]
-      rw! [F.map_id Γ]
-      simp [FunctorToTypes.naturality])
-
-end DepFunctor
-
-open Limits in
-/-- The functor `(b : Γ ⟶ B) ↦ Hom(dom(b*p), -)`. -/
-noncomputable def pullbackDep.{v} {𝒞 : Type*} [Category.{v} 𝒞] [HasPullbacks 𝒞]
-    {E B : 𝒞} (p : E ⟶ B) :
-    DepFunctor (yoneda.obj B) (𝒞 ⥤ Type v) where
-  obj _ b := coyoneda.obj <| Opposite.op <| pullback b p
-  map _ _ σ _ _ eq :=
-    coyoneda.map <| Quiver.Hom.op <|
-      pullback.lift (pullback.fst .. ≫ σ.unop) (pullback.snd ..)
-        (by rw [eq]; simp [pullback.condition])
-  map_id := by simp
-  map_comp := by
-    intros
-    ext : 3
-    dsimp
-    simp only [← Category.assoc]
-    congr 1
-    ext <;> simp
-
--- TODO: move elsewhere
-@[simps]
-def bifunctor_comp_snd {𝒟' : Type*} [Category 𝒟'] (F : 𝒟' ⥤ 𝒟) (P : 𝒞 ⥤ 𝒟 ⥤ ℰ) : 𝒞 ⥤ 𝒟' ⥤ ℰ where
-  obj Γ := F ⋙ P.obj Γ
-  map σ := whiskerLeft F (P.map σ)
-
-/-- The hom-functor `𝒞/Aᵒᵖ ⥤ 𝒞/A ⥤ Type` given by
-`(X, g : X ⟶ A) (Y, f : Y ⟶ A) ↦ 𝒞/A(g, f)`
-written as a dependent functor `∫y(A) ⥤ 𝒞/A ⥤ Type`.
-This is to express the dependent sum `Σ(g : X ⟶ A), 𝒞/A(g, f)`. -/
-@[simps]
-def overDep (A : 𝒞) : DepFunctor (yoneda.obj A) (Over A ⥤ Type) where
-  obj _ g := coyoneda.obj <| Opposite.op <| Over.mk g
-  map _ _ σ f g eq := coyoneda.map <| Quiver.Hom.op <| Over.homMk σ.unop (by simp [eq])
-  map_id := by simp
-  map_comp := by
-    intros
-    ext : 3
-    dsimp
-    ext : 1
-    simp
-
--- TODO: this in mathlib?
-@[simps]
-def Over_equiv {A : 𝒞} (X : 𝒞) (f : Over A) : (X ⟶ f.left) ≃ (b : X ⟶ A) × (Over.mk b ⟶ f) where
-  toFun g := ⟨g ≫ f.hom, Over.homMk g rfl⟩
-  invFun g := g.2.left
-  left_inv _ := by simp
-  right_inv := fun x => by
-    dsimp; congr! 1 with h
-    . simp
-    . rw! [h]
-      simp
-
-/-- `𝒞(X, Over.forget f) ≅ Σ(g: X ⟶ A), 𝒞/A(g, f)` -/
-def Over_iso (A : 𝒞) :
-    bifunctor_comp_snd (Over.forget A) (coyoneda (C := 𝒞)) ≅ (overDep A).Sigma := by
-  refine NatIso.ofComponents₂ (fun Γ U => Equiv.toIso <| Over_equiv Γ.unop U) ?_ ?_ <;> (
-    intros
-    dsimp
-    ext : 1
-    apply let h := ?_; Sigma.ext h ?_
-    . simp
-    . dsimp at h ⊢
-      rw! [h]
-      apply heq_of_eq
-      ext
-      simp
-  )
-
-end CategoryTheory
+      apply let h := ?_; Sigma.ext h ?_
+      . simp
+      . dsimp [Sigma] at h ⊢
+        simp [FunctorToTypes.binaturality_left, FunctorToTypes.binaturality_right]
+    }

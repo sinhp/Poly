@@ -13,6 +13,7 @@ variable {𝒞 𝒟 ℰ : Type*} [Category 𝒞] [Category 𝒟] [Category ℰ]
 /-- Natural isomorphism of bifunctors from naturality in both arguments. -/
 def ofComponents₂ {F G : 𝒞 ⥤ 𝒟 ⥤ ℰ}
     (app : ∀ Γ X, (F.obj Γ).obj X ≅ (G.obj Γ).obj X)
+    -- binaturality_left?
     (naturality_left : ∀ {Γ Δ : 𝒞} (X : 𝒟) (σ : Γ ⟶ Δ),
       (F.map σ).app X ≫ (app Δ X).hom = (app Γ X).hom ≫ (G.map σ).app X := by aesop_cat)
     (naturality_right : ∀ {X Y : 𝒟} (Γ : 𝒞) (f : X ⟶ Y),
