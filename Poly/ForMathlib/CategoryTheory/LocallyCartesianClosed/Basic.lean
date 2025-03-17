@@ -75,18 +75,44 @@ abbrev ExponentiableMorphism [HasPullbacks C] : MorphismProperty C :=
 
 namespace ExponentiableMorphism
 
-variable [HasPullbacks C]
+variable [HasPullbacks C] {I J : C}
 
-abbrev pushforward {I J : C} (f : I ⟶ J) [ExponentiableMorphism f] :=
+abbrev pushforward (f : I ⟶ J) [ExponentiableMorphism f] :=
   rightAdjoint (Over.pullback f)
 
-def adj {I J : C} {f : I ⟶ J} (fexp : ExponentiableMorphism f) :=
+def adj {f : I ⟶ J} (fexp : ExponentiableMorphism f) :=
   Adjunction.ofIsLeftAdjoint (Over.pullback f)
 
 /-- The dependent evaluation natural transformation as the counit of the adjunction. -/
-abbrev ev {I J : C} (f : I ⟶ J) [fexp : ExponentiableMorphism f] :
+abbrev ev (f : I ⟶ J) [fexp : ExponentiableMorphism f] :
     pushforward f ⋙ Over.pullback f ⟶ 𝟭 _ :=
   fexp.adj.counit
+
+variable {f : I ⟶ J}
+
+/-- The currying of `(Over.pullback f).obj A ⟶ X` in `Over I` to a morphism
+`A ⟶ (pushforward f).obj X` in `Over J`. -/
+def pushforwardCurry [fexp : ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (u : (Over.pullback f).obj A ⟶ X) :
+    A ⟶ (pushforward f).obj X :=
+  fexp.adj.homEquiv A X u
+
+/-- The uncurrying of `A ⟶ (pushforward f).obj X` in `Over J` to a morphism
+`(Over.pullback f).obj A ⟶ X` in `Over I`. -/
+def pushforwardUncurry [fexp : ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (v : A ⟶ (pushforward f).obj X) :
+    (Over.pullback f).obj A ⟶ X :=
+  (fexp.adj.homEquiv A X).invFun v
+
+theorem pushforward_uncurry_curry [fexp : ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (u : (Over.pullback f).obj A ⟶ X) :
+    pushforwardUncurry (pushforwardCurry u) = u :=
+  (fexp.adj.homEquiv A X).left_inv u
+
+theorem pushforward_curry_uncurry [fexp : ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (v : A ⟶ (pushforward f).obj X) :
+    pushforwardCurry (pushforwardUncurry v) = v :=
+  (fexp.adj.homEquiv A X).right_inv v
 
 instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
     ExponentiableMorphism (Over.mk f).hom := by

@@ -5,6 +5,7 @@ Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Comma.Over.Pullback
+import Poly.ForMathlib.CategoryTheory.Comma.Over.Pullback
 import Mathlib.CategoryTheory.Closed.Cartesian
 import Mathlib.CategoryTheory.EqToHom
 
@@ -20,7 +21,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open CategoryTheory Category Limits Functor
+open CategoryTheory Category Limits Functor Over
 
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -57,15 +58,30 @@ theorem Fan.fst_mk {pt : C} (f : pt ⟶ B) (g : pullback f s ⟶ X) :
 
 variable {s X}
 
+def Fan.over (c : Fan s X) : Over B := Over.mk c.fst
+
+def Fan.overPullbackToStar (c : Fan s X) [HasBinaryProducts C] :
+    (Over.pullback s).obj c.over ⟶ (Over.star E).obj X :=
+  (forgetAdjStar E).homEquiv _ _ c.snd
+
+@[reassoc (attr := simp)]
+theorem Fan.overPullbackToStar_snd {c : Fan s X} [HasBinaryProducts C] :
+    (Fan.overPullbackToStar c).left ≫ prod.snd = c.snd := by
+  simp [Fan.overPullbackToStar, Adjunction.homEquiv, forgetAdjStar.unit_app]
+
+-- note: the reason we use `(Over.pullback s).map` instead of `pullback.map` is that
+-- we want to readily use lemmas about the adjunction `pullback s ⊣ pushforward s` in `UvPoly`.
 def comparison {P} {c : Fan s X} (f : P ⟶ c.pt) : pullback (f ≫ c.fst) s ⟶ pullback c.fst s :=
-  pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
+  ((Over.pullback s).map (homMk f (by simp) : Over.mk (f ≫ c.fst) ⟶ Over.mk c.fst)).left
+
+theorem comparison_pullback.map {P} {c : Fan s X} {f : P ⟶ c.pt} :
+    comparison f = pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop) := by
+  simp [comparison, pullback.map]
 
 def pullbackMap {c' c : Fan s X} (f : c'.pt ⟶ c.pt)
-    (_ : f ≫ c.fst = c'.fst := by aesop_cat) :
-    pullback c'.fst s ⟶ pullback c.fst s :=
-  -- simp_rw [← h]
-  -- exact pullbackPreComp f
-  pullback.map c'.fst s c.fst s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
+    (h : f ≫ c.fst = c'.fst := by aesop_cat) :
+    pullback c'.fst s ⟶ pullback c.fst s := by
+  simpa using  ((Over.pullback s).map (Over.homMk f h : Over.mk (c'.fst) ⟶ Over.mk c.fst)).left
 
 theorem pullbackMap_comparison {P} {c : Fan s X} (f : P ⟶ c.pt) :
     pullbackMap (c' := Fan.mk (f ≫ c.fst) (comparison f ≫ c.snd)) (c := c) f = comparison f := by
