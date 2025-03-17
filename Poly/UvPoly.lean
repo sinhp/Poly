@@ -268,14 +268,6 @@ def fan (P : UvPoly E B) (X : C) : Fan P.p X where
   fst := P.fstProj X
   snd := (ε P X) ≫ ((forgetAdjStar E).counit).app X   -- (ε P X) ≫ prod.snd
 
--- used to be called `pairPoly`
-@[simp]
-def liftAux {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
-    Γ ⟶ P @ X :=
-  let b' : Over E := (Over.pullback P.p).obj (.mk b)
-  let econj : b' ⟶ (star E).obj X := (forgetAdjStar E).homEquiv b' X e
-  (adj P.p |>.homEquiv _ _ econj).left
-
 -- theorem lifAux_conj
 
 /--
@@ -304,21 +296,21 @@ end PartialProduct
 
 open PartialProduct
 
+/-- Morphisms `b : Γ ⟶ B` and `e : pullback b P.p ⟶ X` induce a morphism `Γ ⟶ P @ X` which is the
+lift of the partial product fan. -/
+-- used to be called `pairPoly`
 abbrev lift {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
     Γ ⟶ P @ X :=
   partialProd.lift ⟨fan P X, isLimitFan P X⟩ b e
 
--- formerly polyPair
+/-- A morphism `f : Γ ⟶ P @ X` projects to a morphism `b : Γ ⟶ B` and a morphism
+`e : pullback b P.p ⟶ X`. -/
+-- formerly `polyPair`
 def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
     Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
-  ⟨f ≫ P.fstProj X, fan P X |>.extend f |>.snd⟩
+  ⟨fan P X |>.extend f |>.fst, fan P X |>.extend f |>.snd⟩
 
 variable {Γ X : C} (P : UvPoly E B)
-
-
-#check Over.pullback
-
-#check Over.comp_left
 
 #exit
 
