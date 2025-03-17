@@ -6,11 +6,25 @@ Authors: Sina Hazratpour
 
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
 import Mathlib.CategoryTheory.Functor.TwoSquare
-
+import Poly.ForMathlib.CategoryTheory.PartialProduct
 
 /-!
 # Polynomial Functor
 
+The Universal property of polynomial functors is mediated through the partial product diagram
+in below.
+```
+     X
+     ^
+     |
+     |
+     • -------fst-----> P @ X
+     |                    |
+     |        (pb)        | P.fstProj X
+     v                    v
+     E ---------------->  B
+              P.p
+```
 -- TODO: there are various `sorry`-carrying proofs in below which require instances of
 `ExponentiableMorphism` for various constructions on morphisms. They need to be defined in
 `Poly.Exponentiable`.
@@ -82,6 +96,7 @@ def idApplyIso (X : C) : (id B) @ X ≅ B ⨯ X := sorry
 variable {B}
 
 /-- The fstProjection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
+@[simp]
 def fstProj (P : UvPoly E B) (X : C) : P @ X ⟶ B :=
   ((Over.star E ⋙ pushforward P.p).obj X).hom
 
@@ -196,8 +211,6 @@ structure Total (C : Type*) [Category C] [HasPullbacks C] where
   {E B : C}
   (poly : UvPoly E B)
 
-#check Total.mk
-
 def Total.of (P : UvPoly E B) : Total C := Total.mk P
 
 end UvPoly
@@ -240,79 +253,95 @@ def smul_eq_prod_const [HasBinaryCoproducts C] [HasInitial C] (S : C) (P : Total
 
 variable {E B : C}
 
--- used to be called `polyPair`
-def polyPair {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P @ X) :
-    Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
-  let b := be ≫ P.fstProj X
-  let be' : Over.mk b ⟶ (Over.star E ⋙ pushforward P.p).obj X := Over.homMk be
-  let be'' := (P.exp.adj.homEquiv _ _).symm be'
-  let be''' : pullback b P.p ⟶ E ⨯ X := be''.left
-  ⟨b, be''' ≫ prod.snd⟩
+namespace PartialProduct
+
+open PartialProduct
+
+/-- The counit of the adjunction `pullback P.p ⊣ pushforward P.p` evaluated `(star E).obj X`. -/
+def ε (P : UvPoly E B) (X : C) : pullback (P.fstProj X) P.p ⟶ E ⨯ X :=
+  ((ev P.p).app ((star E).obj X)).left
+
+/-- The partial product fan associated to a polynomial `P : UvPoly E B` and an object `X : C`. -/
+@[simps]
+def fan (P : UvPoly E B) (X : C) : Fan P.p X where
+  pt := P @ X
+  fst := P.fstProj X
+  snd := (ε P X) ≫ ((forgetAdjStar E).counit).app X   -- (ε P X) ≫ prod.snd
 
 -- used to be called `pairPoly`
-def pairPoly {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
+@[simp]
+def liftAux {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
     Γ ⟶ P @ X :=
-  let pbE := (Over.pullback P.p).obj (Over.mk b)
-  let eE : pbE ⟶ (Over.star E).obj X := (Over.forgetAdjStar E).homEquiv _ _ e
-  (P.exp.adj.homEquiv _ _ eE).left
+  let b' : Over E := (Over.pullback P.p).obj (.mk b)
+  let econj : b' ⟶ (star E).obj X := (forgetAdjStar E).homEquiv b' X e
+  (adj P.p |>.homEquiv _ _ econj).left
 
-/-! ## Generic pullback -/
+-- theorem lifAux_conj
 
 /--
-The UP of polynomial functors is mediated by a "generic pullback".
-```
-     X
-     ^
-  ev |
-     |
-   genPb -----fst-------> E
-     | ┘                  |
- snd |                    | P.p
-     v                    v
-  P @ X ----------------> B
-          P.fstProj X
-```
+`P.PartialProduct.fan` is in fact a limit fan; this provides the univeral mapping property of the
+polynomial functor.
 -/
-def genericPullback (P : UvPoly E B) (X : C) : C :=
-  Comma.left <| (Over.pullback P.p).obj ((Over.star E ⋙ pushforward P.p).obj X)
+def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
+  lift c := (pushforwardCurry (Fan.mk c.fst c.snd).overPullbackToStar).left
+  -- (P.exp.adj.homEquiv _ _ (Fan.mk c.fst c.snd).overPullbackToStar).left
+  -- liftAux P c.fst c.snd
+  fac_left := by aesop_cat
+  fac_right := by
+    intro c
+    simp only [fan,pullbackMap, ev, ← assoc, ε]
+    simp only [pushforwardCurry]
+    --simp only [← homEquiv_counit]
+    rw [← comp_left]
+    sorry
+    --simp only [Fan.overPullbackToStar_snd]
 
-lemma genericPullback_def (P : UvPoly E B) (X : C) :
-    genericPullback P X = pullback (P.fstProj X) P.p := by
-  rfl
+    -- rw [← comp_left]
+    -- simp_rw [← homEquiv_counit]
+  uniq := sorry
 
-namespace genericPullback
+end PartialProduct
 
-def fst (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ P @ X :=
-  pullback.fst (P.fstProj X) P.p
+open PartialProduct
 
-def ε (P : UvPoly E B) (X : C) : genericPullback P X ⟶ E ⨯ X :=
-  ((ExponentiableMorphism.ev P.p).app ((Over.star E).obj X)).left
+abbrev lift {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X) :
+    Γ ⟶ P @ X :=
+  partialProd.lift ⟨fan P X, isLimitFan P X⟩ b e
 
--- u₂ previously
-def ev (P : UvPoly E B) (X : C) : P.genericPullback X ⟶ X := (ε P X) ≫ prod.snd
+-- formerly polyPair
+def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
+    Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
+  ⟨f ≫ P.fstProj X, fan P X |>.extend f |>.snd⟩
+
+variable {Γ X : C} (P : UvPoly E B)
+
+
+#check Over.pullback
+
+#check Over.comp_left
+
+#exit
 
 /-- The second component of `polyPair` is a comparison map of pullbacks composed with `genPb.u₂`. -/
 theorem polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
-    (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.fstProj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫
-                          ev P X := by
-  simp only [polyPair, ev, homEquiv_counit, comp_left, ← assoc]
+    (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.fstProj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫ (ev P X) := by
+  simp only [polyPair, ev, homEquiv_counit, Over.comp_left, ← assoc]
   congr 2
   sorry --aesop_cat
 
-end genericPullback
 
 /-- Universal property of the polynomial functor. -/
 @[simps]
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) where
   toFun := P.polyPair
-  invFun := fun ⟨b, e⟩ => P.pairPoly b e
+  invFun := fun ⟨b, e⟩ => P.PartialProduct.liftAux b e
   left_inv be := by
-    simp_rw [polyPair, pairPoly, ← forgetAdjStar.homEquiv_symm]
+    simp_rw [polyPair, liftAux, ← forgetAdjStar.homEquiv_symm]
     simp
   right_inv := by
     intro ⟨b, e⟩
-    dsimp [polyPair, pairPoly]
+    dsimp [polyPair, liftAux]
     have := Over.forgetAdjStar.homEquiv (X := (Over.pullback P.p).obj (Over.mk b)) (f := e)
     simp at this
     rw [this]
@@ -347,7 +376,7 @@ lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C
                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
   dsimp
   congr! with h
-  . simp [polyPair, pairPoly]
+  . simp [polyPair, partialProduct.liftAux]
   . set g := _ ≫ (P.polyPair be).snd
     rw [(_ : (P.polyPair (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
     · generalize (P.polyPair (σ ≫ be)).fst = x at h

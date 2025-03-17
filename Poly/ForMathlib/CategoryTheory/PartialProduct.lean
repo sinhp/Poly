@@ -72,7 +72,7 @@ theorem Fan.overPullbackToStar_snd {c : Fan s X} [HasBinaryProducts C] :
 -- note: the reason we use `(Over.pullback s).map` instead of `pullback.map` is that
 -- we want to readily use lemmas about the adjunction `pullback s ⊣ pushforward s` in `UvPoly`.
 def comparison {P} {c : Fan s X} (f : P ⟶ c.pt) : pullback (f ≫ c.fst) s ⟶ pullback c.fst s :=
-  ((Over.pullback s).map (homMk f (by simp) : Over.mk (f ≫ c.fst) ⟶ Over.mk c.fst)).left
+  (Over.pullback s |>.map (homMk f (by simp) : Over.mk (f ≫ c.fst) ⟶ Over.mk c.fst)).left
 
 theorem comparison_pullback.map {P} {c : Fan s X} {f : P ⟶ c.pt} :
     comparison f = pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop) := by
@@ -159,23 +159,63 @@ structure LimitFan where
   /-- The proof that is the limit cone -/
   isLimit : IsLimit cone
 
+end PartialProduct
+
+open PartialProduct
+
+variable {E B : C} {s : E ⟶ B} {X : C}
+
+abbrev partialProd (c : LimitFan s X) : C :=
+  c.cone.pt
+
+abbrev partialProd.cone (c : LimitFan s X) : Fan s X :=
+  c.cone
+
+abbrev partialProd.isLimit (c : LimitFan s X) : IsLimit (partialProd.cone c) :=
+  c.isLimit
+
+abbrev partialProd.fst (c : LimitFan s X) : partialProd c ⟶ B :=
+  Fan.fst <| partialProd.cone c
+
+abbrev partialProd.snd (c : LimitFan s X) :
+    pullback (partialProd.fst c) s ⟶ X :=
+  Fan.snd <| partialProd.cone c
+
+/-- If the partial product of `s` and `X` exists, then every pair of morphisms `f : W ⟶ B` and
+`g : pullback f s ⟶ X` induces a morphism `W ⟶ partialProd s X`. -/
+abbrev partialProd.lift {W} (c : LimitFan s X)
+    (f : W ⟶ B) (g : pullback f s ⟶ X) : W ⟶ partialProd c :=
+  ((partialProd.isLimit c)).lift (Fan.mk f g)
+
+@[reassoc, simp]
+theorem partialProd.lift_fst {W} {c : LimitFan s X} (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    partialProd.lift c f g ≫ partialProd.fst c = f :=
+  ((partialProd.isLimit c)).fac_left (Fan.mk f g)
+
+@[reassoc]
+theorem partialProd.lift_snd {W} (c : LimitFan s X) (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    (comparison (partialProd.lift c f g)) ≫ (partialProd.snd c) =
+    (pullback.congrHom (partialProd.lift_fst f g) rfl).hom ≫ g := by
+  let h := ((partialProd.isLimit c)).fac_right (Fan.mk f g)
+  rw [← pullbackMap_comparison]
+  simp [pullbackMap, pullback.map]
+  sorry
+
+variable (s) (X)
+
 /-- `HasPartialProduct s X` represents the mere existence of a partial product cone over
 `s` and `X`. -/
 class HasPartialProduct : Prop where mk' ::
   /-- There is some universal partial product cone over `s` and `X`. -/
   exists_partial_product : Nonempty <| LimitFan s X
 
-instance HasPartialProduct.mk (l : LimitFan s X) : HasPartialProduct s X :=
-  ⟨Nonempty.intro l⟩
+namespace HasPartialProduct
+
+instance mk (c : LimitFan s X) : HasPartialProduct s X :=
+  ⟨Nonempty.intro c⟩
 
 def getLimitFan [HasPartialProduct s X] : LimitFan s X :=
   Classical.choice <| HasPartialProduct.exists_partial_product
-
-end PartialProduct
-
-open PartialProduct MonoidalCategory
-
-variable {E B : C} (s : E ⟶ B) (X : C)
 
 noncomputable abbrev partialProd [HasPartialProduct s X] : C :=
   (getLimitFan s X).cone.pt
@@ -240,3 +280,5 @@ attribute [local instance] CategoryTheory.ChosenFiniteProducts.ofFiniteProducts
 def partialProd.prod [HasFiniteProducts C] [Exponentiable X] :
     partialProd (terminal.from B) X ≅ X ⟹ B := by
   sorry
+
+end HasPartialProduct
