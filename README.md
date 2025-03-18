@@ -8,9 +8,7 @@
 
 This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions.
 
-## Acknowledgment
-
-The work has been done during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn.
+We use this repository as a dependency in the [HoTTLean](https://github.com/sinhp/groupoid_model_in_lean4) project.
 
 ## Content (under development)
 
@@ -54,6 +52,10 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [ ] The differential calculus of polynomials
 
 - [ ] Polynomial functors and generalized combinatorial species
+
+## Acknowledgment
+
+The work was started during the Trimester Program "Prospects of formal mathematics" at the Hausdorff Institute (HIM) in Bonn.
 
 ### Resources
 
