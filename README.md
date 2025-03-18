@@ -31,7 +31,6 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [x] Composition of polynomials
   - [x] The classifying property of polynomial functors
   - [x] The monoidal category `C [X]` of univariate polynomial functors
-  - [ ] The bicategory of polynomial functors
   - [ ] Cartesian closedness of a category of polynomial functors
 
 - [ ] Multivariate Polynomial Functors
@@ -42,7 +41,7 @@ As part of this formalization, we also formalize locally cartesian closed catego
   - [ ] Symmetric polynomials
   - [ ] Sums of polynomials
   - [ ] Products of polynomials
-  - [ ] Composition of polynomials
+  - [x] Composition of polynomials
   - [ ] The classifying property of polynomial functors
   - [ ] The bicategory of multivariate polynomial functors
   - [ ] The double category of polynomial functors
