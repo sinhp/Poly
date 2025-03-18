@@ -94,34 +94,27 @@ def Fan.extend (c : Fan s X) {A : C} (f : A ⟶ c.pt) : Fan s X where
   fst := f ≫ c.fst
   snd := (pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by simp) (by aesop)) ≫ c.snd
 
+@[ext]
 structure Fan.Hom (c c' : Fan s X) where
   hom : c.pt ⟶ c'.pt
   w_left : hom ≫ c'.fst = c.fst := by aesop_cat
-  w_right : pullbackMap hom ≫ c'.snd = c.snd := by
-    aesop_cat
+  w_right : pullbackMap hom ≫ c'.snd = c.snd := by aesop_cat
 
 attribute [reassoc (attr := simp)] Fan.Hom.w_left Fan.Hom.w_right
 
-  @[simps]
-  instance category : Category (Fan s X) where
-    Hom := Fan.Hom
-    id c := ⟨𝟙 c.pt, by aesop_cat, by simp [pullbackMap]⟩
-    comp {X Y Z} f g := ⟨f.hom ≫ g.hom, by simp [g.w_left, f.w_left], by sorry
-      --have := pullback.map_comp (i₁:= 𝟙 E ) (j₁:= 𝟙 E ) (i₂:= f.hom) (j₂:= g.hom) (i₃:= 𝟙 B) (j₃ := 𝟙 B)
-      -- have : 𝟙 E ≫ 𝟙 E = 𝟙 E := by simp
-      -- rw [← this]
-      -- try rw [← comp_id (𝟙 B)]
-      -- simp [← pullback.map_comp (i₁:= 𝟙) ]
-    ⟩
-    id_comp f := by sorry --aesop_cat
-    comp_id f := by sorry --aesop_cat
-    assoc f g h := by sorry --aesop_cat
-
-@[ext]
-theorem Fan.Hom.ext {c c' : Fan s X} (f g : c ⟶ c') (w : f.hom = g.hom) : f = g := by
-  cases f
-  cases g
-  congr
+@[simps]
+instance : Category (Fan s X) where
+  Hom := Fan.Hom
+  id c := ⟨𝟙 c.pt, by simp, by simp [pullbackMap]⟩
+  comp {X Y Z} f g := ⟨f.hom ≫ g.hom, by simp [g.w_left, f.w_left], by
+    rw [← f.w_right, ← g.w_right]
+    simp_rw [← Category.assoc]
+    congr 1
+    ext <;> simp [pullbackMap]
+  ⟩
+  id_comp f := by dsimp; ext; simp
+  comp_id f := by dsimp; ext; simp
+  assoc f g h := by dsimp; ext; simp
 
 /-- Constructs an isomorphism of `PartialProduct.Fan`s out of an isomorphism of the apexes
 that commutes with the projections. -/
