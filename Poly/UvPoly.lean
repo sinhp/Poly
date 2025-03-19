@@ -379,16 +379,16 @@ def iso_Sigma (P : UvPoly E B) :
 
     _ ≅ _ :=
       let i :=
-          calc
-            star E ⋙₂ pushforward P.p ⋙₂ coyoneda (C := Over B) ≅
-                star E ⋙₂ (Over.pullback P.p).op ⋙ coyoneda (C := Over E) :=
-              iso₂WhiskerLeft (star E) (Adjunction.homIso <| adj P.p).symm
+        calc
+          star E ⋙₂ pushforward P.p ⋙₂ coyoneda (C := Over B) ≅
+              star E ⋙₂ (Over.pullback P.p).op ⋙ coyoneda (C := Over E) :=
+            iso₂WhiskerLeft (star E) (Adjunction.homIso <| adj P.p).symm
 
-            _ ≅ (Over.pullback P.p).op ⋙ star E ⋙₂ coyoneda (C := Over E) :=
-              Iso.refl _
+          _ ≅ (Over.pullback P.p).op ⋙ star E ⋙₂ coyoneda (C := Over E) :=
+            Iso.refl _
 
-            _ ≅ (Over.pullback P.p).op ⋙ (forget E).op ⋙ coyoneda (C := C) :=
-              isoWhiskerLeft (Over.pullback P.p).op (Adjunction.homIso <| forgetAdjStar E).symm;
+          _ ≅ (Over.pullback P.p).op ⋙ (forget E).op ⋙ coyoneda (C := C) :=
+            isoWhiskerLeft (Over.pullback P.p).op (Adjunction.homIso <| forgetAdjStar E).symm;
 
       Functor.Sigma.isoCongrRight (isoWhiskerLeft _ i)
 

@@ -249,7 +249,7 @@ def equivalence_Elements (A : 𝒞) : (yoneda.obj A).Elements ≌ (Over A)ᵒᵖ
     -- TODO: `simp` fails to unify `id_comp`/`comp_id`
     (fun f => by simp [Category.comp_id f, Category.id_comp f])
 
-/-- `𝒞(X, Over.forget f) ≅ Σ(g: X ⟶ A), 𝒞/A(g, f)` -/
+/-- For `X ∈ 𝒞` and `f ∈ 𝒞/A`, `𝒞(X, Over.forget f) ≅ Σ(g: X ⟶ A), 𝒞/A(g, f)`. -/
 def forget_iso_Sigma (A : 𝒞) :
     Over.forget A ⋙₂ coyoneda (C := 𝒞) ≅
     Functor.Sigma ((equivalence_Elements A).functor ⋙ coyoneda (C := Over A)) := by
@@ -282,6 +282,7 @@ namespace CategoryTheory.Adjunction
 
 variable {𝒞 𝒟 : Type*} [Category 𝒞] [Category 𝒟]
 
+/-- For `F ⊣ G`, `𝒟(FX, Y) ≅ 𝒞(X, GY)`. -/
 def homIso {F : 𝒞 ⥤ 𝒟} {G : 𝒟 ⥤ 𝒞} (A : F ⊣ G) :
     F.op ⋙ coyoneda (C := 𝒟) ≅ G ⋙₂ coyoneda (C := 𝒞) :=
   NatIso.ofComponents₂ (fun C D => Equiv.toIso <| A.homEquiv C.unop D)
