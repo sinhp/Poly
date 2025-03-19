@@ -7,6 +7,8 @@ Authors: Sina Hazratpour
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
 import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
+import Poly.DepFunctor.Sigma
+
 
 /-!
 # Polynomial Functor
@@ -72,7 +74,7 @@ def prod {E' B'} (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]:
 /-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
 to a single variable polynomial `P : UvPoly E B`. -/
 def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
-  Over.star E ⋙ pushforward P.p ⋙ forget B
+  star E ⋙ pushforward P.p ⋙ forget B
 
 /-- The evaluation function of a polynomial `P` at an object `X`. -/
 def apply (P : UvPoly E B) : C → C := (P.functor).obj
@@ -236,7 +238,7 @@ def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
 
 namespace UvPoly
 
-variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
+variable {C : Type u} [Category.{v} C] [HasTerminal C] [HasPullbacks C]
 
 instance : SMul C (Total C) where
   smul S P := Total.of (smul S P.poly)
@@ -352,55 +354,77 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     · simp only [proj_fst, lift_fst]
     · sorry
 
-#exit
+variable {Γ X : C} (P : UvPoly E B)
 
-/-- `UvPoly.equiv` is natural in `Γ`. -/
-lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C)
-    (f : Γ ⟶ P @ X) :
-    equiv P Δ X (σ ≫ f) = let ⟨b, e⟩ := equiv P Γ X f
-                           ⟨σ ≫ b, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
-                                     (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
-  dsimp
-  congr! with h
-  . simp [polyPair, partialProduct.liftAux]
-  . set g := _ ≫ (P.polyPair be).snd
-    rw [(_ : (P.polyPair (σ ≫ be)).snd = (pullback.congrHom h rfl).hom ≫ g)]
-    · generalize (P.polyPair (σ ≫ be)).fst = x at h
-      cases h
-      simp
-    · simp only [polyPair, comp_obj, homEquiv_counit, id_obj, comp_left, pullback_obj_left,
-      mk_left, mk_hom, star_obj_left, pullback_map_left, homMk_left, pullback.congrHom_hom, ←
-      assoc, g]
-      congr 2
-      ext <;> simp
+/-- `𝒞(Γ, PₚX) ≅ Σ(b : Γ ⟶ B), 𝒞(b*p, X)` -/
+def iso_Sigma (P : UvPoly E B) :
+    P.functor ⋙₂ coyoneda (C := C) ≅
+    Functor.Sigma
+      ((equivalence_Elements B).functor ⋙ (Over.pullback P.p).op ⋙
+        (forget E).op ⋙ coyoneda (C := C)) :=
+  calc
+    P.functor ⋙₂ coyoneda (C := C) ≅
+        (star E ⋙ pushforward P.p) ⋙₂ (forget B ⋙₂ coyoneda (C := C)) :=
+      Iso.refl _
 
-/-- `UvPoly.equiv` is natural in `X`. -/
-lemma equiv_naturality_right {Γ X Y : C}
+    _ ≅ (star E ⋙ pushforward P.p) ⋙₂ Functor.Sigma
+        ((equivalence_Elements B).functor ⋙ coyoneda (C := Over B)) :=
+      iso₂WhiskerLeft _ (forget_iso_Sigma B)
+
+    _ ≅ Functor.Sigma
+        ((equivalence_Elements B).functor ⋙
+          star E ⋙₂ pushforward P.p ⋙₂ coyoneda (C := Over B)) :=
+      -- Q: better make `comp₂_Sigma` an iso and avoid `eqToIso`?
+      eqToIso (by simp [comp₂_Sigma])
+
+    _ ≅ _ :=
+      let i :=
+          calc
+            star E ⋙₂ pushforward P.p ⋙₂ coyoneda (C := Over B) ≅
+                star E ⋙₂ (Over.pullback P.p).op ⋙ coyoneda (C := Over E) :=
+              iso₂WhiskerLeft (star E) (Adjunction.homIso <| adj P.p).symm
+
+            _ ≅ (Over.pullback P.p).op ⋙ star E ⋙₂ coyoneda (C := Over E) :=
+              Iso.refl _
+
+            _ ≅ (Over.pullback P.p).op ⋙ (forget E).op ⋙ coyoneda (C := C) :=
+              isoWhiskerLeft (Over.pullback P.p).op (Adjunction.homIso <| forgetAdjStar E).symm;
+
+      Functor.Sigma.isoCongrRight (isoWhiskerLeft _ i)
+
+-- Alternative definition of `equiv`.
+def equiv' (P : UvPoly E B) (Γ X : C) :
+    (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) :=
+  Iso.toEquiv <| (P.iso_Sigma.app (.op Γ)).app X
+
+theorem equiv'_app (P : UvPoly E B) (Γ X : C) (be : Γ ⟶ P.functor.obj X) :
+    P.equiv' Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be := by
+  simp [equiv']
+
+-- TODO(WN): Tactic script takes 10s, and kernel typechecking another 10s!
+set_option maxHeartbeats 0 in
+lemma equiv'_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
+    P.equiv' Δ X (σ ≫ be) = let p := P.equiv' Γ X be
+                           ⟨σ ≫ p.1, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
+                                     (assoc (obj := C) .. ▸ pullback.condition) ≫ p.2⟩ := by
+  conv_lhs => rw [equiv'_app, comp₂_coyoneda_naturality_left, ← equiv'_app]
+  apply Sigma.ext <;> simp
+
+set_option maxHeartbeats 0 in
+lemma equiv'_naturality_right {Γ X Y : C}
     (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
-    equiv P Γ Y (be ≫ P.functor.map f) =
-      let ⟨b, e⟩ := equiv P Γ X be
-      ⟨b, e ≫ f⟩ := by
-  dsimp
-  congr! 1 with h
-  . simp [polyPair]
-  . set g := (P.polyPair be).snd ≫ f
-    rw [(_ : (P.polyPair (be ≫ P.functor.map f)).snd = (pullback.congrHom h rfl).hom ≫ g)]
-    · generalize (P.polyPair (be ≫ P.functor.map f)).fst = x at h
-      cases h
-      simp
-    · dsimp only [polyPair, g]
-      rw [homMk_comp (w_f := by simp [fstProj, functor]) (w_g := by simp [functor])]
-      simp only [UvPoly.functor, Functor.comp_map, forget_map, homMk_eta,
-        homEquiv_naturality_right_symm, comp_left, assoc]
-      admit
-      --rw [show ((Over.pullback E).map f).left ≫ prod.snd = prod.snd ≫ f by simp]
-      -- simp only [← assoc]
-      -- congr 2
-      -- simp only [comp_obj, forget_obj, star_obj_left, homEquiv_counit, id_obj, comp_left,
-      --   pullback_obj_left, mk_left, mk_hom, pullback_map_left, Over.homMk_left,
-      --   pullback.congrHom_hom, ← assoc]
-      -- congr 1
-      -- ext <;> simp
+    equiv' P Γ Y (be ≫ P.functor.map f) =
+      let p := equiv' P Γ X be
+      ⟨p.1, p.2 ≫ f⟩ := by
+  conv_lhs => rw [equiv'_app, comp₂_coyoneda_naturality_right, ← equiv'_app]
+  have : (𝟙 Γ ≫ ((P.equiv' Γ X) be).fst) = (P.equiv' Γ X be).fst := by simp
+  apply Sigma.ext
+  . simp
+  . dsimp
+    rw! (castMode := .all) [this]
+    simp
+
+#exit
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
