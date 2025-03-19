@@ -50,6 +50,23 @@ theorem cartesian.whiskerLeft {K : Type*} [Category K]  {F G : J ⥤ C} {α : F 
     (hα : cartesian α) (H : K ⥤ J) : cartesian (whiskerLeft H α) :=
   fun _ _ f => hα (H.map f)
 
+theorem cartesian.comp_horizz {M N K : Type*}
+  [Category M] [Category N] [Category K] {F G : J ⥤ C} {M N : C ⥤ K} {α : F ⟶ G} {β : M ⟶ N}
+  (hα : cartesian α) (hβ : cartesian β)
+  [∀ (i j : J) (f : j ⟶ i), PreservesLimit (cospan (α.app i) (G.map f)) M] :
+    cartesian (NatTrans.hcomp α β) := by {
+      have ha := cartesian.whiskerRight hα M
+      have hb := cartesian.whiskerLeft hβ G
+      have hc := cartesian.comp ha hb
+      unfold cartesian
+      intros i j f
+      specialize hc f
+      simp only [Functor.comp_obj, Functor.comp_map, comp_app,
+        whiskerRight_app, whiskerLeft_app,
+        naturality] at hc
+      exact hc
+    }
+
 theorem cartesian_of_discrete {ι : Type*} {F G : Discrete ι ⥤ C}
     (α : F ⟶ G) : cartesian α := by
   rintro ⟨i⟩ ⟨j⟩ ⟨⟨rfl : i = j⟩⟩
