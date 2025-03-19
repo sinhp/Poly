@@ -68,25 +68,75 @@ def e := ((ev f).app (Over.mk u)).left -- ev' (Over.mk f) (Over.mk u)
 
 /- On the way to prove `pentagonIso`.
 We show that the pasting of the 2-cells in below is an isomorphism.
-```     e^*       g_*
-    /M --- >  /P ---->  /D
-    |         |          |
- u! |   ↙     | w!  ≅    | v!
-    |         v          v
-    /B ----  /B ----->  /A
-                  f
+```
+        Δe         Πg
+    C/M ----> C/P ----> C/D
+    |          |         |
+ Σu |   ↙      | Σw  ≅   | Σv
+    v          v         v
+    C/B ---- C/B ----> C/A
+                   f
 ```
 1. To do this we first prove that that the left cell is cartesian.
 2. Then we observe the right cell is cartesian since it is an iso.
 3. So the pasting is also cartesian.
-4. The component of this 2-cell at the terminal object is an iso, so the 2-cell is an iso.
+4. The component of this 2-cell at the terminal object is an iso,
+  so the 2-cell is an iso.
 -/
 
-def cellLeft : pullback (e f u) ⋙ map (w f u) ⟶ map u := sorry
+def cellLeftTriangle : e f u ≫ u = w f u := by
+  unfold e w v
+  have := ((ev f).app (Over.mk u)).w
+  aesop_cat
+
+def cellLeft : pullback (e f u) ⋙ map (w f u) ⟶ map u :=
+  pullbackMapTriangle _ _ _ (cellLeftTriangle f u)
+
+lemma cellLeftCartesian : cartesian (cellLeft f u) := by
+  unfold cartesian
+  simp only [id_obj, mk_left, comp_obj, pullback_obj_left, Functor.comp_map]
+  unfold cellLeft
+  intros i j f'
+  have α := pullbackMapTriangle (w f u) (e f u)
+  simp only [id_obj, mk_left] at α u
+  sorry
+
+def cellRightCommSq : CommSq (g f u) (w f u) (v f u) f :=
+  IsPullback.toCommSq (IsPullback.of_hasPullback _ _)
+
+def cellRight' : pushforward (g f u) ⋙ map (v f u)
+  ≅ map (w f u) ⋙ pushforward f := sorry
+
+lemma cellRightCartesian : cartesian (cellRight' f u).hom :=
+  cartesian_of_isIso ((cellRight' f u).hom)
+
+def pasteCell1 : pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) ⟶
+  pullback (e f u) ⋙ map (w f u) ⋙ pushforward f := by
+  apply whiskerLeft
+  exact (cellRight' f u).hom
+
+def pasteCell2 : (pullback (e f u) ⋙ map (w f u)) ⋙ pushforward f
+   ⟶ (map u) ⋙ pushforward f := by
+  apply whiskerRight
+  exact cellLeft f u
+
+def pasteCell := pasteCell1 f u ≫ pasteCell2 f u
+
+def paste : cartesian (pasteCell f u) := by
+  apply cartesian.comp
+  · unfold pasteCell1
+    apply cartesian.whiskerLeft (cellRightCartesian f u)
+  · unfold pasteCell2
+    apply cartesian.whiskerRight (cellLeftCartesian f u)
+
+#check pushforwardPullbackTwoSquare
 
 -- use `pushforwardPullbackTwoSquare` to construct this iso.
-def pentagonIso : Over.map u ⋙ (pushforward f) ≅
-  pullback (e f u) ⋙ (pushforward (g f u)) ⋙ Over.map (v f u)  :=
-  sorry
+def pentagonIso : map u ⋙ pushforward f ≅
+  pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) := by
+  have := cartesian_of_isPullback_to_terminal (pasteCell f u)
+  letI : IsIso ((pasteCell f u).app (⊤_ Over ((𝟭 (Over B)).obj (Over.mk u)).left)) := sorry
+  have := isIso_of_cartesian (pasteCell f u) (paste f u)
+  exact (asIso (pasteCell f u)).symm
 
 end CategoryTheory
