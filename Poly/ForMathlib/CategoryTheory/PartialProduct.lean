@@ -5,6 +5,7 @@ Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 import Mathlib.CategoryTheory.Comma.Over.Pullback
+import Poly.ForMathlib.CategoryTheory.Comma.Over.Pullback
 import Mathlib.CategoryTheory.Closed.Cartesian
 import Mathlib.CategoryTheory.EqToHom
 
@@ -20,7 +21,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open CategoryTheory Category Limits Functor
+open CategoryTheory Category Limits Functor Over
 
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -57,15 +58,30 @@ theorem Fan.fst_mk {pt : C} (f : pt ⟶ B) (g : pullback f s ⟶ X) :
 
 variable {s X}
 
+def Fan.over (c : Fan s X) : Over B := Over.mk c.fst
+
+def Fan.overPullbackToStar (c : Fan s X) [HasBinaryProducts C] :
+    (Over.pullback s).obj c.over ⟶ (Over.star E).obj X :=
+  (forgetAdjStar E).homEquiv _ _ c.snd
+
+@[reassoc (attr := simp)]
+theorem Fan.overPullbackToStar_snd {c : Fan s X} [HasBinaryProducts C] :
+    (Fan.overPullbackToStar c).left ≫ prod.snd = c.snd := by
+  simp [Fan.overPullbackToStar, Adjunction.homEquiv, forgetAdjStar.unit_app]
+
+-- note: the reason we use `(Over.pullback s).map` instead of `pullback.map` is that
+-- we want to readily use lemmas about the adjunction `pullback s ⊣ pushforward s` in `UvPoly`.
 def comparison {P} {c : Fan s X} (f : P ⟶ c.pt) : pullback (f ≫ c.fst) s ⟶ pullback c.fst s :=
-  pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
+  (Over.pullback s |>.map (homMk f (by simp) : Over.mk (f ≫ c.fst) ⟶ Over.mk c.fst)).left
+
+theorem comparison_pullback.map {P} {c : Fan s X} {f : P ⟶ c.pt} :
+    comparison f = pullback.map (f ≫ c.fst) s (c.fst) s f (𝟙 E) (𝟙 B) (by aesop) (by aesop) := by
+  simp [comparison, pullback.map]
 
 def pullbackMap {c' c : Fan s X} (f : c'.pt ⟶ c.pt)
-    (_ : f ≫ c.fst = c'.fst := by aesop_cat) :
-    pullback c'.fst s ⟶ pullback c.fst s :=
-  -- simp_rw [← h]
-  -- exact pullbackPreComp f
-  pullback.map c'.fst s c.fst s f (𝟙 E) (𝟙 B) (by aesop) (by aesop)
+    (h : f ≫ c.fst = c'.fst := by aesop_cat) :
+    pullback c'.fst s ⟶ pullback c.fst s := by
+  simpa using  ((Over.pullback s).map (Over.homMk f h : Over.mk (c'.fst) ⟶ Over.mk c.fst)).left
 
 theorem pullbackMap_comparison {P} {c : Fan s X} (f : P ⟶ c.pt) :
     pullbackMap (c' := Fan.mk (f ≫ c.fst) (comparison f ≫ c.snd)) (c := c) f = comparison f := by
@@ -78,34 +94,27 @@ def Fan.extend (c : Fan s X) {A : C} (f : A ⟶ c.pt) : Fan s X where
   fst := f ≫ c.fst
   snd := (pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by simp) (by aesop)) ≫ c.snd
 
+@[ext]
 structure Fan.Hom (c c' : Fan s X) where
   hom : c.pt ⟶ c'.pt
   w_left : hom ≫ c'.fst = c.fst := by aesop_cat
-  w_right : pullbackMap hom ≫ c'.snd = c.snd := by
-    aesop_cat
+  w_right : pullbackMap hom ≫ c'.snd = c.snd := by aesop_cat
 
 attribute [reassoc (attr := simp)] Fan.Hom.w_left Fan.Hom.w_right
 
-  @[simps]
-  instance category : Category (Fan s X) where
-    Hom := Fan.Hom
-    id c := ⟨𝟙 c.pt, by aesop_cat, by simp [pullbackMap]⟩
-    comp {X Y Z} f g := ⟨f.hom ≫ g.hom, by simp [g.w_left, f.w_left], by sorry
-      --have := pullback.map_comp (i₁:= 𝟙 E ) (j₁:= 𝟙 E ) (i₂:= f.hom) (j₂:= g.hom) (i₃:= 𝟙 B) (j₃ := 𝟙 B)
-      -- have : 𝟙 E ≫ 𝟙 E = 𝟙 E := by simp
-      -- rw [← this]
-      -- try rw [← comp_id (𝟙 B)]
-      -- simp [← pullback.map_comp (i₁:= 𝟙) ]
-    ⟩
-    id_comp f := by sorry --aesop_cat
-    comp_id f := by sorry --aesop_cat
-    assoc f g h := by sorry --aesop_cat
-
-@[ext]
-theorem Fan.Hom.ext {c c' : Fan s X} (f g : c ⟶ c') (w : f.hom = g.hom) : f = g := by
-  cases f
-  cases g
-  congr
+@[simps]
+instance : Category (Fan s X) where
+  Hom := Fan.Hom
+  id c := ⟨𝟙 c.pt, by simp, by simp [pullbackMap]⟩
+  comp {X Y Z} f g := ⟨f.hom ≫ g.hom, by simp [g.w_left, f.w_left], by
+    rw [← f.w_right, ← g.w_right]
+    simp_rw [← Category.assoc]
+    congr 1
+    ext <;> simp [pullbackMap]
+  ⟩
+  id_comp f := by dsimp; ext; simp
+  comp_id f := by dsimp; ext; simp
+  assoc f g h := by dsimp; ext; simp
 
 /-- Constructs an isomorphism of `PartialProduct.Fan`s out of an isomorphism of the apexes
 that commutes with the projections. -/
@@ -143,23 +152,63 @@ structure LimitFan where
   /-- The proof that is the limit cone -/
   isLimit : IsLimit cone
 
+end PartialProduct
+
+open PartialProduct
+
+variable {E B : C} {s : E ⟶ B} {X : C}
+
+abbrev partialProd (c : LimitFan s X) : C :=
+  c.cone.pt
+
+abbrev partialProd.cone (c : LimitFan s X) : Fan s X :=
+  c.cone
+
+abbrev partialProd.isLimit (c : LimitFan s X) : IsLimit (partialProd.cone c) :=
+  c.isLimit
+
+abbrev partialProd.fst (c : LimitFan s X) : partialProd c ⟶ B :=
+  Fan.fst <| partialProd.cone c
+
+abbrev partialProd.snd (c : LimitFan s X) :
+    pullback (partialProd.fst c) s ⟶ X :=
+  Fan.snd <| partialProd.cone c
+
+/-- If the partial product of `s` and `X` exists, then every pair of morphisms `f : W ⟶ B` and
+`g : pullback f s ⟶ X` induces a morphism `W ⟶ partialProd s X`. -/
+abbrev partialProd.lift {W} (c : LimitFan s X)
+    (f : W ⟶ B) (g : pullback f s ⟶ X) : W ⟶ partialProd c :=
+  ((partialProd.isLimit c)).lift (Fan.mk f g)
+
+@[reassoc, simp]
+theorem partialProd.lift_fst {W} {c : LimitFan s X} (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    partialProd.lift c f g ≫ partialProd.fst c = f :=
+  ((partialProd.isLimit c)).fac_left (Fan.mk f g)
+
+@[reassoc]
+theorem partialProd.lift_snd {W} (c : LimitFan s X) (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    (comparison (partialProd.lift c f g)) ≫ (partialProd.snd c) =
+    (pullback.congrHom (partialProd.lift_fst f g) rfl).hom ≫ g := by
+  let h := ((partialProd.isLimit c)).fac_right (Fan.mk f g)
+  rw [← pullbackMap_comparison]
+  simp [pullbackMap, pullback.map]
+  sorry
+
+variable (s) (X)
+
 /-- `HasPartialProduct s X` represents the mere existence of a partial product cone over
 `s` and `X`. -/
 class HasPartialProduct : Prop where mk' ::
   /-- There is some universal partial product cone over `s` and `X`. -/
   exists_partial_product : Nonempty <| LimitFan s X
 
-instance HasPartialProduct.mk (l : LimitFan s X) : HasPartialProduct s X :=
-  ⟨Nonempty.intro l⟩
+namespace HasPartialProduct
+
+instance mk (c : LimitFan s X) : HasPartialProduct s X :=
+  ⟨Nonempty.intro c⟩
 
 def getLimitFan [HasPartialProduct s X] : LimitFan s X :=
   Classical.choice <| HasPartialProduct.exists_partial_product
-
-end PartialProduct
-
-open PartialProduct MonoidalCategory
-
-variable {E B : C} (s : E ⟶ B) (X : C)
 
 noncomputable abbrev partialProd [HasPartialProduct s X] : C :=
   (getLimitFan s X).cone.pt
@@ -224,3 +273,5 @@ attribute [local instance] CategoryTheory.ChosenFiniteProducts.ofFiniteProducts
 def partialProd.prod [HasFiniteProducts C] [Exponentiable X] :
     partialProd (terminal.from B) X ≅ X ⟹ B := by
   sorry
+
+end HasPartialProduct
