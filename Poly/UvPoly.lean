@@ -266,31 +266,30 @@ def ε (P : UvPoly E B) (X : C) : pullback (P.fstProj X) P.p ⟶ E ⨯ X :=
 def fan (P : UvPoly E B) (X : C) : Fan P.p X where
   pt := P @ X
   fst := P.fstProj X
-  snd := (ε P X) ≫ ((forgetAdjStar E).counit).app X   -- (ε P X) ≫ prod.snd
-
--- theorem lifAux_conj
+  snd := (ε P X) ≫ prod.snd -- ((forgetAdjStar E).counit).app X
 
 /--
 `P.PartialProduct.fan` is in fact a limit fan; this provides the univeral mapping property of the
 polynomial functor.
 -/
 def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
-  lift c := (pushforwardCurry (Fan.mk c.fst c.snd).overPullbackToStar).left
-  -- (P.exp.adj.homEquiv _ _ (Fan.mk c.fst c.snd).overPullbackToStar).left
-  -- liftAux P c.fst c.snd
+  lift c := (pushforwardCurry <| overPullbackToStar c.fst c.snd).left
   fac_left := by aesop_cat
   fac_right := by
     intro c
-    simp only [fan,pullbackMap, ev, ← assoc, ε]
-    simp only [pushforwardCurry]
-    --simp only [← homEquiv_counit]
-    rw [← comp_left]
+    simp only [fan_snd, pullbackMap, ε, ev, ← assoc, ← comp_left]
+    simp_rw [homMk_eta]
+    erw [← homEquiv_counit]
+    simp [← ExponentiableMorphism.homEquiv_apply_eq, overPullbackToStar_prod_snd]
+  uniq := by
+    intro c m h_left h_right
+    dsimp [pushforwardCurry]
+    symm
+    rw [← homMk_left m (U:= Over.mk c.fst) (V:= Over.mk (P.fstProj X))]
+    congr 1
+    apply (Adjunction.homEquiv_apply_eq (adj P.p) (overPullbackToStar c.fst c.snd) (Over.homMk m)).mpr
+    simp [overPullbackToStar, Fan.overPullbackToStar, Fan.over]
     sorry
-    --simp only [Fan.overPullbackToStar_snd]
-
-    -- rw [← comp_left]
-    -- simp_rw [← homEquiv_counit]
-  uniq := sorry
 
 end PartialProduct
 
@@ -303,6 +302,17 @@ abbrev lift {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X
     Γ ⟶ P @ X :=
   partialProd.lift ⟨fan P X, isLimitFan P X⟩ b e
 
+theorem lift_fst {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
+    P.lift b e ≫ P.fstProj X = b := by
+  unfold lift
+  rw [← PartialProduct.fan_fst, partialProd.lift_fst]
+
+@[reassoc]
+theorem lift_snd {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
+    (comparison (c:= PartialProduct.fan P X) (P.lift b e)) ≫ (ε P X) ≫ prod.snd =
+    (pullback.congrHom (partialProd.lift_fst b e) rfl).hom ≫ e := by
+  sorry
+
 /-- A morphism `f : Γ ⟶ P @ X` projects to a morphism `b : Γ ⟶ B` and a morphism
 `e : pullback b P.p ⟶ X`. -/
 -- formerly `polyPair`
@@ -310,60 +320,44 @@ def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
     Σ b : Γ ⟶ B, pullback b P.p ⟶ X :=
   ⟨fan P X |>.extend f |>.fst, fan P X |>.extend f |>.snd⟩
 
-variable {Γ X : C} (P : UvPoly E B)
+@[simp]
+theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
+    (proj P f).fst = f ≫ P.fstProj X := by
+  rfl
 
-#exit
-
-/-- The second component of `polyPair` is a comparison map of pullbacks composed with `genPb.u₂`. -/
-theorem polyPair_snd_eq_comp_u₂' {Γ X : C} (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) :
-    (P.polyPair be).snd = pullback.map (P.polyPair be).fst P.p (P.fstProj X) P.p be (𝟙 _) (𝟙 _) (by simp [polyPair]) (by simp) ≫ (ev P X) := by
-  simp only [polyPair, ev, homEquiv_counit, Over.comp_left, ← assoc]
-  congr 2
-  sorry --aesop_cat
-
+/-- The second component of `proj` is a comparison map of pullbacks composed with `ε P X ≫ prod.snd` -/
+-- formerly `polyPair_snd_eq_comp_u₂'`
+@[simp]
+theorem proj_snd {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
+    (proj P f).snd =
+    (pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by aesop) (by aesop)) ≫ ε P X ≫ prod.snd := by
+  simp [proj]
 
 /-- Universal property of the polynomial functor. -/
 @[simps]
 def equiv (P : UvPoly E B) (Γ : C) (X : C) :
-    (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) where
-  toFun := P.polyPair
-  invFun := fun ⟨b, e⟩ => P.PartialProduct.liftAux b e
-  left_inv be := by
-    simp_rw [polyPair, liftAux, ← forgetAdjStar.homEquiv_symm]
-    simp
+    (Γ ⟶ P @ X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) where
+  toFun := P.proj
+  invFun u := P.lift (Γ := Γ) (X := X) u.1 u.2
+  left_inv f := by
+    dsimp
+    symm
+    fapply partialProd.hom_ext ⟨fan P X, isLimitFan P X⟩
+    · simp [partialProd.lift]
+      rfl
+    · sorry
   right_inv := by
     intro ⟨b, e⟩
-    dsimp [polyPair, liftAux]
-    have := Over.forgetAdjStar.homEquiv (X := (Over.pullback P.p).obj (Over.mk b)) (f := e)
-    simp at this
-    rw [this]
-    set pairHat := P.exp.adj.homEquiv _ _ _
-    congr! with h
-    · simpa [-w] using pairHat.w
-    · -- We deal with HEq/dependency by precomposing with an iso
-      let i : Over.mk (pairHat.left ≫ P.fstProj X) ≅ Over.mk b :=
-        Over.isoMk (Iso.refl _) (by simp [h])
-      rw [
-        show homMk _ _ = i.hom ≫ pairHat by ext; simp [i],
-        show _ ≫ prod.snd = (pullback.congrHom h rfl).hom ≫ e by (
-          simp only [pullback_obj_left,
-          mk_left, mk_hom, star_obj_left, pullback_obj_hom, const_obj_obj, BinaryFan.mk_pt,
-          BinaryFan.π_app_left, BinaryFan.mk_fst, id_eq, homEquiv_unit, id_obj, comp_obj,
-          homEquiv_counit, map_comp, assoc, counit_naturality, left_triangle_components_assoc,
-          comp_left, pullback_map_left, eqToHom_left, eqToHom_refl, homMk_left, prod.comp_lift,
-          limit.lift_π, eq_mpr_eq_cast, PullbackCone.mk_pt, PullbackCone.mk_π_app, comp_id,
-          BinaryFan.π_app_right, BinaryFan.mk_snd, pullback.congrHom_hom, pairHat]
-          congr 1
-          ext <;> simp [i])
-      ]
-      generalize (hasPullbackHorizPaste .. : HasPullback (pairHat.left ≫ P.fstProj X) P.p) = pf
-      generalize pairHat.left ≫ _ = x at h pf
-      cases h
-      simp [pullback.congrHom]
+    ext
+    · simp only [proj_fst, lift_fst]
+    · sorry
+
+#exit
 
 /-- `UvPoly.equiv` is natural in `Γ`. -/
-lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
-    equiv P Δ X (σ ≫ be) = let ⟨b, e⟩ := equiv P Γ X be
+lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C)
+    (f : Γ ⟶ P @ X) :
+    equiv P Δ X (σ ≫ f) = let ⟨b, e⟩ := equiv P Γ X f
                            ⟨σ ≫ b, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ e⟩ := by
   dsimp
@@ -410,17 +404,17 @@ lemma equiv_naturality_right {Γ X Y : C}
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
-  pullback Q.p (genericPullback.ev P A)
+  Limits.pullback Q.p (fan P A).snd
 
 /-- The codomain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compCod {E B D A : C} (P : UvPoly E B) (_ : UvPoly D A) :=
-  P.functor.obj A
+  P @ A
 
 @[simps!]
 def comp [HasPullbacks C] [HasTerminal C]
     {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (compCod P Q) :=
    {
-     p :=  (pullback.snd Q.p (genericPullback.ev P A)) ≫ (genericPullback.fst P A)
+     p :=  (pullback.snd Q.p (fan P A).snd) ≫ (pullback.fst (fan P A).fst P.p)
      exp := by sorry
    }
 
