@@ -1,13 +1,13 @@
 /-
 Copyright (c) 2024 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Sina Hazratpour
+Authors: Sina Hazratpour, Wojciech Nawrocki
 -/
 
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
 import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
-import Poly.DepFunctor.Sigma
+import Poly.Bifunctor.Sigma
 
 
 /-!
@@ -356,12 +356,28 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
 
 variable {Γ X : C} (P : UvPoly E B)
 
+/-- Sends `(Γ, X)` to `Σ(b : Γ ⟶ B), 𝒞(pullback b P.p, X)`. -/
+@[simps! obj_obj map_app]
+def fansOver : Cᵒᵖ ⥤ C ⥤ Type v :=
+  Functor.Sigma
+    ((equivalence_Elements B).functor ⋙ (Over.pullback P.p).op ⋙
+      (forget E).op ⋙ coyoneda (C := C))
+
+omit [HasTerminal C] in
+@[simp]
+theorem fansOver_obj_map {X Y : C} (Γ : Cᵒᵖ) (f : X ⟶ Y) (x : P.fansOver.obj Γ |>.obj X) :
+    (P.fansOver.obj Γ).map f x = ⟨x.1, x.2 ≫ f⟩ := by
+  dsimp [fansOver]
+  have : 𝟙 Γ.unop ≫ x.1 = x.1 := by simp
+  ext : 1
+  . simp
+  . dsimp
+    rw! (castMode := .all) [this]
+    simp
+
 /-- `𝒞(Γ, PₚX) ≅ Σ(b : Γ ⟶ B), 𝒞(b*p, X)` -/
 def iso_Sigma (P : UvPoly E B) :
-    P.functor ⋙₂ coyoneda (C := C) ≅
-    Functor.Sigma
-      ((equivalence_Elements B).functor ⋙ (Over.pullback P.p).op ⋙
-        (forget E).op ⋙ coyoneda (C := C)) :=
+    P.functor ⋙₂ coyoneda (C := C) ≅ P.fansOver :=
   calc
     P.functor ⋙₂ coyoneda (C := C) ≅
         (star E ⋙ pushforward P.p) ⋙₂ (forget B ⋙₂ coyoneda (C := C)) :=
@@ -369,7 +385,7 @@ def iso_Sigma (P : UvPoly E B) :
 
     _ ≅ (star E ⋙ pushforward P.p) ⋙₂ Functor.Sigma
         ((equivalence_Elements B).functor ⋙ coyoneda (C := Over B)) :=
-      iso₂WhiskerLeft _ (forget_iso_Sigma B)
+      comp₂_isoWhiskerLeft _ (forget_iso_Sigma B)
 
     _ ≅ Functor.Sigma
         ((equivalence_Elements B).functor ⋙
@@ -382,16 +398,17 @@ def iso_Sigma (P : UvPoly E B) :
         calc
           star E ⋙₂ pushforward P.p ⋙₂ coyoneda (C := Over B) ≅
               star E ⋙₂ (Over.pullback P.p).op ⋙ coyoneda (C := Over E) :=
-            iso₂WhiskerLeft (star E) (Adjunction.homIso <| adj P.p).symm
+            comp₂_isoWhiskerLeft (star E) (Adjunction.coyoneda_iso <| adj P.p).symm
 
           _ ≅ (Over.pullback P.p).op ⋙ star E ⋙₂ coyoneda (C := Over E) :=
             Iso.refl _
 
           _ ≅ (Over.pullback P.p).op ⋙ (forget E).op ⋙ coyoneda (C := C) :=
-            isoWhiskerLeft (Over.pullback P.p).op (Adjunction.homIso <| forgetAdjStar E).symm;
+            isoWhiskerLeft (Over.pullback P.p).op (Adjunction.coyoneda_iso <| forgetAdjStar E).symm;
 
       Functor.Sigma.isoCongrRight (isoWhiskerLeft _ i)
 
+-- TODO: make modules `UvPoly.UPIso` and `UvPoly.UPFan`
 -- Alternative definition of `equiv`.
 def equiv' (P : UvPoly E B) (Γ X : C) :
     (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback b P.p ⟶ X) :=
@@ -401,28 +418,22 @@ theorem equiv'_app (P : UvPoly E B) (Γ X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv' Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be := by
   simp [equiv']
 
--- TODO(WN): Tactic script takes 10s, and kernel typechecking another 10s!
-set_option maxHeartbeats 0 in
+-- TODO(WN): Checking the theorem statement takes 5s, and kernel typechecking 10s!
 lemma equiv'_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (P : UvPoly E B) (X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv' Δ X (σ ≫ be) = let p := P.equiv' Γ X be
-                           ⟨σ ≫ p.1, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
-                                     (assoc (obj := C) .. ▸ pullback.condition) ≫ p.2⟩ := by
-  conv_lhs => rw [equiv'_app, comp₂_coyoneda_naturality_left, ← equiv'_app]
-  apply Sigma.ext <;> simp
+                            ⟨σ ≫ p.1, pullback.lift (pullback.fst .. ≫ σ) (pullback.snd ..)
+                                      (assoc (obj := C) .. ▸ pullback.condition) ≫ p.2⟩ := by
+  conv_lhs => rw [equiv'_app, coyoneda.comp₂_naturality₂_left, ← equiv'_app]
+  simp
 
-set_option maxHeartbeats 0 in
+-- TODO(WN): Kernel typechecking takes 10s!
 lemma equiv'_naturality_right {Γ X Y : C}
     (P : UvPoly E B) (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
     equiv' P Γ Y (be ≫ P.functor.map f) =
       let p := equiv' P Γ X be
       ⟨p.1, p.2 ≫ f⟩ := by
-  conv_lhs => rw [equiv'_app, comp₂_coyoneda_naturality_right, ← equiv'_app]
-  have : (𝟙 Γ ≫ ((P.equiv' Γ X) be).fst) = (P.equiv' Γ X be).fst := by simp
-  apply Sigma.ext
-  . simp
-  . dsimp
-    rw! (castMode := .all) [this]
-    simp
+  conv_lhs => rw [equiv'_app, coyoneda.comp₂_naturality₂_right, ← equiv'_app]
+  simp
 
 #exit
 

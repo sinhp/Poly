@@ -1,19 +1,16 @@
+/-
+Copyright (c) 2025 Wojciech Nawrocki. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Wojciech Nawrocki
+-/
 import Mathlib.CategoryTheory.Elements
 
-namespace CategoryTheory
+namespace CategoryTheory.CategoryOfElements
 
 variable {𝒞 𝒟 : Type*} [Category 𝒞] [Category 𝒟]
-
-namespace CategoryOfElements
-
 variable (F : 𝒞 ⥤ Type*) (G : F.Elements ⥤ 𝒟)
 
--- TODO: These are the same definition; but neither works with dot notation on `Hom` :(
-#check NatTrans.mapElements
-#check CategoryOfElements.map
-
--- Cannot add `simps` for defs in imported modules
--- attribute [simps map] NatTrans.mapElements
+-- FIXME(mathlib): `NatTrans.mapElements` and `CategoryOfElements.map` are the same thing
 
 @[simp]
 theorem map_homMk_id {X : 𝒞} (a : F.obj X) (eq : F.map (𝟙 X) a = a) :
@@ -34,6 +31,4 @@ theorem map_homMk_comp {X Y Z : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (a : F.obj X) 
   show G.map (f ≫ g) = G.map f ≫ G.map g
   simp
 
-end CategoryOfElements
-
-end CategoryTheory
+end CategoryTheory.CategoryOfElements

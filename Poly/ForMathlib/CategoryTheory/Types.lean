@@ -8,8 +8,9 @@ import Mathlib.CategoryTheory.Types
 
 namespace CategoryTheory.FunctorToTypes
 
-/-! Gross lemmas about bifunctors into `Type`.
-Is there a better way?
+/-! Repetitive lemmas about bifunctors into `Type`.
+
+Q: Is there a better way?
 Mathlib doesn't seem to think so:
 see `hom_inv_id_app`, `hom_inv_id_app_app`, `hom_inv_id_app_app_app`.
 Can a `simproc` that tries `congr_fun/congr_arg simpLemma` work? -/
@@ -18,11 +19,11 @@ universe w
 variable {𝒞 𝒟 : Type*} [Category 𝒞] [Category 𝒟] (F G : 𝒞 ⥤ 𝒟 ⥤ Type w)
   {C₁ C₂ : 𝒞} {D₁ D₂ : 𝒟}
 
-theorem binaturality_left (σ : F ⟶ G) (f : C₁ ⟶ C₂) (x : (F.obj C₁).obj D₁) :
+theorem naturality₂_left (σ : F ⟶ G) (f : C₁ ⟶ C₂) (x : (F.obj C₁).obj D₁) :
     (σ.app C₂).app D₁ ((F.map f).app D₁ x) = (G.map f).app D₁ ((σ.app C₁).app D₁ x) :=
   congr_fun (congr_fun (congr_arg NatTrans.app (σ.naturality f)) D₁) x
 
-theorem binaturality_right (σ : F ⟶ G) (f : D₁ ⟶ D₂) (x : (F.obj C₁).obj D₁) :
+theorem naturality₂_right (σ : F ⟶ G) (f : D₁ ⟶ D₂) (x : (F.obj C₁).obj D₁) :
     (σ.app C₁).app D₂ ((F.obj C₁).map f x) = (G.obj C₁).map f ((σ.app C₁).app D₁ x) :=
   naturality ..
 
