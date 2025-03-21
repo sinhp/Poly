@@ -7,7 +7,7 @@ Authors: Emily Riehl, Sina Hazratpour, Wojciech Nawrocki
 import Mathlib.CategoryTheory.Adjunction.Over
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.ChosenFiniteProducts
-import Poly.ForMathlib
+import Poly.deprecated.ForMathlib
 
 /-!
 # Some basic equalities and isomorphisms of composition and base change functors
