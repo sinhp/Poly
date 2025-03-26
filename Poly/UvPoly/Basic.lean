@@ -97,11 +97,10 @@ def idApplyIso (X : C) : (id B) @ X ≅ B ⨯ X := sorry
 variable {B}
 
 /-- The fstProjection morphism from `∑ b : B, X ^ (E b)` to `B` again. -/
-@[simp]
 def fstProj (P : UvPoly E B) (X : C) : P @ X ⟶ B :=
   ((Over.star E ⋙ pushforward P.p).obj X).hom
 
-@[simp, reassoc (attr := simp)]
+@[reassoc (attr := simp)]
 lemma map_fstProj {X Y : C} (P : UvPoly E B) (f : X ⟶ Y) :
     P.functor.map f ≫ P.fstProj Y = P.fstProj X := by
   simp [fstProj, functor]
@@ -275,7 +274,7 @@ polynomial functor.
 -/
 def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
   lift c := (pushforwardCurry <| overPullbackToStar c.fst c.snd).left
-  fac_left := by aesop_cat
+  fac_left := by aesop_cat (add norm fstProj)
   fac_right := by
     intro c
     simp only [fan_snd, pullbackMap, ε, ev, ← assoc, ← comp_left]
@@ -303,6 +302,7 @@ abbrev lift {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X
     Γ ⟶ P @ X :=
   partialProd.lift ⟨fan P X, isLimitFan P X⟩ b e
 
+@[simp]
 theorem lift_fst {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
     P.lift b e ≫ P.fstProj X = b := by
   unfold lift
