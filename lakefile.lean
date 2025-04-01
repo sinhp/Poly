@@ -11,6 +11,8 @@ package «Poly» where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
+require seq from git "https://github.com/Vtec234/lean4-seq"
+
 @[default_target]
 lean_lib «Poly» where
   -- add any library configuration options here
