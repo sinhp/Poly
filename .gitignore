@@ -1,3 +1,47 @@
+## macOS
+.DS_Store
+## Lake
+.lake/*
+.cache/*
+## Python
+__pycache__
+venv
+## Blueprint
+blueprint/web/
+blueprint/src/chapter/auto
+blueprint/lean_decls
+blueprint/print/
+## Docs
+docs/_includes/sorries.md
+## TeX
+*.paux
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+*.json
+*.auctex-auto
+
 build/
 lake-packages/
 .lake/
