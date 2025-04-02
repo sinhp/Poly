@@ -21,13 +21,22 @@
 
 \usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 
+\usepackage{amsmath,stmaryrd,enumerate,a4,array}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage[cmtip,all]{xy}
+\usepackage{subcaption}
+\usepackage{cleveref}
+\numberwithin{equation}{section}
+\usepackage[parfill]{parskip}
+\usepackage{tikz, tikz-cd, float} % Commutative Diagrams
+\usepackage{bussproofs}
+\usepackage{graphics}
+
 \input{macros/common}
 \input{macros/print}
 
 \title{Polynomial Functors in Lean 4}
 \author{Sina Hazratpour}
 
-\begin{document}
-\maketitle
-\input{content}
-\end{document}
+\input{chapter/all}

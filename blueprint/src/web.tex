@@ -8,8 +8,9 @@
 
 \usepackage{amssymb, amsthm, amsmath}
 \usepackage{hyperref}
-\usepackage[showmore, dep_graph]{blueprint}
-
+\usepackage[showmore, dep_graph,thms=defn+prop+lemma+cor]{blueprint}
+\usepackage{tikz-cd}
+\usepackage{bussproofs}
 
 \input{macros/common}
 \input{macros/web}
@@ -18,10 +19,4 @@
 \github{https://github.com/sinhp/Poly}
 \dochome{https://sinhp.github.io/Poly/docs}
 
-\title{Polynomial Functors in Lean 4}
-\author{Sina Hazratpour}
-
-\begin{document}
-\maketitle
-\input{content}
-\end{document}
+\input{chapter/all}
