@@ -123,6 +123,14 @@ def pushforwardUncurry [ExponentiableMorphism f] {X : Over I} {A : Over J}
     (Over.pullback f).obj A ⟶ X :=
   adj f |>.homEquiv A X |>.invFun v
 
+theorem homEquiv_apply_eq [ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (u : (Over.pullback f).obj A ⟶ X) : (adj f |>.homEquiv _ _) u = pushforwardCurry u :=
+  rfl
+
+theorem homEquiv_symm_apply_eq [ExponentiableMorphism f] {X : Over I} {A : Over J}
+    (v : A ⟶ (pushforward f).obj X) : (adj f |>.homEquiv _ _).symm v = pushforwardUncurry v :=
+  rfl
+
 theorem pushforward_uncurry_curry [ExponentiableMorphism f] {X : Over I} {A : Over J}
     (u : (Over.pullback f).obj A ⟶ X) :
     pushforwardUncurry (pushforwardCurry u) = u :=

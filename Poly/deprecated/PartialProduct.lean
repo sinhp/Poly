@@ -162,9 +162,9 @@ def overPullbackToStar [HasBinaryProducts C] {W} (f : W ⟶ B) (g : pullback f s
     (Over.pullback s).obj (Over.mk f) ⟶ (Over.star E).obj X :=
   Fan.overPullbackToStar <| Fan.mk f g
 
-theorem overPullbackToStar_prod_snd [HasBinaryProducts C]
-    {W} {f : W ⟶ B} {g : pullback f s ⟶ X} :
-    (overPullbackToStar f g).left ≫ prod.snd = g := by
+theorem overPullbackToStar_forgetAdjStar_counit_app [HasBinaryProducts C]
+    {W} (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    (overPullbackToStar f g).left ≫ (forgetAdjStar E).counit.app X = g := by
   simp only [overPullbackToStar, Fan.overPullbackToStar, Fan.over]
   simp only [forgetAdjStar.homEquiv_left_lift]
   aesop
@@ -205,14 +205,84 @@ theorem partialProd.lift_snd {W} (c : LimitFan s X) (f : W ⟶ B) (g : pullback 
   simp [pullbackMap, pullback.map]
   sorry
 
--- theorem hom_lift (h : IsLimit t) {W : C} (m : W ⟶ t.pt) :
---     m = h.lift { pt := W, π := { app := fun b => m ≫ t.π.app b } } :=
---   h.uniq { pt := W, π := { app := fun b => m ≫ t.π.app b } } m fun _ => rfl
+variable (s) (X)
 
-theorem partialProd.hom_ext {W : C} (c : LimitFan s X) {f g : W ⟶ partialProd c}
-    (h₁ : f ≫ partialProd.fst c = g ≫ partialProd.fst c)
-    (h₂ : comparison f ≫ partialProd.snd c =
-    (pullback.congrHom h₁ rfl).hom ≫ comparison g ≫ partialProd.snd c) :
+/-- `HasPartialProduct s X` represents the mere existence of a partial product cone over
+`s` and `X`. -/
+class HasPartialProduct : Prop where mk' ::
+  /-- There is some universal partial product cone over `s` and `X`. -/
+  exists_partial_product : Nonempty <| LimitFan s X
+
+namespace HasPartialProduct
+
+instance mk (c : LimitFan s X) : HasPartialProduct s X :=
+  ⟨Nonempty.intro c⟩
+
+def getLimitFan [HasPartialProduct s X] : LimitFan s X :=
+  Classical.choice <| HasPartialProduct.exists_partial_product
+
+noncomputable abbrev partialProd [HasPartialProduct s X] : C :=
+  (getLimitFan s X).cone.pt
+
+/-- An arbitrary choice of limit cone for a functor. -/
+def partialProd.cone [HasPartialProduct s X] : Fan s X :=
+  (getLimitFan s X).cone
+
+/-- Evidence that the arbitrary choice of cone provided by `limit.cone F` is a limit cone. -/
+def partialProd.isLimit [HasPartialProduct s X] : IsLimit (partialProd.cone s X) :=
+  (getLimitFan s X).isLimit
+
+/-- The projection map to the first component of the partial product. -/
+noncomputable abbrev partialProd.fst [HasPartialProduct s X] : partialProd s X ⟶ B :=
+  Fan.fst <| partialProd.cone s X
+
+noncomputable abbrev partialProd.snd [HasPartialProduct s X] :
+    pullback (partialProd.fst s X) s ⟶ X :=
+  Fan.snd <| partialProd.cone s X
+
+variable {s X}
+
+-- note that @[ext] does not work becasue h₂ depends on h₁.
+theorem partialProd.hom_ext {W : C} [HasPartialProduct s X] {f g : W ⟶ partialProd s X}
+    (h₁ : f ≫ partialProd.fst s X = g ≫ partialProd.fst s X)
+    (h₂ : comparison f ≫ partialProd.snd s X =
+    (pullback.congrHom h₁ rfl).hom ≫ comparison g ≫ partialProd.snd s X) :
     f = g := by
- sorry
- -- apply c.isLimit.uniq
+  sorry
+
+/-- If the partial product of `s` and `X` exists, then every pair of morphisms `f : W ⟶ B` and
+`g : pullback f s ⟶ X` induces a morphism `W ⟶ partialProd s X`. -/
+abbrev partialProd.lift {W} [HasPartialProduct s X]
+    (f : W ⟶ B) (g : pullback f s ⟶ X) : W ⟶ partialProd s X :=
+  ((partialProd.isLimit s X)).lift (Fan.mk f g)
+
+@[reassoc, simp]
+theorem partialProd.lift_fst {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    partialProd.lift f g ≫ partialProd.fst s X = f :=
+  ((partialProd.isLimit s X)).fac_left (Fan.mk f g)
+
+@[reassoc]
+theorem partialProd.lift_snd {W} [HasPartialProduct s X] (f : W ⟶ B) (g : pullback f s ⟶ X) :
+    (comparison (partialProd.lift f g)) ≫ (partialProd.snd s X) =
+    (pullback.congrHom (partialProd.lift_fst f g) rfl).hom ≫ g := by
+  let h := ((partialProd.isLimit s X)).fac_right (Fan.mk f g)
+  rw [← pullbackMap_comparison]
+  sorry
+
+/-- The partial product of `X` and the identity morphism `𝟙 : B ⟶ B` is the exponential object
+`B ⨯ X`. -/
+instance hasPartialProduct.id [HasBinaryProduct B X] : HasPartialProduct (𝟙 B) X := by sorry
+
+def partialProd.id [HasBinaryProduct B X] : partialProd (𝟙 B) X ≅ B ⨯ X := sorry
+
+instance hasPartialProduct.prod [HasTerminal C] [HasBinaryProduct B X] :
+    HasPartialProduct (terminal.from B) X := by
+  sorry
+
+attribute [local instance] CategoryTheory.ChosenFiniteProducts.ofFiniteProducts
+
+def partialProd.prod [HasFiniteProducts C] [Exponentiable X] :
+    partialProd (terminal.from B) X ≅ X ⟹ B := by
+  sorry
+
+end HasPartialProduct
