@@ -79,28 +79,63 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
-  exp := by { sorry
-    -- functor := sorry  -- prove that the sum of exponentiables is exponentiable.
-    -- adj := sorry
-  }
+  exp := by {
+    refine { exists_rightAdjoint := by {
+      have F : Over (P.E ⨿ Q.E) ⥤ Over (P.B ⨿ Q.B) := sorry
+      use F
+      haveI : HasBinaryCoproducts (Over (P.E ⨿ Q.E)) := by {
+        sorry
+      }
+      have hf : PreservesPullbacksOfInclusions F := by {
+        sorry
+      }
+      sorry
+
+
+
+
+
+
+    }
+    }}
   o := coprod.desc P.o Q.o
+--#check PreservesPullbacksOfInclusions
+
+--#check PreservesPullbacksOfInclusions.preservesPullbackInl
+
+
+/-For sums: assuming extensiveness, you can express the slice over
+the sum as the product of slices. Then you can calculate pullback
+ as the product of two functors, amd then you take the products of their adjoints-/
 
 /-- The product of two polynomials in many variables. -/
-def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O) : MvPoly I O where
+def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O) :
+    MvPoly I O where
   E := (pullback (P.p ≫ P.o) Q.o) ⨿ (pullback P.o (Q.p ≫ Q.o))
   B := pullback P.o Q.o
   i := coprod.desc (pullback.fst _ _ ≫ P.i) (pullback.snd _ _ ≫ Q.i)
-  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _) (by aesop) (by aesop)) (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _) (by aesop) (by aesop))
-  exp := sorry -- by extensivity -- PreservesPullbacksOfInclusions
-  o := pullback.fst (P.o) Q.o ≫ P.o
+  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _)
+    (comp_id _) (by rw [comp_id, id_comp]))
+    (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _)
+    (by rw [comp_id, id_comp]) (comp_id _))
+  exp := by {
+    refine { exists_rightAdjoint := by {sorry
 
+    }
+
+
+    }
+  } -- by extensivity -- PreservesPullbacksOfInclusions
+  o := pullback.fst (P.o) Q.o ≫ P.o
+#exit
 protected def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
   (Over.pullback P.i) ⋙ (pushforward P.p) ⋙ (Over.map P.o)
 
 variable (I O : C) (P : MvPoly I O)
 
-def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] : Over I → Over O := (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] :
+  Over I → Over O := (P.functor).obj
 
 /-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
 object.-/
