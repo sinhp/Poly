@@ -218,27 +218,20 @@ open Poly
 variable (P Q : Poly.{u})
 
 /-- Constructor for composition -/
-def comp.mk {X : Type} (x : P (Q X)) : Q.comp P X :=
+def comp.mk {X : Type u} (x : P (Q X)) : Q.comp P X :=
   ⟨⟨x.1, Sigma.fst ∘ x.2⟩, fun z => (x.2 z.1).2 z.2⟩
 
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
-def comp.functor : Poly.functor (P.comp Q) ≅ Poly.functor Q ⋙ Poly.functor P where
-  hom := sorry
-  inv := sorry
-  hom_inv_id := sorry
-  inv_hom_id := sorry
-
--- where
---   hom := {
---     app := fun X => fun ⟨b,e⟩  => {
---       fst := _
---       snd := _
---     }
---     naturality := sorry
---   }
---   inv :=
---   hom_inv_id := sorry
---   inv_hom_id := sorry
+def comp.functor : Poly.functor (Q.comp P) ≅ Poly.functor Q ⋙ Poly.functor P where
+  hom := {
+    app := fun X => fun ⟨b,e⟩ =>
+    ⟨ b.1, fun x' => ⟨ b.2 x', fun b' => e ⟨x',b'⟩ ⟩⟩
+    naturality := by aesop_cat
+  }
+  inv := {
+    app X := comp.mk P Q
+    naturality := by aesop_cat
+  }
 
 example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
   sorry
