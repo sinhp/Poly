@@ -195,12 +195,10 @@ lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
     (star X).map f = Over.homMk (prod.map (𝟙 X) f) (by aesop) := by
   simp [star]
 
-variable (X : C)
-
 /-- Note that the binary products assumption is necessary: the existence of a right adjoint to
 `Over.forget X` is equivalent to the existence of each binary product `X ⨯ -`.
 -/
-instance [HasBinaryProducts C] : (forget X).IsLeftAdjoint  :=
+instance [HasBinaryProducts C]  (X : C) : (forget X).IsLeftAdjoint  :=
   ⟨_, ⟨forgetAdjStar X⟩⟩
 
 attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
@@ -214,7 +212,7 @@ lemma whiskerLeftProdMapId [HasFiniteLimits C] {X : C} {A A' : C} {g : A ⟶ A'}
   · simp only [ChosenFiniteProducts.whiskerLeft_snd]
     exact (prod.map_snd (𝟙 X) g).symm
 
-def starForgetIsoTensorLeft [HasFiniteLimits C] :
+def starForgetIsoTensorLeft [HasFiniteLimits C] (X : C) :
     (Over.star X ⋙ forget X) ≅ tensorLeft X := by
   fapply NatIso.ofComponents
   · intro Z
@@ -226,24 +224,42 @@ namespace forgetAdjStar
 
 variable [HasBinaryProducts C]
 
-theorem unit_app {I : C} (X : Over I): (Over.forgetAdjStar I).unit.app X =
+@[simp]
+theorem unit_app {I : C} (X : Over I): (forgetAdjStar I).unit.app X =
     Over.homMk (prod.lift X.hom (𝟙 X.left)) := by
   ext
-  simp [Over.forgetAdjStar, Adjunction.comp, Equivalence.symm]
+  simp [forgetAdjStar, Adjunction.comp, Equivalence.symm]
 
+@[simp]
 theorem counit_app {I : C} (X : C) :
-    ((Over.forgetAdjStar I).counit.app X) = prod.snd := by
+    ((forgetAdjStar I).counit.app X) = prod.snd := by
   simp [Over.forgetAdjStar, Adjunction.comp, Equivalence.symm]
 
-theorem homEquiv {I : C} (X : Over I) (A : C) (f : X.left ⟶ A) :
-    ((Over.forgetAdjStar I).homEquiv X A) f =
+@[simp]
+theorem homEquiv_homMk_lift {I : C} {X : Over I} {A : C} {f : X.left ⟶ A} :
+    ((forgetAdjStar I).homEquiv X A) f =
     Over.homMk (prod.lift X.hom f) := by
   rw [Adjunction.homEquiv_unit, unit_app]
   ext
   simp
 
-theorem homEquiv_symm {I : C} (X : Over I) (A : C) (f : X ⟶ (Over.star I).obj A) :
-     ((Over.forgetAdjStar I).homEquiv X A).symm f = f.left ≫ prod.snd := by
+@[simp]
+theorem homEquiv_left_lift {I : C} {X : Over I} {A : C} {f : X.left ⟶ A} :
+    (((forgetAdjStar I).homEquiv X A) f).left =
+    prod.lift X.hom f := by
+  simp_rw [homEquiv_homMk_lift]
+  rfl
+
+theorem homEquiv_lift' {X I : C} {u : X ⟶ I} {A : C} {f : X ⟶ A} :
+    ((forgetAdjStar I).homEquiv (.mk u) A) f =
+    Over.homMk (prod.lift u f) := by
+  rw [Adjunction.homEquiv_unit, unit_app]
+  ext
+  simp
+
+@[simp]
+theorem homEquiv_symm_left_snd {I : C} {X : Over I} {A : C} {f : X ⟶ (Over.star I).obj A} :
+     ((forgetAdjStar I).homEquiv X A).symm f = f.left ≫ prod.snd := by
    rw [Adjunction.homEquiv_counit, counit_app]
    simp
 

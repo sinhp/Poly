@@ -11,7 +11,7 @@ Authors: Sina Hazratpour
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Distributivity
-
+import Mathlib.CategoryTheory.Extensive
 --import Poly.UvPoly
 
 /-!
@@ -27,6 +27,7 @@ noncomputable section
 open CategoryTheory Category Limits Functor Adjunction ExponentiableMorphism
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
+
 /-- `P : MvPoly I O` is a multivariable polynomial with input variables in `I`,
 output variables in `O`, and with arities `E` dependent on `I`. -/
 structure MvPoly (I O : C) where
@@ -85,7 +86,13 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   o := coprod.desc P.o Q.o
 
 /-- The product of two polynomials in many variables. -/
-def prod {I O : C} [HasBinaryProducts C] (P Q : MvPoly I O) : MvPoly I O := sorry
+def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O) : MvPoly I O where
+  E := (pullback (P.p ≫ P.o) Q.o) ⨿ (pullback P.o (Q.p ≫ Q.o))
+  B := pullback P.o Q.o
+  i := coprod.desc (pullback.fst _ _ ≫ P.i) (pullback.snd _ _ ≫ Q.i)
+  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _) (by aesop) (by aesop)) (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _) (by aesop) (by aesop))
+  exp := sorry -- by extensivity -- PreservesPullbacksOfInclusions
+  o := pullback.fst (P.o) Q.o ≫ P.o
 
 protected def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
@@ -205,6 +212,11 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by
   exact isoWhiskerLeft _ <| isoWhiskerLeft _ (mapComp (P.w Q) Q.o).symm
 
 end Composition
+
+
+
+
+
 
 end MvPoly
 #exit

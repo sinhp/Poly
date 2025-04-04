@@ -160,9 +160,9 @@ def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h 
 -/
 --pushforwardBeckChevalleySquare
 def pushforwardPullbackTwoSquare
-    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    [ExponentiableMorphism f] [ExponentiableMorphism g] :
     TwoSquare (pushforward g) (pullback h) (pullback k) (pushforward f) :=
-  conjugateEquiv ((mapPullbackAdj k).comp gexp.adj) (fexp.adj.comp (mapPullbackAdj h))
+  conjugateEquiv (mapPullbackAdj k |>.comp <| adj g) (adj f |>.comp <| mapPullbackAdj h)
     (pullbackMapTwoSquare h f g k sq)
 
 /--
@@ -170,11 +170,11 @@ A variant of `pushforwardTwoSquare` involving `star` instead of `pullback`.
 -/
 --pushforwardStarBeckChevalleySquare
 def starPushforwardTriangle
-    [fexp : ExponentiableMorphism f]  :
+    [ExponentiableMorphism f]  :
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
   rw [← Functor.id_comp (star X)] at iso
-  exact (mateEquiv (Adjunction.id) (fexp.adj)) iso
+  exact (mateEquiv (Adjunction.id) (adj f)) iso
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square.
 ```
@@ -185,10 +185,10 @@ def starPushforwardTriangle
             Over Y --.pushforward k -→ Over W
 ```
 -/
-def pushforwardIsoSquare [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g]
-    [hexp : ExponentiableMorphism h] [kexp : ExponentiableMorphism k] :
+def pushforwardIsoSquare [ExponentiableMorphism f] [ExponentiableMorphism g]
+    [ExponentiableMorphism h] [ExponentiableMorphism k] :
     pushforward h ⋙ pushforward g ≅ pushforward f ⋙ pushforward k :=
-  conjugateIsoEquiv (gexp.adj.comp hexp.adj) (kexp.adj.comp fexp.adj) (pullbackIsoSquare h f g k sq)
+  conjugateIsoEquiv (adj g |>.comp <| adj h) (adj k |>.comp <| adj f) (pullbackIsoSquare h f g k sq)
 
 end BeckChevalleyTrans
 
@@ -338,14 +338,14 @@ def pullbackMapIsoSquare (pb : IsPullback h f g k) :
 
 /-- The functor Beck-Chevalley natural transformation of a pullback square is an isomorphism. -/
 instance pushforwardPullbackTwoSquare_of_isPullback_isIso (pb : IsPullback h f g k)
-    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    [ExponentiableMorphism f] [ExponentiableMorphism g] :
     IsIso (pushforwardPullbackTwoSquare h f g k pb.toCommSq) := by
   have := pullbackMapTwoSquare_of_isPullback_isIso pb
   apply conjugateEquiv_iso
 
 /-- The pullback-pushforward exchange isomorphism. -/
 def pushforwardPullbackIsoSquare (pb : IsPullback h f g k)
-    [fexp : ExponentiableMorphism f] [gexp : ExponentiableMorphism g] :
+    [ExponentiableMorphism f] [ExponentiableMorphism g] :
     pushforward g ⋙ pullback k ≅ pullback h ⋙ pushforward f := by
   refine @asIso _ _ _ _ (pushforwardPullbackTwoSquare h f g k pb.toCommSq) ?_
   exact pushforwardPullbackTwoSquare_of_isPullback_isIso pb

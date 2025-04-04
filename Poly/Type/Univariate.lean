@@ -233,18 +233,6 @@ def comp.functor : Poly.functor (Q.comp P) ≅ Poly.functor Q ⋙ Poly.functor P
     naturality := by aesop_cat
   }
 
--- where
---   hom := {
---     app := fun X => fun ⟨b,e⟩  => {
---       fst := _
---       snd := _
---     }
---     naturality := sorry
---   }
---   inv :=
---   hom_inv_id := sorry
---   inv_hom_id := sorry
-
 example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by
   sorry
 
