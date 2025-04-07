@@ -1,1 +1,138 @@
-To be written
+\begin{definition}
+  We define a \myemph{polynomial} over $\catE$ to be a diagram $F$ in $\catE$ of shape
+  \begin{equation}
+  \lean{MvPoly}
+  \label{equ:poly}
+  \xymatrix{
+  I  & B \ar[l]_s \ar[r]^f & A \ar[r]^t & J \, . }
+  \end{equation}
+  We define $\poly{F}:\slice I \to \slice J$ as the composite
+  \[
+  \xymatrix{
+  \slice{I} \ar[r]^{\pbk{s}} & \slice{B} \ar[r]^{\radj{f}} & \slice{A} \ar[r]^{\ladj{t}} & \slice{J} \, . }
+  \]
+  We refer to $\poly{F}$ as the \myemph{polynomial functor} associated to $F$, or
+  the \myemph{extension} of $F$, and say that $F$ \myemph{represents} $\poly F$.
+\end{definition}
+
+\begin{definition}
+\lean{MvPoly.sum}
+\uses{structure:MvPoly}
+The sum of two polynomials in many variables.
+\end{definition}
+
+\begin{definition}
+\lean{MvPoly.prod}
+\uses{structure:MvPoly}
+The product of two polynomials in many variables.
+\end{definition}
+
+\begin{para}\label{para:BC-distr}
+  We shall make frequent use of the Beck-Chevalley isomorphisms and
+  of the distributivity law of dependent sums over dependent
+  products~\cite{MoerdijkI:weltc}.  Given a cartesian square
+  \[
+  \xymatrix {
+  \cdot \drpullback \ar[r]^g \ar[d]_u & \cdot \ar[d]^v \\
+  \cdot \ar[r]_f & \cdot
+  }
+  \]
+  the Beck-Chevalley isomorphisms are
+  \[
+    \ladj g \, \pbk u \iso \pbk v \, \ladj f \qquad \text{and} \qquad
+    \radj g \, \pbk u \iso \pbk v \, \radj f \,.
+    \]
+
+  Given maps $C \stackrel u \longrightarrow B \stackrel f \longrightarrow A$,
+  we can construct the diagram
+  \begin{equation}\label{distr-diag}
+  \xymatrixrowsep{40pt}
+  \xymatrixcolsep{27pt}
+  \vcenter{\hbox{
+  \xymatrix @!=0pt {
+  &N \drpullback \ar[rr]^g \ar[ld]_e \ar[dd]^{w=\pbk f(v)}&& M \ar[dd]^{v=\radj f (u)} \\
+  C \ar[rd]_u && & \\
+  &B \ar[rr]_f && A\,,
+  }}}
+  \end{equation}
+  where $w = \pbk f\, \radj f(u)$ and $e$ is the counit
+  of $\pbk{f} \adjoint \radj{f}$.
+  For such diagrams the following
+  distributive law holds:
+  \begin{equation}\label{distr-law}
+  \radj f \, \ladj u \iso \ladj v \, \radj g \, \pbk e \,.
+  \end{equation}
+
+\begin{para}
+\label{para:comp}
+\lean{MvPoly.comp}
+\uses{structure:MvPoly}
+We now define the operation of substitution of polynomials, and show that the
+  extension of substitution is composition of polynomial functors, as expected.
+  In particular, the composite of two polynomial functors is again polynomial.
+  Given polynomials
+\[
+\xymatrix{
+ &  B \ar[r]^f  \ar[dl]_{s} & A \ar[dr]^{t} & \\
+ I \ar@{}[rrr]|{F} & & & J } \qquad
+\xymatrix{
+ & D \ar[r]^g \ar[dl]_{u} & C \ar[dr]^{v}   \\
+J \ar@{}[rrr]|{G}& & & K }
+\]
+we say that $F$ is a polynomial \myemph{from} $I$ \myemph{to} $J$ (and $G$ from
+$J$ to $K$), and
+we define $G\circ F$, the \myemph{substitution} of $F$ into $G$, to be the polynomial
+$I \leftarrow N \to M \to K$ constructed via this diagram:
+\begin{equation}
+\label{equ:compspan}
+\xycenter{
+  &  &  & N \ar[dl]_{n} \ar[rr]^{p} \ar@{}[dr] |{(iv)}
+&  & D'
+\ar[dl]^{\varepsilon} \ar[r]^{q} \ar@{}[ddr] |{(ii)} &
+M  \ar[dd]^{w} &  \\
+  &  & B' \ar[dl]_{m} \ar[rr]^{r} \ar@{} [dr]|{(iii)}
+&  & A'  \ar[dr]^{k} \ar[dl]_{h}
+\ar@{} [dd] |{(i)}
+&  &  &  \\
+   & B \ar[rr]^f \ar[dl]_{s} & & A \ar[dr]_{t} &   & D \ar[dl]^{u}
+\ar[r]^{g} & C \ar[dr]^{v} &    \\
+I  &    & &   & J &   &   & K   }
+\end{equation}
+Square $(i)$ is cartesian, and $(ii)$ is a distributivity diagram
+like \eqref{distr-diag}: $w$ is obtained
+by applying $\radj{g}$ to $k$, and $D'$ is the pullback of $M$ along $g$.
+The arrow $\varepsilon: D' \to A'$ is the $k$-component of the counit of
+the adjunction $\ladj g \adjoint \pbk g$.
+Finally, the squares $(iii)$ and $(iv)$ are
+cartesian.
+\end{para}
+
+\begin{proposition}\label{thm:subst}
+\lean{MvPoly.comp.functor}
+\uses{structure:MvPoly, def:MvPoly.comp}
+There is a natural isomorphism
+  $$
+  \poly{G\circ F} \iso \poly{G} \circ \poly{F} .
+  $$
+\end{proposition}
+
+\begin{proof}
+  Referring to Diagram~\eqref{equ:compspan} we have
+  the following chain of natural isomorphisms:
+\begin{eqnarray*}
+\extension{G} \circ \extension{F} & = & \ladj{v} \, \radj{g} \, \pbk{u}  \; \ladj{t}  \, \radj{f}
+\, \pbk{s} \\
+& \iso & \ladj{v} \, \radj{g}  \, \ladj{k}  \, \pbk{h}  \, \radj{f}  \, \pbk{s}\\
+ & \iso &
+\ladj{v} \, \ladj{w}  \, \radj{q}  \, \pbk{\varepsilon}  \, \pbk{h}  \, \radj{f} \, \pbk{s}\\
+& \iso &
+\ladj{v} \, \ladj{w}  \, \radj{q}  \, \radj{p}  \, \pbk{n}  \, \pbk{m} \, \pbk{s}\\
+& \iso &
+\ladj{(v\, w)} \, \radj{(q \, p)}  \, \pbk{(s\, m\, n)}\, \\
+& = & \extension{G \circ F}\,.
+\end{eqnarray*}
+Here we used the Beck-Chevalley isomorphism for the cartesian square
+$(i)$, the distributivity law for $(ii)$, Beck-Chevalley isomorphism
+for the cartesian squares $(iii)$ and $(iv)$, and finally pseudo-functoriality
+of the pullback functors and their adjoints.
+\end{proof}

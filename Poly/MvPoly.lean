@@ -127,7 +127,7 @@ def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O
     }
   } -- by extensivity -- PreservesPullbacksOfInclusions
   o := pullback.fst (P.o) Q.o ≫ P.o
-#exit
+
 protected def functor {I O : C} (P : MvPoly I O) :
     Over I ⥤ Over O :=
   (Over.pullback P.i) ⋙ (pushforward P.p) ⋙ (Over.map P.o)
