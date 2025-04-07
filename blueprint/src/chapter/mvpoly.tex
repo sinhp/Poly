@@ -10,12 +10,11 @@ Let $\catC$ be category with pullbacks and terminal object.
   \end{definition}
 
 
-% \begin{definition}[multivariable polynomial functors]
-%   \label{defPolynomialFunctor}
-%   \label{defExtension}
-%   \index{polynomial!functor@{---} functor}
-%   \index{polynomial!extension of a {---}}
-%   The \textbf{extension} of a polynomial $F : \declpoly IBAJsft$ in a locally cartesian closed category $\mathcal{E}$ is the functor $\upP_F = \upSigma_t \upPi_f \upDelta_s : \mathcal{E} \slice{I} \to \mathcal{E} \slice{J}$. Internally, we can define $\upP_F$ by
-%   $$\upP_F \seqbn{X_i}{i \in I} = \seqbn{\sum_{a \in A_j} \prod_{b \in B_a} X_{s(b)}}{j \in J}$$
-%   A \textbf{polynomial functor} is a functor that is naturally isomorphic to the extension of a polynomial.
-%   \end{definition}
+\begin{definition}[extension of polynomial functors]
+  \label{defn:extension}
+  \lean{CategoryTheory.MvPoly.functor} \leanok
+  The \textbf{extension} of a polynomial $\polyspan IBAJipo$ is the functor
+  $\upP = o_! \, f_* \, i^* \colon \catC / I \to \catC/ O$. Internally, we can define $\upP$ by
+  $$\upP \seqbn{X_i}{i \in I} = \seqbn{\sum_{a \in A_j} \prod_{b \in B_a} X_{s(b)}}{j \in J}$$
+  A \textbf{polynomial functor} is a functor that is naturally isomorphic to the extension of a polynomial.
+  \end{definition}
