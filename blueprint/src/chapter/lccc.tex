@@ -1,5 +1,4 @@
-\begin{definition}[Exponentiable Morphism]
-  \label{defn:exponentiable-morphism}
+\begin{definition}[exponentiable morphism]\label{defn:exponentiable-morphism}
   \lean{CategoryTheory.ExponentiableMorphism} \leanok
     Suppose $\catC$ is a category with pullbacks.
     A morphism $f \colon A \to B$ in $\catC$ is \textbf{exponentiable} if the pullback functor
@@ -18,9 +17,14 @@
     \end{tikzcd}\end{center}
 \end{definition}
 
+\begin{definition}[pushforward functor]\label{rmk:pushforward}
+  \lean{CategoryTheory.ExponentiableMorphism.pushforward} \leanok
+  Let $f \colon A \to B$ be an exponentiable morphism in a category $\catC$ with pullbacks.
+  We call the right adjoint $f_*$ of the pullback functor $f^*$ the \textbf{pushforward} functor
+  along $f$.
+\end{definition}
 
-\begin{theorem}[Exponentiable morphisms are exponentiable objects of the slices]
-  \label{thm:exponentiable-mor-exponentiable-obj}
+\begin{theorem}[exponentiable morphisms are exponentiable objects of the slices]\label{thm:exponentiable-mor-exponentiable-obj}
   \lean{CategoryTheory.ExponentiableMorphism.OverMkHom}
   \leanok
   \uses{defn:exponentiable-morphism}
@@ -29,8 +33,7 @@
 \end{theorem}
 
 
-\begin{definition}[Locally cartesian closed categories]
-\label{defn:LCCC}
+\begin{definition}[Locally cartesian closed categories]\label{defn:LCCC}
 \lean{CategoryTheory.LocallyCartesianClosed} \leanok
   A category with pullbacks is \textbf{locally cartesian closed} if
   is a category $\catC$ with a terminal object $1$ and with all slices $\catC / A$ cartesian closed.
