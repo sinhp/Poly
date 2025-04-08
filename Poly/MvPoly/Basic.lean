@@ -24,6 +24,8 @@ import Mathlib.CategoryTheory.Extensive
 
 noncomputable section
 
+namespace CategoryTheory
+
 open CategoryTheory Category Limits Functor Adjunction ExponentiableMorphism
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
@@ -67,7 +69,7 @@ instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) := sorry
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
-  ⟨⊥_ C, prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
+  ⟨⊥_ C, Limits.prod O A, initial.to I , initial.to _, inferInstance, prod.fst⟩
 
 /-- The monomial polynomial in many variables. -/
 def monomial {I O E : C} (i : E ⟶ I) (p : E ⟶ O) [ExponentiableMorphism p]: MvPoly I O :=
@@ -79,6 +81,7 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
+<<<<<<< HEAD:Poly/MvPoly.lean
   exp := by {
     refine { exists_rightAdjoint := by {
       have F : Over (P.E ⨿ Q.E) ⥤ Over (P.B ⨿ Q.B) := sorry
@@ -98,6 +101,9 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
 
     }
     }}
+=======
+  exp := sorry
+>>>>>>> refs/remotes/origin/master:Poly/MvPoly/Basic.lean
   o := coprod.desc P.o Q.o
 --#check PreservesPullbacksOfInclusions
 
@@ -281,6 +287,6 @@ def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.
 
 end UvPoly
 
-
+end CategroyTheory
 
 end

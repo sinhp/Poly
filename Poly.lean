@@ -7,3 +7,4 @@ import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Presheaf
 -- import Poly.Type.Univariate
 -- import Poly.Exponentiable
 import Poly.UvPoly.Basic
+import Poly.MvPoly.Basic
