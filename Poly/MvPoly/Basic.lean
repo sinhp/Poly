@@ -61,11 +61,6 @@ example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
 
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
 instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) := sorry
-  -- functor := {
-  --   obj := sorry
-  --   map := sorry
-  -- }
-  -- adj := sorry
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
