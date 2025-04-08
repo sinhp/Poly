@@ -81,7 +81,6 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
-<<<<<<< HEAD:Poly/MvPoly.lean
   exp := by {
     refine { exists_rightAdjoint := by {
       have F : Over (P.E ⨿ Q.E) ⥤ Over (P.B ⨿ Q.B) := sorry
@@ -101,9 +100,6 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
 
     }
     }}
-=======
-  exp := sorry
->>>>>>> refs/remotes/origin/master:Poly/MvPoly/Basic.lean
   o := coprod.desc P.o Q.o
 --#check PreservesPullbacksOfInclusions
 
