@@ -58,7 +58,262 @@
     </dl>
   </div>
     <div id="graph"></div>
-<div id="statements"></div>
+<div id="statements">
+
+    
+    <div class="dep-modal-container" id="defn:exponentiable-morphism_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="defn:exponentiable-morphism" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">1.0.1</span><span class="definition_thmtitle">exponentiable morphism</span></div>
+    <div class="thm_thmcontent"><p>   Suppose \(\mathbb {C}\) is a category with pullbacks. A morphism \(f \colon A \to B\) in \(\mathbb {C}\) is <b class="bfseries">exponentiable</b> if the pullback functor \(f^* \colon \mathbb {C}/ B \to \mathbb {C}/ A\) has a right adjoint \(f_*\). Since \(f^*\) always has a left adjoint \(f_!\), given by post-composition with \(f\), an exponentiable morphism \(f\) gives rise to an adjoint triple </p>
+<div class="centered"><div class="tikzcd" id="a0000000005">
+    <img src="images/img-0001.svg" class="tikzcd-vector" alt="\begin{tikzcd} 
+      &amp; {\catC / B} \\
+      \\
+      {} &amp; {\catC / A}
+      \arrow[&#34;&#34;{name=0, anchor=center, inner sep=0}, &#34;{f_*}&#34;, bend left, shift left=5, from=1-2, to=3-2]
+      \arrow[&#34;&#34;{name=1, anchor=center, inner sep=0}, &#34;{f_!}&#34;&#39;, bend right, shift right=5, from=1-2, to=3-2]
+      \arrow[&#34;&#34;{name=2, anchor=center, inner sep=0}, &#34;{f^*}&#34;{description}, from=3-2, to=1-2]
+      \arrow[&#34;\dashv&#34;{anchor=center}, draw=none, from=1, to=2]
+      \arrow[&#34;\dashv&#34;{anchor=center}, draw=none, from=2, to=0]
+    \end{tikzcd}" />
+</div></div>
+</div>
+
+    <a class="latex_link" href="sect0001.html#defn:exponentiable-morphism">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.ExponentiableMorphism">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="defn:extension_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="defn:extension" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">3.0.2</span><span class="definition_thmtitle">extension of polynomial functors</span></div>
+    <div class="thm_thmcontent"><p>   The <b class="bfseries">extension</b> of a polynomial \(I \xleftarrow {i} B \xrightarrow {p} A \xrightarrow {o} J\) is the functor \(\mathrm{P}= o_! \,  f_* \,  i^* \colon \mathbb {C}/ I \to \mathbb {C}/ O\). Internally, we can define \(\mathrm{P}\) by </p>
+<div class="displaymath" id="a0000000010">
+  \[ \mathrm{P}\left(\left. X_i \  \middle \rvert \  i \in I \right.\right) = \left(\left. \sum _{b \in B_j} \prod _{e \in E_b} X_{s(b)} \  \middle \rvert \  j \in J \right.\right) \]
+</div>
+<p> A <b class="bfseries">polynomial functor</b> is a functor that is naturally isomorphic to the extension of a polynomial. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#defn:extension">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.MvPoly.functor">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="defn:LCCC_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="defn:LCCC" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">1.0.4</span><span class="definition_thmtitle">Locally cartesian closed categories</span></div>
+    <div class="thm_thmcontent"><p>  A category with pullbacks is <b class="bfseries">locally cartesian closed</b> if is a category \(\mathbb {C}\) with a terminal object \(1\) and with all slices \(\mathbb {C}/ A\) cartesian closed. </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#defn:LCCC">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.LocallyCartesianClosed">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="defn:Polynomial_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="defn:Polynomial" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">3.0.1</span><span class="definition_thmtitle">multivariable polynomial functor</span></div>
+    <div class="thm_thmcontent"><p>  A <b class="bfseries">polynomial</b> in \(\mathbb {C}\) from \(I\) to \(O\) is a triple \((i,p,o)\) where \(i\), \(p\) and \(o\) are morphisms in \(\mathbb {C}\) forming the diagram </p>
+<div class="displaymath" id="a0000000009">
+  \[ I \xleftarrow {i} E \xrightarrow {p} B \xrightarrow {o} J. \]
+</div>
+<p> The object \(I\) is the object of input variables and the object \(O\) is the object of output variables. The morphism \(p\) encodes the arities/exponents. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#defn:Polynomial">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.MvPoly">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="defn:UvPoly_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="defn:UvPoly" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">2.0.1</span><span class="definition_thmtitle">Polynomial endofunctor</span></div>
+    <div class="thm_thmcontent"><p>   Let \(\mathbb {C}\) be a locally Cartesian closed category (in our case, presheaves on the category of contexts). This means for each morphism \(t : B \to A\) we have an adjoint triple </p>
+<div class="centered"><div class="tikzcd" id="a0000000006">
+    <img src="images/img-0002.svg" class="tikzcd-vector" alt="\begin{tikzcd} 
+    &amp; {\catC / B} \\
+    \\
+    {} &amp; {\catC / A}
+    \arrow[&#34;&#34;{name=0, anchor=center, inner sep=0}, &#34;{t_*}&#34;, bend left, shift left=5, from=1-2, to=3-2]
+    \arrow[&#34;&#34;{name=1, anchor=center, inner sep=0}, &#34;{t_!}&#34;&#39;, bend right, shift right=5, from=1-2, to=3-2]
+    \arrow[&#34;&#34;{name=2, anchor=center, inner sep=0}, &#34;{t^*}&#34;{description}, from=3-2, to=1-2]
+    \arrow[&#34;\dashv&#34;{anchor=center}, draw=none, from=1, to=2]
+    \arrow[&#34;\dashv&#34;{anchor=center}, draw=none, from=2, to=0]
+  \end{tikzcd}" />
+</div></div>
+<p> where \(t^{*}\) is pullback, and \(t_{!}\) is composition with \(t\). </p>
+<p>Let \(t : B \to A\) be a morphism in \(\mathbb {C}\). Then define \(P_{t} : \mathbb {C}\to \mathbb {C}\) be the composition </p>
+<div class="displaymath" id="a0000000007">
+  \[  P_{t} := A_{!} \circ t_{*} \circ B^{*} \quad \quad \quad  \]
+</div>
+<div class="centered"><div class="tikzcd" id="a0000000008">
+    <img src="images/img-0003.svg" class="tikzcd-vector" alt="\begin{tikzcd} 
+    \catC &amp; {\catC / B} &amp; {\catC / A} &amp; \catC
+    \arrow[&#34;{B^*}&#34;, from=1-1, to=1-2]
+    \arrow[&#34;{t_*}&#34;, from=1-2, to=1-3]
+    \arrow[&#34;{A_!}&#34;, from=1-3, to=1-4]
+  \end{tikzcd}" />
+</div></div>
+</div>
+
+    <a class="latex_link" href="sect0002.html#defn:UvPoly">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.UvPoly">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="rmk:pushforward_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="rmk:pushforward" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">1.0.2</span><span class="definition_thmtitle">pushforward functor</span></div>
+    <div class="thm_thmcontent"><p>   Let \(f \colon A \to B\) be an exponentiable morphism in a category \(\mathbb {C}\) with pullbacks. We call the right adjoint \(f_*\) of the pullback functor \(f^*\) the <b class="bfseries">pushforward</b> functor along \(f\). </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#rmk:pushforward">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.ExponentiableMorphism.pushforward">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:exponentiable-mor-exponentiable-obj_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:exponentiable-mor-exponentiable-obj" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">1.0.3</span><span class="theorem_thmtitle">exponentiable morphisms are exponentiable objects of the slices</span></div>
+    <div class="thm_thmcontent"><p>   A morphism \(f \colon A \to B\) in a category \(\mathbb {C}\) with pullbacks is exponentiable if and only if it is an exponentiable object, regarded as an object of the slice \(\mathbb {C}/ B\). </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#thm:exponentiable-mor-exponentiable-obj">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://sinhp.github.io/Poly/docs/find/#doc/CategoryTheory.ExponentiableMorphism.OverMkHom">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+</div>
 </div> <!-- content -->
 </div> <!-- wrapper -->
 <script src="js/jquery.min.js" type="text/javascript"></script>
@@ -77,7 +332,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [penwidth=1.8];	edge [arrowhead=vee];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"defn:exponentiable-morphism"	[color=green,		fillcolor="#B0ECA3",		label="exponentiable-morphism",		shape=box,		style=filled];	"thm:exponentiable-mor-exponentiable-obj"	[color=green,		label="exponentiable-mor-exponentiable-obj",		shape=ellipse];	"defn:exponentiable-morphism" -> "thm:exponentiable-mor-exponentiable-obj"	[style=dashed];	"defn:UvPoly"	[color=green,		fillcolor="#B0ECA3",		label=UvPoly,		shape=box,		style=filled];	"defn:Polynomial"	[color=green,		fillcolor="#B0ECA3",		label=Polynomial,		shape=box,		style=filled];	"defn:LCCC"	[color=green,		fillcolor="#B0ECA3",		label=LCCC,		shape=box,		style=filled];	"rmk:pushforward"	[color=green,		fillcolor="#B0ECA3",		label=pushforward,		shape=box,		style=filled];	"defn:extension"	[color=green,		fillcolor="#B0ECA3",		label=extension,		shape=box,		style=filled];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

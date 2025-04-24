@@ -1,5 +1,7 @@
-\begin{definition}[exponentiable morphism]\label{defn:exponentiable-morphism}
-  \lean{CategoryTheory.ExponentiableMorphism} \leanok
+\begin{definition}[exponentiable morphism]
+  \label{defn:exponentiable-morphism}
+  \lean{CategoryTheory.ExponentiableMorphism}
+  \leanok
     Suppose $\catC$ is a category with pullbacks.
     A morphism $f \colon A \to B$ in $\catC$ is \textbf{exponentiable} if the pullback functor
     $f^* \colon \catC / B \to \catC / A$ has a right adjoint $f_*$.
@@ -17,8 +19,10 @@
     \end{tikzcd}\end{center}
 \end{definition}
 
-\begin{definition}[pushforward functor]\label{rmk:pushforward}
-  \lean{CategoryTheory.ExponentiableMorphism.pushforward} \leanok
+\begin{definition}[pushforward functor]
+  \label{rmk:pushforward}
+  \lean{CategoryTheory.ExponentiableMorphism.pushforward}
+  \leanok
   Let $f \colon A \to B$ be an exponentiable morphism in a category $\catC$ with pullbacks.
   We call the right adjoint $f_*$ of the pullback functor $f^*$ the \textbf{pushforward} functor
   along $f$.
