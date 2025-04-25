@@ -1,0 +1,90 @@
+
+In this chapter we provide several different perspectives on polynomial functors.
+
+As a first introduction, polynomial functors are categorfication of the usual polynomials from algebra. Categorification is the process of finding category-theoretic analogs of set-theoretic concepts by replacing sets with categories, elements by objects, functions with functors, equations between elements by isomorphisms between objects, and equations between functions by natural isomorphisms between functors.
+
+\renewcommand{\arraystretch}{1.5}
+
+%% draw me a latex table here
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|}
+    \hline
+      \textbf{Sets/Types}  & \textbf{Categories} \\
+      \hline
+      $\Nat$ & The category $\FinSet$ of finite sets and functions \\
+      \hline
+      $2 \in \Nat$ & The set $\mathbf{2} = \{0, 1\}$\\
+      \hline
+      Equality $1 + 1 = 2$ &  Isomorphism $\mathbf{1} \coprod \mathbf{1} \iso \mathbf{2}$ in $\FinSet$ \\
+      \hline
+      Equality $2 \cdot 3 = 6$ &  Isomorphism $\mathbf{2} \times \mathbf{3} \iso \mathbf{6}$ in $\FinSet$ \\
+      \hline
+      Addition  operation
+      &
+      The disjoint union functor
+      \\
+      $+ : \mathtt{Nat} \times \mathtt{Nat} \to \mathtt{Nat}$ &
+      $+ : \FinSet \times \FinSet \to \FinSet$ \\
+      \hline
+      Multiplication operation & The product functor \\
+      $ \cdot : \mathtt{Nat} \times \mathtt{Nat} \to \mathtt{Nat}$
+      &
+       $\times : \FinSet \times \FinSet \to \FinSet$
+      \\
+      \hline
+      Commutativity of addition  &     Natural isomorphism  \\
+      $\forall (m, n : \Nat), m + n = n + m$ & $\mathbf{m} + \mathbf{n} \iso \mathbf{n} + \mathbf{m}$ in $\FinSet$ \\
+      \hline
+      Commutativity of multiplication  &     Natural isomorphism  \\
+      $\forall (m, n : \Nat), m \cdot n = n \cdot m$ & $\mathbf{m} \times \mathbf{n} \iso \mathbf{n} \times \mathbf{m}$ in $\FinSet$ \\
+      \hline
+      Associativity of addition  &     Natural isomorphism  \\
+      $\forall (m, n, k : \Nat), m + (n + k) = (m + n) + k$ & $\mathbf{m} + (\mathbf{n} + \mathbf{k}) \iso (\mathbf{m} + \mathbf{n}) + \mathbf{k}$ in $\FinSet$ \\
+      \hline
+      Associativity of multiplication  &     Natural isomorphism  \\
+      $\forall (m, n, k : \Nat), m \cdot (n \cdot k) = (m \cdot n) \cdot k$ & $\mathbf{m} \times (\mathbf{n} \times \mathbf{k}) \iso (\mathbf{m} \times \mathbf{n}) \times \mathbf{k}$ in $\FinSet$ \\
+      \hline
+      $\vdots$ & $\vdots$ \\
+      \hline
+  \end{tabular}
+\end{table}
+
+In fact, $\Nat$ is a commutative semiring; it admits two monoid structure and can be seen as an additive commutative monoid $(\Nat, +, 0)$ and a multiplicative commutative monoid $(\Nat, \cdot, 1)$. The two operations are related by the distributive law $m \cdot (n + k) = m \cdot n + m \cdot k$. One category-level higher, $\FinSet$ can be seen as a commutative rig-category, that is a category with two monoidal structures, one for the product and one for the coproduct. The two monoidal structures are related by the distributive law $X \times (Y + Z) \iso (X \times Y) + (X \times Z)$. Iterating this process, we can climb the ladder of $n$-categories: The rig-categories are objects of a 2-category where 1-morphisms are monoidal functors and 2-morphisms are monoidal natural transformations.
+
+Recall that a polynomial is a finite sum of monomials, where each monomial is a product of variables raised to some non-negative integer powers. A univariate polynomial is usually writted down as a formal sum
+\begin{equation}
+\label{eq:univariate-presentation-1}
+\sum_{i=0}^{n - 1} \, a_i \, x^i
+\end{equation}
+
+where $x$ is the variable, $a_i$ are coefficients in some ring $R$. To have a unique representation, we sort the monomials by their exponent, the terms of lower exponent come first, so although $x + x^ 2$ and $x^2 + x$ are the same polynomial, we choose the first one as the canonical representation.
+
+Another way to think about this formal sum is to see the exponent $i$ as a function of the coefficients: In this view, a a polynomial is simply a function $R \to \Nat$ with finite support. So we can write \ref{eq:univariate-presentation-1} as
+\begin{equation}
+\label{eq:univariate-presentation-2}
+\sum_{c \in I} \, c \, x^{i(c)}
+\end{equation}
+where $I$ is a finite support. This is how usual polynomials are defined in the Lean4's mathematical library \texttt{mathlib}.
+
+\begin{LeanCode}
+  structure Polynomial (R : Type*) [Semiring R] where ofFinsupp ::
+  toFinsupp : AddMonoidAlgebra R Nat
+\end{LeanCode}
+
+where \Lean{AddMonoidAlgebra R Nat} is defined as the type \Lean{R →₀ Nat} of functions from $R$ to $\Nat$ with finite support.
+
+These two views are equivalent. For simplicity, let's restrict ourselves to the case of polynomials with coefficients in $\Nat$ so that when expanded all the coefficients become $1$ and instead we will have multiplicities of the monomials. So we can write the polynomial $x + 3 * x^2 $ as $x + x^2 + x^2 + x^2$. In this presentation we encode a polynomial by its degree (a natural number $n$) and a finite list of multiplicities $m_0, m_1, \ldots, m_{n - 1}$. This is just a function $m : \Nat \to \Nat$ with finite support.
+
+
+
+A multivariate polynomial is a polynomial in several variables, say $x_1, \ldots, x_n$.
+
+
+
+
+
+
+They are usually denoted by a sum of the form
+$$\sum_{i \in I} \prod_{j \in J} a_{ij} x_j^{e_{ij}}$$
+where $I$ and $J$ are finite sets, $a_{ij}$ are coefficients, and $e_{ij}$ are non-negative integers.

@@ -33,6 +33,16 @@
 % \usepackage{bussproofs}
 \usepackage{graphics}
 
+\usepackage{fontspec}
+\usepackage{minted}
+\usepackage{verbatim}
+
+% autogobble lets us indent the lean code to distinguish it from the latex
+\setminted{frame=single}
+\newmintinline[Lean]{lean}{breaklines,breakbefore={. },breakafter={_}}
+\newminted[LeanCode]{Lean}{autogobble}
+
+
 \input{macros/common}
 \input{macros/print}
 
