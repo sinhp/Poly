@@ -55,8 +55,6 @@
       
       <dt>Dark green background</dt><dd>the <em>proof</em> of this result and all its ancestors are formalized</dd>
       
-      <dt>Dark green border</dt><dd>this is in Mathlib</dd>
-      
     </dl>
   </div>
     <div id="graph"></div>
@@ -334,7 +332,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"defn:UvPoly"	[color=green,		fillcolor="#B0ECA3",		label=UvPoly,		shape=box,		style=filled];	"defn:Polynomial"	[color=green,		fillcolor="#B0ECA3",		label=Polynomial,		shape=box,		style=filled];	"defn:extension"	[color=green,		fillcolor="#B0ECA3",		label=extension,		shape=box,		style=filled];	"thm:exponentiable-mor-exponentiable-obj"	[color=green,		label="exponentiable-mor-exponentiable-obj",		shape=ellipse];	"defn:exponentiable-morphism"	[color=green,		fillcolor="#B0ECA3",		label="exponentiable-morphism",		shape=box,		style=filled];	"defn:exponentiable-morphism" -> "thm:exponentiable-mor-exponentiable-obj"	[style=dashed];	"defn:LCCC"	[color=green,		fillcolor="#B0ECA3",		label=LCCC,		shape=box,		style=filled];	"rmk:pushforward"	[color=green,		fillcolor="#B0ECA3",		label=pushforward,		shape=box,		style=filled];}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"defn:exponentiable-morphism"	[color=green,		fillcolor="#B0ECA3",		label="exponentiable-morphism",		shape=box,		style=filled];	"thm:exponentiable-mor-exponentiable-obj"	[color=green,		label="exponentiable-mor-exponentiable-obj",		shape=ellipse];	"defn:exponentiable-morphism" -> "thm:exponentiable-mor-exponentiable-obj"	[style=dashed];	"defn:Polynomial"	[color=green,		fillcolor="#B0ECA3",		label=Polynomial,		shape=box,		style=filled];	"rmk:pushforward"	[color=green,		fillcolor="#B0ECA3",		label=pushforward,		shape=box,		style=filled];	"defn:LCCC"	[color=green,		fillcolor="#B0ECA3",		label=LCCC,		shape=box,		style=filled];	"defn:UvPoly"	[color=green,		fillcolor="#B0ECA3",		label=UvPoly,		shape=box,		style=filled];	"defn:extension"	[color=green,		fillcolor="#B0ECA3",		label=extension,		shape=box,		style=filled];}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

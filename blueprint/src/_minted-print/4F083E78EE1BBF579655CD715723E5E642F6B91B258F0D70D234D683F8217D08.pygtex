@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+  \PYG{k+kd}{structure} \PYG{n}{Polynomial} \PYG{o}{(}\PYG{n}{R} \PYG{o}{:} \PYG{k+kt}{Type}\PYG{n+nb+bp}{*}\PYG{o}{)} \PYG{o}{[}\PYG{n}{Semiring} \PYG{n}{R}\PYG{o}{]} \PYG{n}{where} \PYG{n}{ofFinsupp} \PYG{o}{::}
+  \PYG{n}{toFinsupp} \PYG{o}{:} \PYG{n}{AddMonoidAlgebra} \PYG{n}{R} \PYG{n}{Nat}
+\end{Verbatim}
