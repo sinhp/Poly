@@ -62,11 +62,12 @@ universe v u
 
 namespace CategoryTheory
 
-open CategoryTheory Category MonoidalCategory Limits Functor Adjunction Over
+open CategoryTheory Category MonoidalCategory CartesianMonoidalCategory Limits Functor Adjunction
+  Over
 
 variable {C : Type u} [Category.{v} C]
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 /-- A morphism `f : I ⟶ J` is exponentiable if the pullback functor `Over J ⥤ Over I`
 has a right adjoint. -/
@@ -223,7 +224,7 @@ end HasPushforwards
 
 namespace CartesianClosedOver
 
-open Over Reindex IsIso ChosenFiniteProducts CartesianClosed HasPushforwards ExponentiableMorphism
+open Over Reindex IsIso CartesianClosed HasPushforwards ExponentiableMorphism
 
 variable {C} [HasFiniteWidePullbacks C] {I J : C} [CartesianClosed (Over J)]
 
