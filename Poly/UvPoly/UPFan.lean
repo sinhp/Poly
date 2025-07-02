@@ -23,8 +23,7 @@ def equiv (P : UvPoly E B) (Γ : C) (X : C) :
     dsimp
     symm
     fapply partialProd.hom_ext ⟨fan P X, isLimitFan P X⟩
-    · simp [partialProd.lift]
-      rfl
+    · simp; rfl
     · sorry
   right_inv := by
     intro ⟨b, e⟩
