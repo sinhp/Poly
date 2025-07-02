@@ -147,7 +147,7 @@ def Over.sigmaReindexNatIsoTensorLeft (Y : Over X) :
     (pullback Y.hom) ⋙ (map Y.hom) ≅ tensorLeft Y := by
   fapply NatIso.ofComponents
   · intro Z
-    simp only [const_obj_obj, Functor.id_obj, comp_obj, tensorObj, Over.pullback]
+    simp only [const_obj_obj, Functor.id_obj, comp_obj, Over.pullback]
     exact sigmaReindexIsoProd Y Z
   · intro Z Z' f
     dsimp

@@ -223,10 +223,10 @@ instance : Category (UvPoly.Total C) where
   id P := UvPoly.Hom.id P.poly
   comp := UvPoly.Hom.comp
   id_comp := by
-    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
+    simp [UvPoly.Hom.comp]
     sorry
   comp_id := by
-    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
+    simp [UvPoly.Hom.comp]
     sorry
   assoc := by
     simp [UvPoly.Hom.comp]

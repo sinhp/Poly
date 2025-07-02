@@ -129,8 +129,6 @@ def paste : cartesian (pasteCell f u) := by
   · unfold pasteCell2
     apply cartesian.whiskerRight (cellLeftCartesian f u)
 
-#check pushforwardPullbackTwoSquare
-
 -- use `pushforwardPullbackTwoSquare` to construct this iso.
 def pentagonIso : map u ⋙ pushforward f ≅
   pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) := by
