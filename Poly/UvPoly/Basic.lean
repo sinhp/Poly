@@ -323,8 +323,7 @@ def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
 
 @[simp]
 theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
-    (proj P f).fst = f ≫ P.fstProj X := by
-  rfl
+    (proj P f).fst = f ≫ P.fstProj X := rfl
 
 /-- The second component of `proj` is a comparison map of pullbacks composed with `ε P X ≫ prod.snd` -/
 -- formerly `polyPair_snd_eq_comp_u₂'`

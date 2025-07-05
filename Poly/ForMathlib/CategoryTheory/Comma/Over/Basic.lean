@@ -17,8 +17,7 @@ variable {T : Type u₁} [Category.{v₁} T]
 namespace Over
 
 @[simp]
-theorem mk_eta {X : T} (U : Over X) : mk U.hom = U := by
-  rfl
+theorem mk_eta {X : T} (U : Over X) : mk U.hom = U := rfl
 
 /-- A variant of `homMk_comp` that can trigger in `simp`. -/
 @[simp]
@@ -30,8 +29,7 @@ lemma homMk_comp' {X Y Z W : T} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_c
 @[simp]
 lemma homMk_comp'_assoc {X Y Z W : T} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (fgh_comp) :
     homMk (U := mk ((f ≫ g) ≫ h)) (f ≫ g) fgh_comp =
-    homMk f ≫ homMk (U := mk (g ≫ h)) (V := mk h) g := by
-  rfl
+    homMk f ≫ homMk (U := mk (g ≫ h)) (V := mk h) g := rfl
 
 @[simp]
 lemma homMk_id {X B : T} (f : X ⟶ B) (h : 𝟙 X ≫ f = f) : homMk (𝟙 X) h = 𝟙 (mk f) :=
@@ -57,8 +55,7 @@ lemma map_left {Y : Over X} {Z Z' : Over (Y.left)} {g : Z ⟶ Z'} :
     ((Over.map Y.hom).map g).left = g.left := Over.map_map_left
 
 lemma map_homMk_left {Y : Over X} {Z Z' : Over (Y.left)} {g : Z ⟶ Z'} :
-    map g = (Over.homMk g.left : Sigma Y Z ⟶ Sigma Y Z') := by
-  rfl
+    map g = (Over.homMk g.left : Sigma Y Z ⟶ Sigma Y Z') := rfl
 
 /-- The first projection of the sigma object. -/
 @[simps!]

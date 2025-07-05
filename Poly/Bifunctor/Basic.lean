@@ -27,15 +27,13 @@ scoped [CategoryTheory] infixr:80 " ⋙₂ " => Functor.comp₂
 @[simp]
 theorem comp_comp₂ {𝒟'' : Type*} [Category 𝒟'']
     (F : 𝒟'' ⥤ 𝒟') (G : 𝒟' ⥤ 𝒟) (P : 𝒞 ⥤ 𝒟 ⥤ ℰ) :
-    (F ⋙ G) ⋙₂ P = F ⋙₂ (G ⋙₂ P) := by
-  rfl
+    (F ⋙ G) ⋙₂ P = F ⋙₂ (G ⋙₂ P) := rfl
 
 /-- Composition with `F,G` ordered like the arguments of `P` is considered `simp`ler. -/
 @[simp]
 theorem comp₂_comp {𝒞' : Type*} [Category 𝒞']
     (F : 𝒞' ⥤ 𝒞) (G : 𝒟' ⥤ 𝒟) (P : 𝒞 ⥤ 𝒟 ⥤ ℰ) :
-    G ⋙₂ (F ⋙ P) = F ⋙ (G ⋙₂ P) := by
-  rfl
+    G ⋙₂ (F ⋙ P) = F ⋙ (G ⋙₂ P) := rfl
 
 @[simps!]
 def comp₂_iso {F₁ F₂ : 𝒟' ⥤ 𝒟} {P₁ P₂ : 𝒞 ⥤ 𝒟 ⥤ ℰ}

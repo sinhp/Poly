@@ -34,8 +34,7 @@ namespace Reindex
 variable [HasPullbacks C] {X : C}
 
 lemma hom {Y : Over X} {Z : Over X} :
-    (Reindex Y Z).hom = pullback.snd Z.hom Y.hom := by
-  rfl
+    (Reindex Y Z).hom = pullback.snd Z.hom Y.hom := rfl
 
 /-- `Reindex` is symmetric in its first and second arguments up to an isomorphism. -/
 def symmetryObjIso (Y Z : Over X) :
@@ -59,7 +58,7 @@ lemma symmetry_hom {Y Z : Over X} :
 def fstProj (Y Z : Over X) : Sigma Y (Reindex Y Z) ⟶ Y :=
   Over.homMk (pullback.snd Z.hom Y.hom) (by simp)
 
-lemma fstProj_sigma_fst (Y Z : Over X) : fstProj Y Z = Sigma.fst (Reindex Y Z) := by rfl
+lemma fstProj_sigma_fst (Y Z : Over X) : fstProj Y Z = Sigma.fst (Reindex Y Z) := rfl
 
 /-- The second projection out of the reindexed sigma object. -/
 def sndProj (Y Z : Over X) : Sigma Y (Reindex Y Z) ⟶ Z :=
