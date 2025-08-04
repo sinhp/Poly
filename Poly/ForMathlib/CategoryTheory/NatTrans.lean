@@ -18,6 +18,8 @@ variable {K : Type*} [Category K] {D : Type*} [Category D]
 
 namespace NatTrans
 
+open Functor
+
 /-- A natural transformation is cartesian if every commutative square of the following form is
 a pullback.
 ```

@@ -23,8 +23,7 @@ lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left �
 
 @[simp]
 lemma left_homMk {B : C} {U V : Over B} (f : U ⟶ V) (h) :
-    homMk f.left h = f := by
-  rfl
+    homMk f.left h = f := rfl
 
 end CategoryTheory.Over
 
@@ -42,12 +41,10 @@ variable {C : Type*} [Category C] [HasFiniteProducts C]
 attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
 
 @[simp]
-theorem ofFiniteProducts_fst (X Y : C) : fst X Y = prod.fst := by
-  rfl
+theorem ofFiniteProducts_fst (X Y : C) : fst X Y = prod.fst := rfl
 
 @[simp]
-theorem ofFiniteProducts_snd  (X Y : C) : snd X Y = prod.snd := by
-  rfl
+theorem ofFiniteProducts_snd  (X Y : C) : snd X Y = prod.snd := rfl
 
 @[simp]
 theorem ofFiniteProducts_whiskerLeft {Y Z : C} (X : C) (f : Y ⟶ Z) :

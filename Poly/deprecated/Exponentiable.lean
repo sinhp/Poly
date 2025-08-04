@@ -84,18 +84,15 @@ example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
 
 /-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
 lemma hom_eq_pullback_snd {I J : C} (f : J ⟶ I) (X : Over I):
-    ((Δ_ f).obj X).hom = pullback.snd := by
-  rfl
+    ((Δ_ f).obj X).hom = pullback.snd := rfl
 
 example {I : C} (f : J ⟶ I) (p : X ⟶ I) :
-    ((Δ_ f).obj (Over.mk p)).hom = pullback.snd := by
-  rfl
+    ((Δ_ f).obj (Over.mk p)).hom = pullback.snd := rfl
 
 /-- For objects `X` and `Y` in `Over I`, the base-change of `X` along `Y.hom` is
 equal to `pullback.snd : pullback X.hom Y.hom ⟶ Y.left` -/
 example {I : C} (X Y : Over I) :
-    ((Δ_ Y.hom).obj X).hom = pullback.snd := by
-  rfl
+    ((Δ_ Y.hom).obj X).hom = pullback.snd := rfl
 
 -- /-- The base-change of `Y` along `X` is `pullback.snd (f:= Y.hom) (g:= X.hom)` -/
 -- lemma hom_eq_pullback_snd' [HasPullbacks C] {I : C} (X Y : Over I) :

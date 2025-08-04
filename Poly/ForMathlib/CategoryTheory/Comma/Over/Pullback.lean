@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Comma.Over.Pullback
-import Mathlib.CategoryTheory.ChosenFiniteProducts
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Monad.Products
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
@@ -16,7 +16,9 @@ universe v₁ v₂ u₁ u₂
 
 namespace CategoryTheory
 
-open Category Limits Comonad MonoidalCategory
+open Category Limits Comonad MonoidalCategory CartesianMonoidalCategory
+
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 variable {C : Type u₁} [Category.{v₁} C]
 
@@ -32,8 +34,7 @@ namespace Reindex
 variable [HasPullbacks C] {X : C}
 
 lemma hom {Y : Over X} {Z : Over X} :
-    (Reindex Y Z).hom = pullback.snd Z.hom Y.hom := by
-  rfl
+    (Reindex Y Z).hom = pullback.snd Z.hom Y.hom := rfl
 
 /-- `Reindex` is symmetric in its first and second arguments up to an isomorphism. -/
 def symmetryObjIso (Y Z : Over X) :
@@ -57,7 +58,7 @@ lemma symmetry_hom {Y Z : Over X} :
 def fstProj (Y Z : Over X) : Sigma Y (Reindex Y Z) ⟶ Y :=
   Over.homMk (pullback.snd Z.hom Y.hom) (by simp)
 
-lemma fstProj_sigma_fst (Y Z : Over X) : fstProj Y Z = Sigma.fst (Reindex Y Z) := by rfl
+lemma fstProj_sigma_fst (Y Z : Over X) : fstProj Y Z = Sigma.fst (Reindex Y Z) := rfl
 
 /-- The second projection out of the reindexed sigma object. -/
 def sndProj (Y Z : Over X) : Sigma Y (Reindex Y Z) ⟶ Z :=
@@ -87,7 +88,7 @@ end Reindex
 
 section BinaryProduct
 
-open ChosenFiniteProducts Sigma Reindex
+open Sigma Reindex
 
 variable [HasFiniteWidePullbacks C] {X : C}
 
@@ -106,8 +107,6 @@ def isBinaryProductSigmaReindex (Y Z : Over X) :
     · exact congr_arg CommaMorphism.left (h ⟨ .right⟩)
     · exact congr_arg CommaMorphism.left (h ⟨ .left ⟩)
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-
 /-- The object `(Sigma Y) (Reindex Y Z)` is isomorphic to the binary product `Y × Z`
 in `Over X`. -/
 @[simps!]
@@ -122,12 +121,12 @@ def sigmaReindexIsoProdMk {Y : C} (f : Y ⟶ X) (Z : Over X) :
   sigmaReindexIsoProd (Over.mk f) _
 
 lemma sigmaReindexIsoProd_hom_comp_fst {Y Z : Over X} :
-    (sigmaReindexIsoProd Y Z).hom ≫ (fst Y Z) = (π_ Y Z) :=
+    (sigmaReindexIsoProd Y Z).hom ≫ fst Y Z = (π_ Y Z) :=
   IsLimit.conePointUniqueUpToIso_hom_comp
     (isBinaryProductSigmaReindex Y Z) (Limits.prodIsProd Y Z) ⟨.left⟩
 
 lemma sigmaReindexIsoProd_hom_comp_snd {Y Z : Over X} :
-    (sigmaReindexIsoProd Y Z).hom ≫ (snd Y Z) = (μ_ Y Z) :=
+    (sigmaReindexIsoProd Y Z).hom ≫ snd Y Z = (μ_ Y Z) :=
   IsLimit.conePointUniqueUpToIso_hom_comp
     (isBinaryProductSigmaReindex Y Z) (Limits.prodIsProd Y Z) ⟨.right⟩
 
@@ -137,10 +136,7 @@ end Over
 
 section TensorLeft
 
-open MonoidalCategory Over Functor ChosenFiniteProducts
-
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-attribute [local instance] monoidalOfChosenFiniteProducts
+open Over Functor
 
 variable [HasFiniteWidePullbacks C] {X : C}
 
@@ -150,16 +146,16 @@ def Over.sigmaReindexNatIsoTensorLeft (Y : Over X) :
     (pullback Y.hom) ⋙ (map Y.hom) ≅ tensorLeft Y := by
   fapply NatIso.ofComponents
   · intro Z
-    simp only [const_obj_obj, Functor.id_obj, comp_obj, tensorLeft_obj, tensorObj, Over.pullback]
+    simp only [const_obj_obj, Functor.id_obj, comp_obj, Over.pullback]
     exact sigmaReindexIsoProd Y Z
   · intro Z Z' f
-    simp
+    dsimp
     ext1 <;> simp_rw [assoc]
-    · simp_rw [whiskerLeft_fst]
+    · rw [whiskerLeft_fst]
       iterate rw [sigmaReindexIsoProd_hom_comp_fst]
       ext
       simp
-    · simp_rw [whiskerLeft_snd]
+    · rw [whiskerLeft_snd]
       iterate rw [sigmaReindexIsoProd_hom_comp_snd, ← assoc, sigmaReindexIsoProd_hom_comp_snd]
       ext
       simp [Reindex.sndProj]
@@ -187,7 +183,7 @@ def equivOverTerminal [HasTerminal C] : Over (⊤_ C) ≌ C :=
 
 namespace Over
 
-open MonoidalCategory
+open CartesianMonoidalCategory
 
 variable {C}
 
@@ -201,15 +197,14 @@ lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
 instance [HasBinaryProducts C]  (X : C) : (forget X).IsLeftAdjoint  :=
   ⟨_, ⟨forgetAdjStar X⟩⟩
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-attribute [local instance] monoidalOfChosenFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 lemma whiskerLeftProdMapId [HasFiniteLimits C] {X : C} {A A' : C} {g : A ⟶ A'} :
     X ◁ g = prod.map (𝟙 X) g := by
   ext
-  · simp only [ChosenFiniteProducts.whiskerLeft_fst]
+  · simp only [whiskerLeft_fst]
     exact (Category.comp_id _).symm.trans (prod.map_fst (𝟙 X) g).symm
-  · simp only [ChosenFiniteProducts.whiskerLeft_snd]
+  · simp only [whiskerLeft_snd]
     exact (prod.map_snd (𝟙 X) g).symm
 
 def starForgetIsoTensorLeft [HasFiniteLimits C] (X : C) :

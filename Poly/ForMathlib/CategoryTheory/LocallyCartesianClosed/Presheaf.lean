@@ -22,7 +22,7 @@ abbrev Psh (C : Type u) [Category.{v} C] : Type (max u (v + 1)) := Cᵒᵖ ⥤ T
 
 variable {C : Type*} [SmallCategory C] [HasTerminal C]
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 instance cartesianClosedOver {C : Type u} [Category.{max u v} C] (P : Psh C) :
     CartesianClosed (Over P) :=

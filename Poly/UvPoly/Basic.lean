@@ -223,10 +223,10 @@ instance : Category (UvPoly.Total C) where
   id P := UvPoly.Hom.id P.poly
   comp := UvPoly.Hom.comp
   id_comp := by
-    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
+    simp [UvPoly.Hom.comp]
     sorry
   comp_id := by
-    simp [UvPoly.Hom.id, UvPoly.Hom.comp]
+    simp [UvPoly.Hom.comp]
     sorry
   assoc := by
     simp [UvPoly.Hom.comp]
@@ -323,8 +323,7 @@ def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
 
 @[simp]
 theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
-    (proj P f).fst = f ≫ P.fstProj X := by
-  rfl
+    (proj P f).fst = f ≫ P.fstProj X := rfl
 
 /-- The second component of `proj` is a comparison map of pullbacks composed with `ε P X ≫ prod.snd` -/
 -- formerly `polyPair_snd_eq_comp_u₂'`

@@ -53,8 +53,7 @@ structure Fan where
   snd : pullback fst s ⟶ X
 
 theorem Fan.fst_mk {pt : C} (f : pt ⟶ B) (g : pullback f s ⟶ X) :
-    Fan.fst (Fan.mk f g) = f := by
-  rfl
+    Fan.fst (Fan.mk f g) = f := rfl
 
 variable {s X}
 
@@ -84,8 +83,7 @@ def pullbackMap {c' c : Fan s X} (f : c'.pt ⟶ c.pt)
   ((Over.pullback s).map (Over.homMk f (by aesop) : Over.mk (c'.fst) ⟶ Over.mk c.fst)).left
 
 theorem pullbackMap_comparison {P} {c : Fan s X} (f : P ⟶ c.pt) :
-    pullbackMap (c' := Fan.mk (f ≫ c.fst) (comparison f ≫ c.snd)) (c := c) f = comparison f := by
-  rfl
+    pullbackMap (c' := Fan.mk (f ≫ c.fst) (comparison f ≫ c.snd)) (c := c) f = comparison f := rfl
 
 /-- A map to the apex of a partial product cone induces a partial product cone by precomposition. -/
 @[simps]
