@@ -97,9 +97,10 @@ lemma cellLeftCartesian : cartesian (cellLeft f u) := by
   simp only [id_obj, mk_left, comp_obj, pullback_obj_left, Functor.comp_map]
   unfold cellLeft
   intros i j f'
-  have α := pullbackMapTriangle (w f u) (e f u)
+  have α := pullbackMapTriangle (w f u) (e f u) u (cellLeftTriangle f u)
   simp only [id_obj, mk_left] at α u
   sorry
+
 
 def cellRightCommSq : CommSq (g f u) (w f u) (v f u) f :=
   IsPullback.toCommSq (IsPullback.of_hasPullback _ _)
@@ -110,30 +111,30 @@ def cellRight' : pushforward (g f u) ⋙ map (v f u)
 lemma cellRightCartesian : cartesian (cellRight' f u).hom :=
   cartesian_of_isIso ((cellRight' f u).hom)
 
-def pasteCell1 : pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) ⟶
+abbrev pasteCell1 : pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) ⟶
   pullback (e f u) ⋙ map (w f u) ⋙ pushforward f := by
   apply whiskerLeft
   exact (cellRight' f u).hom
 
-def pasteCell2 : (pullback (e f u) ⋙ map (w f u)) ⋙ pushforward f
-   ⟶ (map u) ⋙ pushforward f := by
-  apply whiskerRight
-  exact cellLeft f u
+abbrev pasteCell2 : (pullback (e f u) ⋙ map (w f u)) ⋙ pushforward f
+   ⟶ (map u) ⋙ pushforward f := whiskerRight (cellLeft f u) _
 
 def pasteCell := pasteCell1 f u ≫ pasteCell2 f u
 
 def paste : cartesian (pasteCell f u) := by
   apply cartesian.comp
-  · unfold pasteCell1
-    apply cartesian.whiskerLeft (cellRightCartesian f u)
-  · unfold pasteCell2
-    apply cartesian.whiskerRight (cellLeftCartesian f u)
+  · exact cartesian.whiskerLeft (cellRightCartesian f u) _
+  · exact cartesian.whiskerRight (cellLeftCartesian f u) _
 
 -- use `pushforwardPullbackTwoSquare` to construct this iso.
 def pentagonIso : map u ⋙ pushforward f ≅
   pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) := by
   have := cartesian_of_isPullback_to_terminal (pasteCell f u)
   letI : IsIso ((pasteCell f u).app (⊤_ Over ((𝟭 (Over B)).obj (Over.mk u)).left)) := sorry
+  -- by {
+  --   have : TwoSquare (pushforward (g f u)) (Over.pullback _) (Over.pullback _) (pushforward f) := by
+  --    apply pushforwardPullbackTwoSquare _ _ _ f u
+  -- }
   have := isIso_of_cartesian (pasteCell f u) (paste f u)
   exact (asIso (pasteCell f u)).symm
 
