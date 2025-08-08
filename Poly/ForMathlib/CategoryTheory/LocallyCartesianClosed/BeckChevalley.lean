@@ -100,21 +100,18 @@ def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :
   mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
 
 /--
-The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as the mate the isomorphism
-`mapForget f`:
+The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C`
+as the mate of the isomorphism `mapForget f`:
 ```
-          Over X --.forget X -> C
-             ↑                  |
-.pullback f  |         ↘        | 𝟭
-             |                  |
-          Over Y --.forget Y -> C
+Over Y -- .pullback f -> Over X
+  |                        |
+  | .forget Y  ↘         | .forget X
+  V                        V
+  C --------- 𝟭 ---------- C
 ```
 -/
---pullbackForgetBeckChevalleySquare
-def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) := by
-  let iso := (mapForget f).inv
-  rw [← Functor.comp_id (forget X)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
+  mateEquiv (mapPullbackAdj f) (Adjunction.id) (mapForget f).inv
 
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/

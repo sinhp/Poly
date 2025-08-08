@@ -7,6 +7,7 @@ Authors: Sina Hazratpour, Wojciech Nawrocki
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
 import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
+import Poly.ForMathlib.CategoryTheory.NatTrans
 
 
 /-!
@@ -72,7 +73,7 @@ def prod {E' B'} (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]:
 
 /-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
 to a single variable polynomial `P : UvPoly E B`. -/
-def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
+def functor (P : UvPoly E B) : C ⥤ C :=
   star E ⋙ pushforward P.p ⋙ forget B
 
 /-- The evaluation function of a polynomial `P` at an object `X`. -/
@@ -80,6 +81,10 @@ def apply (P : UvPoly E B) : C → C := (P.functor).obj
 
 @[inherit_doc]
 infix:90 " @ " => UvPoly.apply
+
+instance (P : UvPoly E B) : Limits.PreservesLimitsOfShape WalkingCospan P.functor := by
+  unfold functor
+  infer_instance
 
 variable (B)
 
@@ -156,16 +161,27 @@ C --- >  C/E ---->  C/B ----> C
 ```
 -/
 def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
-    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
-    P.functor ⟶ Q.functor := by
-  have sq : CommSq φ P.p Q.p δ := pb.toCommSq.flip
+    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) : P.functor ⟶ Q.functor :=
   let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
     (Over.starPullbackIsoStar φ).inv
   let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
     (pushforwardPullbackIsoSquare pb.flip).inv
   let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
     pullbackForgetTwoSquare δ
-  simpa using cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
+  let := cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
+  this
+
+theorem cartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
+    NatTrans.cartesian (pullbackForgetTwoSquare f) := by
+  sorry
+
+open NatTrans in
+theorem cartesian_cartesianNaturalTrans {D F : C} [HasBinaryProducts C]
+    (P : UvPoly E B) (Q : UvPoly F D) (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
+    NatTrans.cartesian (cartesianNaturalTrans P Q δ φ pb) :=
+  cartesian_vComp (cartesian_of_isIso _) <|
+  cartesian_vComp (cartesian_of_isIso _) <|
+  cartesian_pullbackForgetTwoSquare _
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram

@@ -5,6 +5,7 @@ Authors: Sina Hazratpour
 -/
 
 import Mathlib.CategoryTheory.NatTrans
+import Mathlib.CategoryTheory.Functor.TwoSquare
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
 open CategoryTheory Limits IsPullback
@@ -85,6 +86,34 @@ theorem cartesian_of_isPullback_to_terminal [HasTerminal J] {F G : J ⥤ C} (α 
   exact α.naturality f
   exact pb j
 
+variable {C₁ : Type u₁} {C₂ : Type u₂} {C₃ : Type u₃} {C₄ : Type u₄}
+  [Category.{v₁} C₁] [Category.{v₂} C₂] [Category.{v₃} C₃] [Category.{v₄} C₄]
+  {T : C₁ ⥤ C₂} {L : C₁ ⥤ C₃} {R : C₂ ⥤ C₄} {B : C₃ ⥤ C₄}
+variable {C₅ : Type u₅} {C₆ : Type u₆} {C₇ : Type u₇} {C₈ : Type u₈}
+  [Category.{v₅} C₅] [Category.{v₆} C₆] [Category.{v₇} C₇] [Category.{v₈} C₈]
+  {T' : C₂ ⥤ C₅} {R' : C₅ ⥤ C₆} {B' : C₄ ⥤ C₆} {L' : C₃ ⥤ C₇} {R'' : C₄ ⥤ C₈} {B'' : C₇ ⥤ C₈}
+
+open TwoSquare in
+theorem cartesian_vComp {w : TwoSquare T L R B} {w' : TwoSquare B L' R'' B''}
+    [∀ (i j : C₁) (f : j ⟶ i), PreservesLimit (cospan (w.app i) ((L ⋙ B).map f)) R''] :
+    cartesian w → cartesian w' → cartesian (w ≫ᵥ w') :=
+  fun cw cw' =>
+    (cartesian_of_isIso _).comp <|
+    (cartesian.whiskerRight cw _).comp <|
+    (cartesian_of_isIso _).comp <|
+    (cartesian.whiskerLeft cw' _).comp <|
+    (cartesian_of_isIso _)
+
+open TwoSquare in
+theorem cartesian_hComp {w : TwoSquare T L R B} {w' : TwoSquare T' R R' B'}
+    [∀ (i j : C₁) (f : j ⟶ i), PreservesLimit (cospan (w.app i) ((L ⋙ B).map f)) B'] :
+    cartesian w → cartesian w' → cartesian (w ≫ₕ w') :=
+  fun cw cw' =>
+    (cartesian_of_isIso _).comp <|
+    (cartesian.whiskerLeft cw' _).comp <|
+    (cartesian_of_isIso _).comp <|
+    (cartesian.whiskerRight cw _).comp <|
+    (cartesian_of_isIso _)
 
 end NatTrans
 
