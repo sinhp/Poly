@@ -25,8 +25,8 @@ variable {C : Type u₁} [Category.{v₁} C]
 
 namespace Over
 
-theorem cartesian_mapPullbackAdj_counit [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
-    NatTrans.cartesian (Over.mapPullbackAdj f).counit := by
+theorem isCartesian_mapPullbackAdj_counit [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
+    NatTrans.IsCartesian (Over.mapPullbackAdj f).counit := by
   intro A B U
   apply IsPullback.of_right
     (h₁₂ := Over.homMk (V := Over.mk f) (pullback.snd B.hom f) <| by simp)

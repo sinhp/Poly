@@ -160,7 +160,7 @@ C --- >  C/E ---->  C/B ----> C
               P.p
 ```
 -/
-def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
+def cartesianNatTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
     (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) : P.functor ⟶ Q.functor :=
   let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
     (Over.starPullbackIsoStar φ).inv
@@ -171,17 +171,13 @@ def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : U
   let := cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
   this
 
-theorem cartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
-    NatTrans.cartesian (pullbackForgetTwoSquare f) := by
-  sorry
-
 open NatTrans in
-theorem cartesian_cartesianNaturalTrans {D F : C} [HasBinaryProducts C]
+theorem isCartesian_cartesianNatTrans {D F : C} [HasBinaryProducts C]
     (P : UvPoly E B) (Q : UvPoly F D) (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
-    NatTrans.cartesian (cartesianNaturalTrans P Q δ φ pb) :=
-  cartesian_vComp (cartesian_of_isIso _) <|
-  cartesian_vComp (cartesian_of_isIso _) <|
-  cartesian_pullbackForgetTwoSquare _
+    NatTrans.IsCartesian (cartesianNatTrans P Q δ φ pb) :=
+  (isCartesian_of_isIso _).vComp <|
+  (isCartesian_of_isIso _).vComp <|
+  isCartesian_pullbackForgetTwoSquare _
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram

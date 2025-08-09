@@ -113,6 +113,11 @@ Over Y -- .pullback f -> Over X
 def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
   mateEquiv (mapPullbackAdj f) Adjunction.id (mapForget f).inv
 
+theorem isCartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
+    NatTrans.IsCartesian (pullbackForgetTwoSquare f) := by
+  unfold pullbackForgetTwoSquare
+  sorry
+
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/
 --pullbackForgetBeckChevalleyTriangle
