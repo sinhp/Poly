@@ -80,10 +80,10 @@ def mapIsoSquare {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y
     Over.map h ⋙ Over.map g ≅ Over.map f ⋙ Over.map k :=
   eqToIso (map_square_eq sq)
 
-variable [HasBinaryProducts C] [HasPullbacks C]
+variable [HasPullbacks C]
 
 variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
-(sq : CommSq h f g k)
+  (sq : CommSq h f g k)
 
 /-- The Beck-Chevalley natural transformation `pullback f ⋙ map h ⟶ map k ⋙ pullback g`
 constructed as a mate of `mapIsoSquare`:
@@ -116,7 +116,12 @@ def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭
 theorem isCartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
     NatTrans.IsCartesian (pullbackForgetTwoSquare f) := by
   unfold pullbackForgetTwoSquare
-  sorry
+  simp only [mateEquiv_apply]
+  repeat apply IsCartesian.comp; apply isCartesian_of_isIso
+  apply IsCartesian.comp
+  . apply IsCartesian.whiskerRight
+    apply isCartesian_mapPullbackAdj_counit
+  . apply isCartesian_of_isIso
 
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/
@@ -171,8 +176,7 @@ def pushforwardPullbackTwoSquare
 A variant of `pushforwardTwoSquare` involving `star` instead of `pullback`.
 -/
 --pushforwardStarBeckChevalleySquare
-def starPushforwardTriangle
-    [ExponentiableMorphism f]  :
+def starPushforwardTriangle [HasBinaryProducts C] [ExponentiableMorphism f]  :
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
   rw [← Functor.id_comp (star X)] at iso
