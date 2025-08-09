@@ -111,7 +111,7 @@ Over Y -- .pullback f -> Over X
 ```
 -/
 def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
-  mateEquiv (mapPullbackAdj f) (Adjunction.id) (mapForget f).inv
+  mateEquiv (mapPullbackAdj f) Adjunction.id (mapForget f).inv
 
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/
@@ -127,7 +127,7 @@ def pullbackMapTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
   let iso := (mapComp f h').hom
   rw [w] at iso
   rw [← Functor.comp_id (map h)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+  exact (mateEquiv (mapPullbackAdj f) Adjunction.id) iso
 
 /-- The isomorphism between the pullbacks along a commutative square.  This is constructed as the
 conjugate of the `mapIsoSquare`.
@@ -171,7 +171,7 @@ def starPushforwardTriangle
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
   rw [← Functor.id_comp (star X)] at iso
-  exact (mateEquiv (Adjunction.id) (adj f)) iso
+  exact (mateEquiv Adjunction.id (adj f)) iso
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square.
 ```
