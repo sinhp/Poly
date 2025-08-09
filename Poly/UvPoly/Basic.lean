@@ -7,6 +7,7 @@ Authors: Sina Hazratpour, Wojciech Nawrocki
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
 import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
+import Poly.ForMathlib.CategoryTheory.NatTrans
 
 
 /-!
@@ -61,18 +62,18 @@ variable {E B : C}
 /-- The constant polynomial in many variables: for this we need the initial object -/
 def const [HasInitial C] (S : C) : UvPoly (⊥_ C) S := ⟨initial.to S, sorry⟩
 
-def smul [HasBinaryProducts C] (S : C) (P : UvPoly E B) : UvPoly (S ⨯ E) (S ⨯ B) :=
+def smul (S : C) (P : UvPoly E B) : UvPoly (S ⨯ E) (S ⨯ B) :=
   ⟨prod.map (𝟙 S) P.p, sorry⟩
 
 /-- The product of two polynomials in a single variable. -/
-def prod {E' B'} (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C]:
+def prod {E' B'} (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C] :
     UvPoly ((E ⨯ B') ⨿ (B ⨯ E')) (B ⨯ B') where
   p := coprod.desc (prod.map P.p (𝟙 B')) (prod.map (𝟙 B) Q.p)
   exp := sorry -- perhaps we need extra assumptions on `C` to prove this, e.g. `C` is lextensive?
 
 /-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
 to a single variable polynomial `P : UvPoly E B`. -/
-def functor [HasBinaryProducts C] (P : UvPoly E B) : C ⥤ C :=
+def functor (P : UvPoly E B) : C ⥤ C :=
   star E ⋙ pushforward P.p ⋙ forget B
 
 /-- The evaluation function of a polynomial `P` at an object `X`. -/
@@ -80,6 +81,10 @@ def apply (P : UvPoly E B) : C → C := (P.functor).obj
 
 @[inherit_doc]
 infix:90 " @ " => UvPoly.apply
+
+instance (P : UvPoly E B) : Limits.PreservesLimitsOfShape WalkingCospan P.functor := by
+  unfold functor
+  infer_instance
 
 variable (B)
 
@@ -155,17 +160,24 @@ C --- >  C/E ---->  C/B ----> C
               P.p
 ```
 -/
-def cartesianNaturalTrans {D F : C}[HasBinaryProducts C] (P : UvPoly E B) (Q : UvPoly F D)
-    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
-    P.functor ⟶ Q.functor := by
-  have sq : CommSq φ P.p Q.p δ := pb.toCommSq.flip
+def cartesianNatTrans {D F : C} (P : UvPoly E B) (Q : UvPoly F D)
+    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) : P.functor ⟶ Q.functor :=
   let cellLeft : TwoSquare (𝟭 C) (Over.star F) (Over.star E) (pullback φ) :=
     (Over.starPullbackIsoStar φ).inv
   let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
     (pushforwardPullbackIsoSquare pb.flip).inv
   let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
     pullbackForgetTwoSquare δ
-  simpa using cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
+  let := cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
+  this
+
+open NatTrans in
+theorem isCartesian_cartesianNatTrans {D F : C} (P : UvPoly E B) (Q : UvPoly F D)
+    (δ : B ⟶ D) (φ : E ⟶ F) (pb : IsPullback P.p φ δ Q.p) :
+    NatTrans.IsCartesian (cartesianNatTrans P Q δ φ pb) :=
+  (isCartesian_of_isIso _).vComp <|
+  (isCartesian_of_isIso _).vComp <|
+  isCartesian_pullbackForgetTwoSquare _
 
 /-- A morphism from a polynomial `P` to a polynomial `Q` is a pair of morphisms `e : E ⟶ E'`
 and `b : B ⟶ B'` such that the diagram

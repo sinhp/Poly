@@ -8,7 +8,8 @@ import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Monad.Products
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
-
+import Poly.ForMathlib.CategoryTheory.NatTrans
+import Poly.ForMathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
 noncomputable section
 
@@ -23,6 +24,19 @@ attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 variable {C : Type u₁} [Category.{v₁} C]
 
 namespace Over
+
+theorem isCartesian_mapPullbackAdj_counit [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
+    NatTrans.IsCartesian (Over.mapPullbackAdj f).counit := by
+  intro A B U
+  apply IsPullback.of_right
+    (h₁₂ := Over.homMk (V := Over.mk f) (pullback.snd B.hom f) <| by simp)
+    (v₁₃ := Over.mkIdTerminal.from _)
+    (h₂₂ := Over.mkIdTerminal.from _)
+  case p => ext; simp
+  . apply (Over.forget Y).reflect_isPullback
+    convert (IsPullback.of_hasPullback A.hom f).flip using 1 <;> simp
+  . apply (Over.forget Y).reflect_isPullback
+    convert (IsPullback.of_hasPullback B.hom f).flip using 1 <;> simp
 
 /-- The reindexing of `Z : Over X` along `Y : Over X`, defined by pulling back `Z` along
 `Y.hom : Y.left ⟶ X`. -/

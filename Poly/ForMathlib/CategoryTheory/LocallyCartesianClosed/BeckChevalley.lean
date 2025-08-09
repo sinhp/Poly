@@ -100,21 +100,23 @@ def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :
   mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
 
 /--
-The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as the mate the isomorphism
-`mapForget f`:
+The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C`
+as the mate of the isomorphism `mapForget f`:
 ```
-          Over X --.forget X -> C
-             ↑                  |
-.pullback f  |         ↘        | 𝟭
-             |                  |
-          Over Y --.forget Y -> C
+Over Y -- .pullback f -> Over X
+  |                        |
+  | .forget Y  ↘         | .forget X
+  V                        V
+  C --------- 𝟭 ---------- C
 ```
 -/
---pullbackForgetBeckChevalleySquare
-def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) := by
-  let iso := (mapForget f).inv
-  rw [← Functor.comp_id (forget X)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
+  mateEquiv (mapPullbackAdj f) Adjunction.id (mapForget f).inv
+
+theorem isCartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
+    NatTrans.IsCartesian (pullbackForgetTwoSquare f) := by
+  unfold pullbackForgetTwoSquare
+  sorry
 
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/
@@ -130,7 +132,7 @@ def pullbackMapTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
   let iso := (mapComp f h').hom
   rw [w] at iso
   rw [← Functor.comp_id (map h)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+  exact (mateEquiv (mapPullbackAdj f) Adjunction.id) iso
 
 /-- The isomorphism between the pullbacks along a commutative square.  This is constructed as the
 conjugate of the `mapIsoSquare`.
@@ -174,7 +176,7 @@ def starPushforwardTriangle
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
   rw [← Functor.id_comp (star X)] at iso
-  exact (mateEquiv (Adjunction.id) (adj f)) iso
+  exact (mateEquiv Adjunction.id (adj f)) iso
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square.
 ```

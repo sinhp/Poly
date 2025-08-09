@@ -35,6 +35,10 @@ lemma homMk_comp'_assoc {X Y Z W : T} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) 
 lemma homMk_id {X B : T} (f : X ⟶ B) (h : 𝟙 X ≫ f = f) : homMk (𝟙 X) h = 𝟙 (mk f) :=
   rfl
 
+@[simp]
+theorem mkIdTerminal_from_left {B : T} (U : Over B) : (mkIdTerminal.from U).left = U.hom := by
+  simp [mkIdTerminal, CostructuredArrow.mkIdTerminal, Limits.IsTerminal.from, Functor.preimage]
+
 /-- `Over.Sigma Y U` is a shorthand for `(Over.map Y.hom).obj U`.
 This is a category-theoretic analogue of `Sigma` for types. -/
 abbrev Sigma {X : T} (Y : Over X) (U : Over (Y.left)) : Over X :=
