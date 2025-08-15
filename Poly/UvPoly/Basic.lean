@@ -362,5 +362,6 @@ instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.To
   rightUnitor := sorry
 
 end UvPoly
+
 end CategoryTheory
 end

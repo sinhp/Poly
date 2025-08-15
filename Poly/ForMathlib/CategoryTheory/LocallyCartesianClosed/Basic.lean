@@ -296,4 +296,12 @@ def expIso {I : C} (A X : Over I) :  Pi A (Reindex A X) ≅ A ⟹ X := Iso.refl 
 
 end LocallyCartesianClosed
 
+open LocallyCartesianClosed ExponentiableMorphism
+
+instance pushforward_preservesLimits [HasFiniteWidePullbacks C]
+    [LocallyCartesianClosed C] {I J : C} (f : I ⟶ J)
+    [ExponentiableMorphism f] : PreservesLimits (pushforward f) :=
+  (adj f).rightAdjoint_preservesLimits
+
+
 end CategoryTheory
