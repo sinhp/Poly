@@ -88,11 +88,11 @@ variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
 /-- The Beck-Chevalley natural transformation `pullback f ⋙ map h ⟶ map k ⋙ pullback g`
 constructed as a mate of `mapIsoSquare`:
 ```
-          Over X -- .map h -> Over Z
-             ↑                  ↑
-.pullback f  |         ↘        | .pullback g
-             |                  |
-          Over Y -- .map k -> Over W
+    Over Y - pullback f → Over X
+      |                     |
+map k |          ↙          | map h
+      ↓                     ↓
+    Over W - pullback g → Over Z
 ```
 -/
 --pullbackBeckChevalleySquare
@@ -103,11 +103,11 @@ def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :
 The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C`
 as the mate of the isomorphism `mapForget f`:
 ```
-Over Y -- .pullback f -> Over X
-  |                        |
-  | .forget Y  ↘         | .forget X
-  V                        V
-  C --------- 𝟭 ---------- C
+       Over Y - pullback f → Over X
+         |                     |
+forget Y |          ↙          | forget X
+         ↓                     ↓
+         C ======== 𝟭 ======== C
 ```
 -/
 def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
@@ -158,11 +158,11 @@ def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h 
 `pushforward g ⋙ pullback k ⟶ pullback h ⋙ pushforward f` constructed as a mate of
 `pullbackMapTwoSquare`.
 ```
-              Over X ←-.pullback h-- Over Z
-                |                     |
-.pushforward f  |          ↖          | .pushforward g
-                ↓                     ↓
-              Over Y ←-.pullback k-- Over W
+         Over Z - pushforward g → Over W
+           |                        |
+pullback h |           ↙            | pullback k
+           ↓                        ↓
+         Over X - pushforward f → Over Y
 ```
 -/
 --pushforwardBeckChevalleySquare
