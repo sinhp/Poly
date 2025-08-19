@@ -61,11 +61,6 @@ example [HasInitial C] {X Y : C} (f : Y ⟶ X) :
 
 /-- Given an object `X`, The unique map `initial.to X : ⊥_ C ⟶ X ` is exponentiable. -/
 instance [HasInitial C] (X : C) : ExponentiableMorphism (initial.to X) := sorry
-  -- functor := {
-  --   obj := sorry
-  --   map := sorry
-  -- }
-  -- adj := sorry
 
 /-- The constant polynomial in many variables: for this we need the initial object. -/
 def const {I O : C} [HasInitial C] (A : C) [HasBinaryProduct O A] : MvPoly I O :=
@@ -81,16 +76,53 @@ def sum {I O : C} [HasBinaryCoproducts C] (P Q : MvPoly I O) : MvPoly I O where
   B := P.B ⨿ Q.B
   i := coprod.desc P.i Q.i
   p := coprod.map P.p Q.p
-  exp := sorry
+  exp := by {
+    refine { exists_rightAdjoint := by {
+      have F : Over (P.E ⨿ Q.E) ⥤ Over (P.B ⨿ Q.B) := sorry
+      use F
+      haveI : HasBinaryCoproducts (Over (P.E ⨿ Q.E)) := by {
+        sorry
+      }
+      have hf : PreservesPullbacksOfInclusions F := by {
+        sorry
+      }
+      sorry
+
+
+
+
+
+
+    }
+    }}
   o := coprod.desc P.o Q.o
+--#check PreservesPullbacksOfInclusions
+
+--#check PreservesPullbacksOfInclusions.preservesPullbackInl
+
+
+/-For sums: assuming extensiveness, you can express the slice over
+the sum as the product of slices. Then you can calculate pullback
+ as the product of two functors, amd then you take the products of their adjoints-/
 
 /-- The product of two polynomials in many variables. -/
-def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O) : MvPoly I O where
+def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O) :
+    MvPoly I O where
   E := (pullback (P.p ≫ P.o) Q.o) ⨿ (pullback P.o (Q.p ≫ Q.o))
   B := pullback P.o Q.o
   i := coprod.desc (pullback.fst _ _ ≫ P.i) (pullback.snd _ _ ≫ Q.i)
-  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _) (by aesop) (by aesop)) (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _) (by aesop) (by aesop))
-  exp := sorry -- by extensivity -- PreservesPullbacksOfInclusions
+  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _)
+    (comp_id _) (by rw [comp_id, id_comp]))
+    (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _)
+    (by rw [comp_id, id_comp]) (comp_id _))
+  exp := by {
+    refine { exists_rightAdjoint := by {sorry
+
+    }
+
+
+    }
+  } -- by extensivity -- PreservesPullbacksOfInclusions
   o := pullback.fst (P.o) Q.o ≫ P.o
 
 protected def functor {I O : C} (P : MvPoly I O) :
@@ -99,7 +131,8 @@ protected def functor {I O : C} (P : MvPoly I O) :
 
 variable (I O : C) (P : MvPoly I O)
 
-def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] : Over I → Over O := (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] :
+  Over I → Over O := (P.functor).obj
 
 /-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
 object.-/
