@@ -92,8 +92,8 @@ def cellLeftTriangle : e f u ≫ u = w f u := by
 def cellLeft : pullback (e f u) ⋙ map (w f u) ⟶ map u :=
   pullbackMapTriangle _ _ _ (cellLeftTriangle f u)
 
-lemma cellLeftCartesian : cartesian (cellLeft f u) := by
-  unfold cartesian
+lemma isCartesian_cellLeft : IsCartesian (cellLeft f u) := by
+  unfold IsCartesian
   simp only [id_obj, mk_left, comp_obj, pullback_obj_left, Functor.comp_map]
   unfold cellLeft
   intros i j f'
@@ -107,8 +107,8 @@ def cellRightCommSq : CommSq (g f u) (w f u) (v f u) f :=
 def cellRight' : pushforward (g f u) ⋙ map (v f u)
   ≅ map (w f u) ⋙ pushforward f := sorry
 
-lemma cellRightCartesian : cartesian (cellRight' f u).hom :=
-  cartesian_of_isIso ((cellRight' f u).hom)
+lemma isCartesian_cellRight' : IsCartesian (cellRight' f u).hom :=
+  isCartesian_of_isIso ((cellRight' f u).hom)
 
 def pasteCell1 : pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) ⟶
   pullback (e f u) ⋙ map (w f u) ⋙ pushforward f := by
@@ -122,19 +122,19 @@ def pasteCell2 : (pullback (e f u) ⋙ map (w f u)) ⋙ pushforward f
 
 def pasteCell := pasteCell1 f u ≫ pasteCell2 f u
 
-def paste : cartesian (pasteCell f u) := by
-  apply cartesian.comp
+def paste : IsCartesian (pasteCell f u) := by
+  apply IsCartesian.comp
   · unfold pasteCell1
-    apply cartesian.whiskerLeft (cellRightCartesian f u)
+    apply (isCartesian_cellRight' f u).whiskerLeft
   · unfold pasteCell2
-    apply cartesian.whiskerRight (cellLeftCartesian f u)
+    apply (isCartesian_cellLeft f u).whiskerRight
 
 -- use `pushforwardPullbackTwoSquare` to construct this iso.
 def pentagonIso : map u ⋙ pushforward f ≅
   pullback (e f u) ⋙ pushforward (g f u) ⋙ map (v f u) := by
-  have := cartesian_of_isPullback_to_terminal (pasteCell f u)
+  have := isCartesian_of_isPullback_to_terminal (pasteCell f u)
   letI : IsIso ((pasteCell f u).app (⊤_ Over ((𝟭 (Over B)).obj (Over.mk u)).left)) := sorry
-  have := isIso_of_cartesian (pasteCell f u) (paste f u)
+  have := isIso_of_isCartesian (pasteCell f u) (paste f u)
   exact (asIso (pasteCell f u)).symm
 
 end CategoryTheory

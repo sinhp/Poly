@@ -80,19 +80,19 @@ def mapIsoSquare {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y
     Over.map h ⋙ Over.map g ≅ Over.map f ⋙ Over.map k :=
   eqToIso (map_square_eq sq)
 
-variable [HasBinaryProducts C] [HasPullbacks C]
+variable [HasPullbacks C]
 
 variable {X Y Z W : C} (h : X ⟶ Z) (f : X ⟶ Y) (g : Z ⟶ W) (k : Y ⟶ W)
-(sq : CommSq h f g k)
+  (sq : CommSq h f g k)
 
 /-- The Beck-Chevalley natural transformation `pullback f ⋙ map h ⟶ map k ⋙ pullback g`
 constructed as a mate of `mapIsoSquare`:
 ```
-          Over X -- .map h -> Over Z
-             ↑                  ↑
-.pullback f  |         ↘        | .pullback g
-             |                  |
-          Over Y -- .map k -> Over W
+    Over Y - pullback f → Over X
+      |                     |
+map k |          ↙          | map h
+      ↓                     ↓
+    Over W - pullback g → Over Z
 ```
 -/
 --pullbackBeckChevalleySquare
@@ -100,21 +100,28 @@ def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :
   mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
 
 /--
-The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C` as the mate the isomorphism
-`mapForget f`:
+The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C`
+as the mate of the isomorphism `mapForget f`:
 ```
-          Over X --.forget X -> C
-             ↑                  |
-.pullback f  |         ↘        | 𝟭
-             |                  |
-          Over Y --.forget Y -> C
+       Over Y - pullback f → Over X
+         |                     |
+forget Y |          ↙          | forget X
+         ↓                     ↓
+         C ======== 𝟭 ======== C
 ```
 -/
---pullbackForgetBeckChevalleySquare
-def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) := by
-  let iso := (mapForget f).inv
-  rw [← Functor.comp_id (forget X)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
+  mateEquiv (mapPullbackAdj f) Adjunction.id (mapForget f).inv
+
+theorem isCartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
+    NatTrans.IsCartesian (pullbackForgetTwoSquare f) := by
+  unfold pullbackForgetTwoSquare
+  simp only [mateEquiv_apply]
+  repeat apply IsCartesian.comp; apply isCartesian_of_isIso
+  apply IsCartesian.comp
+  . apply IsCartesian.whiskerRight
+    apply isCartesian_mapPullbackAdj_counit
+  . apply isCartesian_of_isIso
 
 /-- The natural transformation `pullback f ⋙ forget X ⟶ forget Y`, a variant of
 `pullbackForgetTwoSquare`. -/
@@ -130,7 +137,7 @@ def pullbackMapTriangle (h' : Y ⟶ Z) (w : f ≫ h' = h) :
   let iso := (mapComp f h').hom
   rw [w] at iso
   rw [← Functor.comp_id (map h)] at iso
-  exact (mateEquiv (mapPullbackAdj f) (Adjunction.id)) iso
+  exact (mateEquiv (mapPullbackAdj f) Adjunction.id) iso
 
 /-- The isomorphism between the pullbacks along a commutative square.  This is constructed as the
 conjugate of the `mapIsoSquare`.
@@ -151,11 +158,11 @@ def pullbackIsoSquare : pullback k ⋙ pullback f ≅ pullback g ⋙ pullback h 
 `pushforward g ⋙ pullback k ⟶ pullback h ⋙ pushforward f` constructed as a mate of
 `pullbackMapTwoSquare`.
 ```
-              Over X ←-.pullback h-- Over Z
-                |                     |
-.pushforward f  |          ↖          | .pushforward g
-                ↓                     ↓
-              Over Y ←-.pullback k-- Over W
+         Over Z - pushforward g → Over W
+           |                        |
+pullback h |           ↙            | pullback k
+           ↓                        ↓
+         Over X - pushforward f → Over Y
 ```
 -/
 --pushforwardBeckChevalleySquare
@@ -169,12 +176,11 @@ def pushforwardPullbackTwoSquare
 A variant of `pushforwardTwoSquare` involving `star` instead of `pullback`.
 -/
 --pushforwardStarBeckChevalleySquare
-def starPushforwardTriangle
-    [ExponentiableMorphism f]  :
+def starPushforwardTriangle [HasBinaryProducts C] [ExponentiableMorphism f]  :
     star Y ⟶ star X ⋙ pushforward f := by
   let iso := (starPullbackIsoStar f).hom
   rw [← Functor.id_comp (star X)] at iso
-  exact (mateEquiv (Adjunction.id) (adj f)) iso
+  exact (mateEquiv Adjunction.id (adj f)) iso
 
 /-- The conjugate isomorphism between the pushforwards along a commutative square.
 ```
