@@ -274,11 +274,13 @@ def ε (P : UvPoly E B) (X : C) : pullback (P.fstProj X) P.p ⟶ E ⨯ X :=
   ((ev P.p).app ((star E).obj X)).left
 
 /-- The partial product fan associated to a polynomial `P : UvPoly E B` and an object `X : C`. -/
-@[simps]
+@[simps -isSimp]
 def fan (P : UvPoly E B) (X : C) : Fan P.p X where
   pt := P @ X
   fst := P.fstProj X
-  snd := (ε P X) ≫ prod.snd -- ((forgetAdjStar E).counit).app X
+  snd := ε P X ≫ prod.snd -- ((forgetAdjStar E).counit).app X
+
+attribute [simp] fan_pt fan_fst
 
 /--
 `P.PartialProduct.fan` is in fact a limit fan; this provides the univeral mapping property of the
@@ -297,11 +299,15 @@ def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
     intro c m h_left h_right
     dsimp [pushforwardCurry]
     symm
-    rw [← homMk_left m (U:= Over.mk c.fst) (V:= Over.mk (P.fstProj X))]
+    rw [← homMk_left m (U := Over.mk c.fst) (V := Over.mk (P.fstProj X))]
     congr 1
     apply (Adjunction.homEquiv_apply_eq (adj P.p) (overPullbackToStar c.fst c.snd) (Over.homMk m)).mpr
     simp [overPullbackToStar, Fan.overPullbackToStar, Fan.over]
-    sorry
+    apply (Adjunction.homEquiv_apply_eq _ _ _).mpr
+    rw [← h_right]
+    simp [forgetAdjStar, comp_homEquiv, Comonad.adj]
+    simp [Equivalence.toAdjunction, homEquiv]
+    simp [coalgebraEquivOver, Equivalence.symm]; rfl
 
 end PartialProduct
 
@@ -316,15 +322,18 @@ abbrev lift {Γ X : C} (P : UvPoly E B) (b : Γ ⟶ B) (e : pullback b P.p ⟶ X
 
 @[simp]
 theorem lift_fst {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
-    P.lift b e ≫ P.fstProj X = b := by
-  unfold lift
-  rw [← PartialProduct.fan_fst, partialProd.lift_fst]
+    P.lift b e ≫ P.fstProj X = b := partialProd.lift_fst ..
 
 @[reassoc]
 theorem lift_snd {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
-    (comparison (c:= PartialProduct.fan P X) (P.lift b e)) ≫ (ε P X) ≫ prod.snd =
-    (pullback.congrHom (partialProd.lift_fst b e) rfl).hom ≫ e := by
-  sorry
+    comparison (c := fan P X) (P.lift b e) ≫ (fan P X).snd =
+    (pullback.congrHom (partialProd.lift_fst b e) rfl).hom ≫ e := partialProd.lift_snd ..
+
+theorem hom_ext {Γ X : C} {P : UvPoly E B} {f g : Γ ⟶ P @ X}
+    (h₁ : f ≫ P.fstProj X = g ≫ P.fstProj X)
+    (h₂ : comparison f ≫ (fan P X).snd =
+      (pullback.congrHom (by exact h₁) rfl).hom ≫ comparison g ≫ (fan P X).snd) :
+    f = g := partialProd.hom_ext ⟨fan P X, isLimitFan P X⟩ h₁ h₂
 
 /-- A morphism `f : Γ ⟶ P @ X` projects to a morphism `b : Γ ⟶ B` and a morphism
 `e : pullback b P.p ⟶ X`. -/
@@ -341,8 +350,7 @@ theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
 -- formerly `polyPair_snd_eq_comp_u₂'`
 @[simp]
 theorem proj_snd {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
-    (proj P f).snd =
-    (pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by aesop) (by aesop)) ≫ ε P X ≫ prod.snd := by
+    (proj P f).snd = pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by simp) (by simp) ≫ (fan P X).snd := by
   simp [proj]
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
@@ -351,11 +359,9 @@ def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
 
 @[simps!]
 def comp [HasPullbacks C] [HasTerminal C]
-    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) :=
-   {
-     p :=  (pullback.snd Q.p (fan P A).snd) ≫ (pullback.fst (fan P A).fst P.p)
-     exp := by sorry
-   }
+    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) where
+  p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
+  exp := sorry
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
