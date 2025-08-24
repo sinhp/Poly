@@ -167,50 +167,47 @@ theorem overPullbackToStar_prod_snd [HasBinaryProducts C]
   simp only [forgetAdjStar.homEquiv_left_lift]
   aesop
 
-abbrev partialProd (c : LimitFan s X) : C :=
-  c.cone.pt
+abbrev partialProd (c : LimitFan s X) : C := c.cone.pt
 
-abbrev partialProd.cone (c : LimitFan s X) : Fan s X :=
-  c.cone
+abbrev partialProd.cone (c : LimitFan s X) : Fan s X := c.cone
 
-abbrev partialProd.isLimit (c : LimitFan s X) : IsLimit (partialProd.cone c) :=
-  c.isLimit
+abbrev partialProd.isLimit (c : LimitFan s X) : IsLimit (cone c) := c.isLimit
 
-abbrev partialProd.fst (c : LimitFan s X) : partialProd c ⟶ B :=
-  Fan.fst <| partialProd.cone c
+abbrev partialProd.fst (c : LimitFan s X) : partialProd c ⟶ B := (cone c).fst
 
-abbrev partialProd.snd (c : LimitFan s X) :
-    pullback (partialProd.fst c) s ⟶ X :=
-  Fan.snd <| partialProd.cone c
+abbrev partialProd.snd (c : LimitFan s X) : pullback (fst c) s ⟶ X := (cone c).snd
 
 /-- If the partial product of `s` and `X` exists, then every pair of morphisms `f : W ⟶ B` and
 `g : pullback f s ⟶ X` induces a morphism `W ⟶ partialProd s X`. -/
 abbrev partialProd.lift {W} (c : LimitFan s X)
     (f : W ⟶ B) (g : pullback f s ⟶ X) : W ⟶ partialProd c :=
-  ((partialProd.isLimit c)).lift (Fan.mk f g)
+  (isLimit c).lift (Fan.mk f g)
 
 @[reassoc, simp]
 theorem partialProd.lift_fst {W} {c : LimitFan s X} (f : W ⟶ B) (g : pullback f s ⟶ X) :
-    partialProd.lift c f g ≫ partialProd.fst c = f :=
-  ((partialProd.isLimit c)).fac_left (Fan.mk f g)
+    lift c f g ≫ fst c = f :=
+  (isLimit c).fac_left (Fan.mk f g)
 
 @[reassoc]
 theorem partialProd.lift_snd {W} (c : LimitFan s X) (f : W ⟶ B) (g : pullback f s ⟶ X) :
-    (comparison (partialProd.lift c f g)) ≫ (partialProd.snd c) =
+    comparison (partialProd.lift c f g) ≫ snd c =
     (pullback.congrHom (partialProd.lift_fst f g) rfl).hom ≫ g := by
-  let h := ((partialProd.isLimit c)).fac_right (Fan.mk f g)
+  conv_rhs => arg 2; exact ((isLimit c).fac_right (Fan.mk f g)).symm
   rw [← pullbackMap_comparison]
-  simp [pullbackMap, pullback.map]
-  sorry
+  rw [← Category.assoc]; congr 1
+  ext <;> simp [pullbackMap]
 
 -- theorem hom_lift (h : IsLimit t) {W : C} (m : W ⟶ t.pt) :
 --     m = h.lift { pt := W, π := { app := fun b => m ≫ t.π.app b } } :=
 --   h.uniq { pt := W, π := { app := fun b => m ≫ t.π.app b } } m fun _ => rfl
 
 theorem partialProd.hom_ext {W : C} (c : LimitFan s X) {f g : W ⟶ partialProd c}
-    (h₁ : f ≫ partialProd.fst c = g ≫ partialProd.fst c)
-    (h₂ : comparison f ≫ partialProd.snd c =
-    (pullback.congrHom h₁ rfl).hom ≫ comparison g ≫ partialProd.snd c) :
+    (h₁ : f ≫ fst c = g ≫ fst c)
+    (h₂ : comparison f ≫ snd c = (pullback.congrHom h₁ rfl).hom ≫ comparison g ≫ snd c) :
     f = g := by
- sorry
- -- apply c.isLimit.uniq
+  let f' : Fan s X := { pt := W, fst := f ≫ fst c, snd := comparison f ≫ snd c }
+  cases c.isLimit.uniq f' g (by simp [h₁, f']) <| by
+    refine .trans ?_ h₂.symm
+    rw [← Category.assoc]; congr 1
+    ext <;> simp [pullbackMap, comparison, f']
+  exact c.isLimit.uniq f' f rfl rfl
