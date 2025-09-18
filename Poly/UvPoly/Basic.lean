@@ -52,7 +52,7 @@ namespace UvPoly
 
 open TwoSquare
 
-variable {C : Type*} [Category C] [HasTerminal C] [HasPullbacks C]
+variable [HasTerminal C]
 
 instance : HasBinaryProducts C :=
   hasBinaryProducts_of_hasTerminal_and_pullbacks C
@@ -217,9 +217,10 @@ def comp {E B F D N M : C} {P : UvPoly E B} {Q : UvPoly F D} {R : UvPoly N M}
 
 end Hom
 
+variable (C) in
 /-- Bundling up the the polynomials over different bases to form the underlying type of the
 category of polynomials. -/
-structure Total (C : Type*) [Category C] [HasPullbacks C] where
+structure Total where
   {E B : C}
   (poly : UvPoly E B)
 
@@ -248,7 +249,7 @@ def Total.ofHom {E' B' : C} (P : UvPoly E B) (Q : UvPoly E' B') (α : P.Hom Q) :
 
 namespace UvPoly
 
-variable {C : Type u} [Category.{v} C] [HasTerminal C] [HasPullbacks C]
+variable [HasTerminal C]
 
 instance : SMul C (Total C) where
   smul S P := Total.of (smul S P.poly)
@@ -358,10 +359,76 @@ def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
   Limits.pullback Q.p (fan P A).snd
 
 @[simps!]
-def comp [HasPullbacks C] [HasTerminal C]
-    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) where
-  p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
-  exp := sorry
+def comp {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) := by
+  letI p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
+  refine { p, exp.exists_rightAdjoint := ?_ }
+  let F1 := map (P.fstProj A) ⋙ Over.pullback P.p
+  let G1 := pushforward P.p ⋙ Over.pullback (P.fstProj A)
+  let adj1 : F1 ⊣ G1 := mapPullbackAdj (P.fstProj A) |>.comp (adj P.p)
+  let F2 := Over.pullback (pullback.fst (fan P A).fst P.p)
+  let G2 := map (pullback.snd (fan P A).fst P.p)
+  let F3 := map (fan P A).snd ⋙ Over.pullback Q.p
+  let G3 := pushforward Q.p ⋙ Over.pullback (fan P A).snd
+  let adj2 : F3 ⊣ G3 := mapPullbackAdj (fan P A).snd |>.comp (adj Q.p)
+  let G4 := map (pullback.fst Q.p (fan P A).snd)
+  let F5 := map p
+  let G5 := Over.pullback p
+  let adj3 : F5 ⊣ G5 := mapPullbackAdj p
+  suffices G5 ⊣ G4 ⋙ G3 ⋙ G2 ⋙ G1 from ⟨_, ⟨this⟩⟩
+  refine {
+    unit := {
+      app Y := ?_
+      naturality := sorry
+    }
+    counit := {
+      app X := ?_
+      naturality := ?_
+    }
+    left_triangle_components := sorry
+    right_triangle_components := sorry
+  }
+  ·
+    change Y ⟶ (G5 ⋙ G4 ⋙ G3 ⋙ G2 ⋙ G1).obj Y
+    refine adj1.homEquiv _ _ ?_
+    let f : F1.obj Y ⟶ (F2 ⋙ G2).obj Y :=
+      Over.homMk (pullback.lift (pullback.fst ..)
+        (pullback.lift (pullback.fst .. ≫ Y.hom) (pullback.snd ..)
+          ?_) ?_) ?_
+    refine f ≫ G2.map ?_
+    refine adj2.homEquiv _ _ ?_
+    refine ?_ ≫ G4.map (adj3.homEquiv (G5.obj Y) _ (Over.homMk (pullback.fst ..) ?_))
+    refine Over.homMk (pullback.lift
+      (pullback.fst .. ≫ pullback.fst ..)
+      (pullback.lift (pullback.snd ..)
+        (pullback.fst .. ≫ pullback.snd ..) ?_)
+      ?_) ?_
+    · simp [← pullback.condition, F2]
+    · simp only [assoc, pullback.condition, limit.lift_π_assoc, PullbackCone.mk_π_app, p]
+    · simp only [F3, F2, G4, G5, map_obj_hom, pullback_obj_hom, comp_obj]
+      rw [pullback.lift_snd_assoc, pullback.lift_fst]
+    · rw [pullback.condition]; rfl
+    · rw [← pullback.condition, assoc]; rfl
+    · rw [pullback.lift_fst]
+    · simp only [F2, G2, comp_obj, map_obj_hom, pullback_obj_hom]
+      rw [pullback.lift_snd_assoc, pullback.lift_snd]; rfl
+  dsimp
+
+  done
+    -- simp
+    -- simp only [comp_obj, map_obj_hom, id_obj,
+    --   const_obj_obj, pullback_obj_hom, limit.lift_π_assoc, PullbackCone.mk_pt, cospan_right,
+    --   PullbackCone.mk_π_app, limit.lift_π, F3, F2, G4, G5]
+
+  -- · simp [pullback.condition, F5, G5]
+  ·
+        dsimp -- [G1,G2,G3,G4,G5]
+        have f X : G5.obj X ⟶ F1.obj X :=
+          _
+        refine adj1.counit
+        have := _ ≫ @(adj P.p).counit.app _ ≫ _; simp at this
+        refine ((mapPullbackAdj _).homEquiv _ _).symm ?_
+
+        done
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
@@ -378,6 +445,7 @@ instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.To
   leftUnitor := sorry
   rightUnitor := sorry
 
+#print sorries UvPoly.comp UvPoly.PartialProduct.isLimitFan partialProd.lift_snd partialProd.hom_ext
 end UvPoly
 end CategoryTheory
 end
