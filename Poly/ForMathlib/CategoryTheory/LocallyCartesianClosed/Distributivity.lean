@@ -107,60 +107,40 @@ def preservesCoequalizer {C D} [Category C] [Category D] {X Y : C} {f g : X ⟶ 
     |>.ofIsoColimit (Cofork.ext (Iso.refl _) ?_)
   simp [Cocones.precompose, Cofork.π, iso]
 
--- theorem whiskeringLeft_preservesEpi {C D E} [Category C] [Category D] [Category E] (F : C ⥤ D)
---     : ((whiskeringLeft C D E).obj F).PreservesEpimorphisms := by
---   refine ⟨fun {G G'} f ⟨hf⟩ => ⟨fun {K} g h eq => ?_⟩⟩
---   ext X
---   replace eq := congr(($eq).app X)
---   dsimp at g h eq
---   exact hf _ _ eq
+theorem evaluation_preservesMonomorphisms {C} (D)
+    [Category C] [Category D] [HasPullbacks D] (X : C) :
+    ((evaluation C D).obj X).PreservesMonomorphisms := by
+  refine ⟨fun {A B} f _ => ?_⟩
+  have : IsPullback (𝟙 _) (𝟙 _) f f := by
+    refine ⟨⟨rfl⟩, ⟨Limits.PullbackCone.IsLimit.mk _ (·.fst) (by simp) (fun s => ?_) ?_⟩⟩
+    · simpa using (cancel_mono f).1 s.condition
+    · intro s m h1 h2; simpa using h1
+  suffices IsPullback (𝟙 _) (𝟙 _) (f.app X) (f.app X) from
+    ⟨fun {Z} g h eq => (this.lift_fst _ _ eq).symm.trans (this.lift_snd _ _ eq)⟩
+  have :=
+    (IsLimit.ofConeEquiv (Cones.postcomposeEquivalence (cospanCompIso ..))).symm <|
+    isLimitOfPreserves ((evaluation C D).obj X) this.2.some
+  refine ⟨⟨rfl⟩, ⟨.ofIsoLimit this <| PullbackCone.ext (Iso.refl _) ?_ ?_⟩⟩ <;>
+    simp [PullbackCone.fst, PullbackCone.snd]
 
-
-
---   have := isColimitOfPreserves F H
---   let iso : parallelPair f g ⋙ F ≅ parallelPair (F.map f) (F.map g) := diagramIsoParallelPair _
---   refine (IsColimit.ofCoconeEquiv (Cocones.precomposeEquivalence iso.symm)).symm this
---     |>.ofIsoColimit (Cofork.ext (Iso.refl _) ?_)
---   simp [Cocones.precompose, Cofork.π, iso]
-
--- instance evaluation_preservesColimit
---     {C : Type u} [Category.{v} C] {J : Type u₁} [Category.{v₁} J] {K : Type u₂} [Category.{v₂} K]
---     (F : J ⥤ K ⥤ C) (k : K) :
---     PreservesColimit F ((evaluation K C).obj k) := by
---   refine ⟨fun h' => ⟨fun s => ?_, ?_, ?_⟩⟩
---   · simp
---     have := s.ι.app; simp at this
---     -- have := h'.desc precompose
---     have := h'.desc ⟨_, fun x => by
---       have := s.ι.app x
---       dsimp at this
-
---       simp, _⟩
-  -- let X : (k : K) → ColimitCocone (F.flip.obj k) := fun k => getColimitCocone (F.flip.obj k)
-  -- preservesColimit_of_preserves_colimit_cocone (combinedIsColimit _ X) <|
-    -- IsColimit.ofIsoColimit (colimit.isColimit _) (evaluateCombinedCocones F X k).symm
-
--- instance whiskeringLeft_preservesColimit
---     {C : Type u₁} [Category.{v₁} C]
---     {D : Type u₂} [Category.{v₂} D]
---     {E : Type u₃} [Category.{v₃} E]
---     (J : Type u) [Category.{v} J]
---     (K : J ⥤ E ⥤ D) (F : C ⥤ E)
---     -- [∀ (k : E), HasColimit (K.flip.obj k)]
---     :
---     PreservesColimit K ((whiskeringLeft C E D).obj F) :=
---   ⟨fun c {hc} => ⟨by
---     apply evaluationJointlyReflectsColimits
---     intro Y
---     change IsColimit (((evaluation E D).obj (F.obj Y)).mapCocone c)
---     have := evaluation_preservesColimit K (F.obj Y)
---     exact isColimitOfPreserves _ hc⟩⟩
+theorem evaluation_preservesEpimorphisms {C} (D)
+    [Category C] [Category D] [HasPushouts D] (X : C) :
+    ((evaluation C D).obj X).PreservesEpimorphisms := by
+  refine ⟨fun f _ => ⟨fun {Z} g h eq => ?_⟩⟩
+  have : Mono (NatTrans.op f) := by
+    refine ⟨fun g h eq => ?_⟩
+    have := congrArg NatTrans.unop eq; simp at this
+    exact congrArg NatTrans.op ((cancel_epi f).1 this)
+  have := evaluation_preservesMonomorphisms Dᵒᵖ (Opposite.op X)
+  have := (this.1 (NatTrans.op f)).1 (Z := .op Z) g.op h.op (by simpa using congr(($eq).op))
+  exact congr(($this).unop)
 
 attribute [-simp] whiskerLeft_twice whiskerRight_twice in
-def adjointTriangle {B C A : Type*} [Category B] [Category C] [Category A] [HasCoequalizers A]
+theorem adjointTriangle {B C A : Type*} [Category B] [Category C] [Category A] [HasCoequalizers A]
+    [HasPushouts B] -- FIXME: Dubuc didn't need this assumption
     {U : B ⥤ C} {F : C ⥤ B} (adj1 : F ⊣ U)
     {R : A ⥤ B} {F' : C ⥤ A} (adj2 : F' ⊣ R ⋙ U)
-    (H : IsColimit adj1.cofork) : (L : B ⥤ A) × (L ⊣ R) := by
+    (H : IsColimit adj1.cofork) : Nonempty <| (L : B ⥤ A) × (L ⊣ R) := by
   let θ : F ⟶ F' ⋙ R := ((mateEquiv adj2 adj1).symm (.mk _ R (𝟭 _) _ (𝟙 _))).natTrans
   let α : U ⋙ F ⋙ U ⋙ F' ⟶ U ⋙ F' := whiskerRight adj1.counit (U ⋙ F')
   let β : U ⋙ F ⋙ U ⋙ F' ⟶ U ⋙ F' :=
@@ -229,45 +209,19 @@ def adjointTriangle {B C A : Type*} [Category B] [Category C] [Category A] [HasC
       refine (cancel_epi (R.whiskerLeft adj1.counit)).1 ?_
       rw [← whiskerLeft_comp_assoc, η_cond, whiskerLeft_comp_assoc, whiskerLeft_twice',
         ← whiskerRight_left', ← whiskerRight_comp, ε_cond, this, comp_id]
-    -- have := adj1.left_triangle
-    -- refine SplitEpi.epi ⟨_, _⟩
     refine ⟨fun {Z} (f₁ f₂ : R ⟶ _) eq => ?_⟩
-    -- let X : HasCoequalizers B := sorry
-    -- have (k : B) : HasColimit
-    --    ((parallelPair ((U ⋙ F).whiskerLeft adj1.counit)
-    --     (whiskerRight adj1.counit (U ⋙ F))).flip.obj k) := by
-    --   let α' := (U ⋙ F).whiskerLeft adj1.counit
-    --   let β' := whiskerRight adj1.counit (U ⋙ F)
-    --   let K : Cofork α' β' := adj1.cofork
-    --   have : α' ≫ adj1.counit = β' ≫ adj1.counit := K.condition
-    --   change IsColimit K at H
-    --   dsimp [Cofork] at K
-    --   let iso := diagramIsoParallelPair ((parallelPair α' β').flip.obj k)
-    --   let Q : Cocone (parallelPair (α'.app k) (β'.app k)) :=
-    --     Cofork.ofπ (adj1.counit.app k) (by rw [← comp_app, this, comp_app])
-    --   refine ⟨_, (IsColimit.ofCoconeEquiv (c := Q) (Cocones.precomposeEquivalence iso)).symm ?_⟩
-    --   have := H
-    --   refine Cofork.IsColimit.mk _ (fun s => (H.desc s).app k) _ _
-    --   #exit
-    --   simp [Cocones.precompose, iso]
-    -- stop
-    -- have := preservesCoequalizer _ _ ((whiskeringLeft A B B).obj R) H
+    ext a
     have : Epi adj1.counit := Cofork.IsColimit.epi H
-    have := @this.1
-    have := congr(R.whiskerLeft (U.whiskerLeft adj1.unit) ≫ whiskerRight $eq U)
-    simp at this
-    rw [whiskerRight_left', ← whiskerLeft_comp_assoc, ← whiskerLeft_comp_assoc,
-      adj1.right_triangle, whiskerLeft_id', id_comp, id_comp] at this
-    suffices _ : U.Faithful from faithful_whiskeringRight_obj.1 this
-    refine ⟨fun {X Y} f g eq => ?_⟩
-    sorry
+    have := (evaluation_preservesEpimorphisms _ (R.obj a)).1 adj1.counit
+    replace eq := congr(($eq).app a); simp at eq
+    exact this.1 _ _ eq
 
-def coadjointTriangle {C D E : Type*} [Category C] [Category D] [Category E] [HasEqualizers E]
+def coadjointTriangle {C D E : Type*} [Category C] [Category D] [Category E] [HasEqualizers E] [HasPullbacks C]
     {L : C ⥤ D} {R : D ⥤ C} (adj1 : L ⊣ R)
     {L' : E ⥤ C} {R' : D ⥤ E} (adj2 : L' ⋙ L ⊣ R')
     (H : IsLimit adj1.fork) : (R₁ : C ⥤ E) × (L' ⊣ R₁) := by
   suffices Hop : IsColimit adj1.op.cofork from
-    have ⟨L, hL⟩ := adjointTriangle adj1.op adj2.op (R := L'.op) Hop
+    have ⟨L, hL⟩ := (adjointTriangle adj1.op adj2.op (R := L'.op) Hop).some
     ⟨L.unop, hL.unop⟩
   refine Cofork.IsColimit.mk' _ fun s => ?_
   let π : s.pt.unop ⟶ L ⋙ R := NatTrans.unop s.π
