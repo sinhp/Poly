@@ -5,6 +5,7 @@ Authors: Sina Hazratpour, Wojciech Nawrocki
 -/
 
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley -- LCCC.BeckChevalley
+import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Distributivity
 import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
 import Poly.ForMathlib.CategoryTheory.NatTrans
@@ -36,7 +37,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open CategoryTheory Category Limits Functor Adjunction Over ExponentiableMorphism
+open Category Limits Functor Adjunction Over ExponentiableMorphism
   LocallyCartesianClosed
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -74,7 +75,7 @@ def prod {E' B'} (P : UvPoly E B) (Q : UvPoly E' B') [HasBinaryCoproducts C] :
 /-- For a category `C` with binary products, `P.functor : C ⥤ C` is the functor associated
 to a single variable polynomial `P : UvPoly E B`. -/
 def functor (P : UvPoly E B) : C ⥤ C :=
-  star E ⋙ pushforward P.p ⋙ forget B
+  star E ⋙ pushforward P.p ⋙ Over.forget B
 
 /-- The evaluation function of a polynomial `P` at an object `X`. -/
 def apply (P : UvPoly E B) : C → C := (P.functor).obj
@@ -93,8 +94,8 @@ variable (B)
 def id : UvPoly B B := ⟨𝟙 B, by infer_instance⟩
 
 /-- The functor associated to the identity polynomial is isomorphic to the identity functor. -/
-def idIso : (UvPoly.id B).functor ≅ star B ⋙ forget B :=
-  isoWhiskerRight (isoWhiskerLeft _ (pushforwardIdIso B)) (forget B)
+def idIso : (UvPoly.id B).functor ≅ star B ⋙ Over.forget B :=
+  isoWhiskerRight (isoWhiskerLeft _ (pushforwardIdIso B)) (Over.forget B)
 
 /-- Evaluating the identity polynomial at an object `X` is isomorphic to `B × X`. -/
 def idApplyIso (X : C) : (id B) @ X ≅ B ⨯ X := sorry
@@ -136,7 +137,7 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
   let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
-  simpa using (cellLeftMidPasted ≫ₕ (vId (forget B)))
+  simpa using (cellLeftMidPasted ≫ₕ (vId (Over.forget B)))
 
 /-- A cartesian map of polynomials
 ```
@@ -166,7 +167,7 @@ def cartesianNatTrans {D F : C} (P : UvPoly E B) (Q : UvPoly F D)
     (Over.starPullbackIsoStar φ).inv
   let cellMid :  TwoSquare (pullback φ) (pushforward Q.p) (pushforward P.p) (pullback δ) :=
     (pushforwardPullbackIsoSquare pb.flip).inv
-  let cellRight : TwoSquare (pullback δ) (forget D) (forget B) (𝟭 C) :=
+  let cellRight : TwoSquare (pullback δ) (Over.forget D) (Over.forget B) (𝟭 C) :=
     pullbackForgetTwoSquare δ
   let := cellLeft ≫ᵥ cellMid ≫ᵥ cellRight
   this
@@ -276,7 +277,7 @@ def ε (P : UvPoly E B) (X : C) : pullback (P.fstProj X) P.p ⟶ E ⨯ X :=
 
 /-- The partial product fan associated to a polynomial `P : UvPoly E B` and an object `X : C`. -/
 @[simps -isSimp]
-def fan (P : UvPoly E B) (X : C) : Fan P.p X where
+def fan (P : UvPoly E B) (X : C) : PartialProduct.Fan P.p X where
   pt := P @ X
   fst := P.fstProj X
   snd := ε P X ≫ prod.snd -- ((forgetAdjStar E).counit).app X
@@ -287,12 +288,12 @@ attribute [simp] fan_pt fan_fst
 `P.PartialProduct.fan` is in fact a limit fan; this provides the univeral mapping property of the
 polynomial functor.
 -/
-def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
+def isLimitFan (P : UvPoly E B) (X : C) : PartialProduct.IsLimit (PartialProduct.fan P X) where
   lift c := (pushforwardCurry <| overPullbackToStar c.fst c.snd).left
   fac_left := by aesop_cat (add norm fstProj)
   fac_right := by
     intro c
-    simp only [fan_snd, pullbackMap, ε, ev, ← assoc, ← comp_left]
+    simp only [fan_snd, PartialProduct.pullbackMap, ε, ev, ← assoc, ← comp_left]
     simp_rw [homMk_eta]
     erw [← homEquiv_counit]
     simp [← ExponentiableMorphism.homEquiv_apply_eq, overPullbackToStar_prod_snd]
@@ -303,7 +304,7 @@ def isLimitFan (P : UvPoly E B) (X : C) : IsLimit (fan P X) where
     rw [← homMk_left m (U := Over.mk c.fst) (V := Over.mk (P.fstProj X))]
     congr 1
     apply (Adjunction.homEquiv_apply_eq (adj P.p) (overPullbackToStar c.fst c.snd) (Over.homMk m)).mpr
-    simp [overPullbackToStar, Fan.overPullbackToStar, Fan.over]
+    simp [overPullbackToStar, PartialProduct.Fan.overPullbackToStar, PartialProduct.Fan.over]
     apply (Adjunction.homEquiv_apply_eq _ _ _).mpr
     rw [← h_right]
     simp [forgetAdjStar, comp_homEquiv, Comonad.adj]
@@ -327,13 +328,13 @@ theorem lift_fst {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p 
 
 @[reassoc]
 theorem lift_snd {Γ X : C} {P : UvPoly E B} {b : Γ ⟶ B} {e : pullback b P.p ⟶ X} :
-    comparison (c := fan P X) (P.lift b e) ≫ (fan P X).snd =
+    PartialProduct.comparison (c := PartialProduct.fan P X) (P.lift b e) ≫ (fan P X).snd =
     (pullback.congrHom (partialProd.lift_fst b e) rfl).hom ≫ e := partialProd.lift_snd ..
 
 theorem hom_ext {Γ X : C} {P : UvPoly E B} {f g : Γ ⟶ P @ X}
     (h₁ : f ≫ P.fstProj X = g ≫ P.fstProj X)
-    (h₂ : comparison f ≫ (fan P X).snd =
-      (pullback.congrHom (by exact h₁) rfl).hom ≫ comparison g ≫ (fan P X).snd) :
+    (h₂ : PartialProduct.comparison f ≫ (fan P X).snd =
+      (pullback.congrHom (by exact h₁) rfl).hom ≫ PartialProduct.comparison g ≫ (fan P X).snd) :
     f = g := partialProd.hom_ext ⟨fan P X, isLimitFan P X⟩ h₁ h₂
 
 /-- A morphism `f : Γ ⟶ P @ X` projects to a morphism `b : Γ ⟶ B` and a morphism
@@ -359,76 +360,13 @@ def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
   Limits.pullback Q.p (fan P A).snd
 
 @[simps!]
-def comp {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) := by
-  letI p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
-  refine { p, exp.exists_rightAdjoint := ?_ }
-  let F1 := map (P.fstProj A) ⋙ Over.pullback P.p
-  let G1 := pushforward P.p ⋙ Over.pullback (P.fstProj A)
-  let adj1 : F1 ⊣ G1 := mapPullbackAdj (P.fstProj A) |>.comp (adj P.p)
-  let F2 := Over.pullback (pullback.fst (fan P A).fst P.p)
-  let G2 := map (pullback.snd (fan P A).fst P.p)
-  let F3 := map (fan P A).snd ⋙ Over.pullback Q.p
-  let G3 := pushforward Q.p ⋙ Over.pullback (fan P A).snd
-  let adj2 : F3 ⊣ G3 := mapPullbackAdj (fan P A).snd |>.comp (adj Q.p)
-  let G4 := map (pullback.fst Q.p (fan P A).snd)
-  let F5 := map p
-  let G5 := Over.pullback p
-  let adj3 : F5 ⊣ G5 := mapPullbackAdj p
-  suffices G5 ⊣ G4 ⋙ G3 ⋙ G2 ⋙ G1 from ⟨_, ⟨this⟩⟩
-  refine {
-    unit := {
-      app Y := ?_
-      naturality := sorry
-    }
-    counit := {
-      app X := ?_
-      naturality := ?_
-    }
-    left_triangle_components := sorry
-    right_triangle_components := sorry
-  }
-  ·
-    change Y ⟶ (G5 ⋙ G4 ⋙ G3 ⋙ G2 ⋙ G1).obj Y
-    refine adj1.homEquiv _ _ ?_
-    let f : F1.obj Y ⟶ (F2 ⋙ G2).obj Y :=
-      Over.homMk (pullback.lift (pullback.fst ..)
-        (pullback.lift (pullback.fst .. ≫ Y.hom) (pullback.snd ..)
-          ?_) ?_) ?_
-    refine f ≫ G2.map ?_
-    refine adj2.homEquiv _ _ ?_
-    refine ?_ ≫ G4.map (adj3.homEquiv (G5.obj Y) _ (Over.homMk (pullback.fst ..) ?_))
-    refine Over.homMk (pullback.lift
-      (pullback.fst .. ≫ pullback.fst ..)
-      (pullback.lift (pullback.snd ..)
-        (pullback.fst .. ≫ pullback.snd ..) ?_)
-      ?_) ?_
-    · simp [← pullback.condition, F2]
-    · simp only [assoc, pullback.condition, limit.lift_π_assoc, PullbackCone.mk_π_app, p]
-    · simp only [F3, F2, G4, G5, map_obj_hom, pullback_obj_hom, comp_obj]
-      rw [pullback.lift_snd_assoc, pullback.lift_fst]
-    · rw [pullback.condition]; rfl
-    · rw [← pullback.condition, assoc]; rfl
-    · rw [pullback.lift_fst]
-    · simp only [F2, G2, comp_obj, map_obj_hom, pullback_obj_hom]
-      rw [pullback.lift_snd_assoc, pullback.lift_snd]; rfl
-  dsimp
-
-  done
-    -- simp
-    -- simp only [comp_obj, map_obj_hom, id_obj,
-    --   const_obj_obj, pullback_obj_hom, limit.lift_π_assoc, PullbackCone.mk_pt, cospan_right,
-    --   PullbackCone.mk_π_app, limit.lift_π, F3, F2, G4, G5]
-
-  -- · simp [pullback.condition, F5, G5]
-  ·
-        dsimp -- [G1,G2,G3,G4,G5]
-        have f X : G5.obj X ⟶ F1.obj X :=
-          _
-        refine adj1.counit
-        have := _ ≫ @(adj P.p).counit.app _ ≫ _; simp at this
-        refine ((mapPullbackAdj _).homEquiv _ _).symm ?_
-
-        done
+def comp [HasPullbacks C] [HasTerminal C]
+    {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) where
+  p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
+  exp :=
+    haveI := ExponentiableMorphism.of_isPullback (.flip <| .of_hasPullback Q.p (fan P A).snd)
+    haveI := ExponentiableMorphism.of_isPullback (.of_hasPullback (fan P A).fst P.p)
+    inferInstance
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso [HasPullbacks C] [HasTerminal C]
@@ -445,7 +383,6 @@ instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.To
   leftUnitor := sorry
   rightUnitor := sorry
 
-#print sorries UvPoly.comp UvPoly.PartialProduct.isLimitFan partialProd.lift_snd partialProd.hom_ext
 end UvPoly
 end CategoryTheory
 end
