@@ -3,7 +3,7 @@ Copyright (c) 2025 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour, Emily Riehl
 -/
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Adjunction.Lifting.Right
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Poly.ForMathlib.CategoryTheory.NatTrans
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
@@ -54,11 +54,25 @@ def exponentiableMorphism : ExponentiableMorphism (g f u) := by infer_instance
 
 namespace ExponentiableMorphism
 
+instance mapPullbackAdj_regularMono {C} [Category C] [HasPullbacks C] {A B : C} (F : A ⟶ B)
+    (X : Over A) : RegularMono ((mapPullbackAdj F).unit.app X) := by
+  let FU := Over.map F ⋙ Over.pullback F
+  set η := (mapPullbackAdj F).unit
+  have := congr($((whiskerLeft_comp_whiskerRight η η)).app X)
+  refine ⟨_, _, _, this, Fork.IsLimit.mk' _ fun s => ?_⟩
+  have hi := (Fork.ι s).w; simp at hi
+  have w := congr($(Fork.condition s).left ≫ pullback.fst .. ≫ pullback.snd ..); simp [η] at w
+  refine ⟨homMk (s.ι.left ≫ pullback.fst ..) (by simp [w, hi]), ?_, ?_⟩
+  · ext; simp; ext <;> simp [η]; rw [w]
+  · intro m H; ext; simpa [η] using congr(($H).left ≫ pullback.fst ..)
+
 /-- The pullback of exponentiable morphisms is exponentiable. -/
-def pullback {I J K : C} (f : I ⟶ J) (g : K ⟶ J)
-    [gexp : ExponentiableMorphism g] :
-    ExponentiableMorphism (pullback.fst f g ) :=
-  sorry
+theorem of_isPullback {C' : Type u} [Category.{v} C'] [HasPullbacks C'] [HasTerminal C']
+  {P I J K : C'} {fst : P ⟶ I} {snd : P ⟶ K} {f : I ⟶ J} {g : K ⟶ J}
+    (H : IsPullback fst snd f g) [ExponentiableMorphism g] : ExponentiableMorphism fst :=
+  have : IsLeftAdjoint _ :=
+    ⟨_, ⟨(mapPullbackAdj f).comp (adj g) |>.ofNatIsoLeft (pullbackMapIsoSquare H.flip).symm⟩⟩
+  isLeftAdjoint_triangle_lift (Over.pullback fst) (mapPullbackAdj snd)
 
 end ExponentiableMorphism
 
