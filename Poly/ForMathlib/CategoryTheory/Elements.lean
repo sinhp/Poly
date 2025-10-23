@@ -22,7 +22,7 @@ theorem map_homMk_id {X : 𝒞} (a : F.obj X) (eq : F.map (𝟙 X) a = a) :
 theorem map_homMk_comp {X Y Z : 𝒞} (f : X ⟶ Y) (g : Y ⟶ Z) (a : F.obj X) eq :
     G.map (Y := ⟨Z, F.map g (F.map f a)⟩) (Subtype.mk (α := X ⟶ Z) (f ≫ g) eq) =
     G.map (X := ⟨X, a⟩) (Y := ⟨Y, F.map f a⟩) (Subtype.mk (α := X ⟶ Y) f rfl) ≫
-    G.map (Subtype.mk (α := Y ⟶ Z) g (rfl)) := by
+    G.map (Subtype.mk g rfl) := by
   set X : F.Elements := ⟨X, a⟩
   set Y : F.Elements := ⟨Y, F.map f a⟩
   set Z : F.Elements := ⟨Z, F.map g (F.map f a)⟩

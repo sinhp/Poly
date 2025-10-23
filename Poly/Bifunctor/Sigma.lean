@@ -5,8 +5,7 @@ Authors: Wojciech Nawrocki
 -/
 import Mathlib.CategoryTheory.Comma.Over.Basic
 import Mathlib.CategoryTheory.Functor.Currying
-
-import SEq.Tactic.DepRewrite
+import Mathlib.Tactic.DepRewrite
 
 import Poly.ForMathlib.CategoryTheory.Elements
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
@@ -178,5 +177,3 @@ def forget_iso_Sigma (A : 𝒞) :
       simp
 
 end CategoryTheory.Over
-
-#min_imports
