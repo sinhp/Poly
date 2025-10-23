@@ -20,7 +20,7 @@ This is equivalent to the type of partial product cones with apex `Γ` over `X`.
 def partProdsOver : Cᵒᵖ ⥤ C ⥤ Type v :=
   Functor.Sigma
     ((Over.equivalence_Elements B).functor ⋙ (Over.pullback P.p).op ⋙
-      (forget E).op ⋙ coyoneda (C := C))
+      (Over.forget E).op ⋙ coyoneda (C := C))
 
 @[simp]
 theorem partProdsOver_obj_map {X Y : C} (Γ : Cᵒᵖ) (f : X ⟶ Y) (x : (P.partProdsOver.obj Γ).obj X) :
@@ -40,7 +40,7 @@ def iso_Sigma (P : UvPoly E B) :
     P.functor ⋙₂ coyoneda (C := C) ≅ P.partProdsOver :=
   calc
     P.functor ⋙₂ coyoneda (C := C) ≅
-        (star E ⋙ pushforward P.p) ⋙₂ (forget B ⋙₂ coyoneda (C := C)) :=
+        (star E ⋙ pushforward P.p) ⋙₂ (Over.forget B ⋙₂ coyoneda (C := C)) :=
       Iso.refl _
 
     _ ≅ (star E ⋙ pushforward P.p) ⋙₂ Functor.Sigma
@@ -63,7 +63,7 @@ def iso_Sigma (P : UvPoly E B) :
           _ ≅ (Over.pullback P.p).op ⋙ star E ⋙₂ coyoneda (C := Over E) :=
             Iso.refl _
 
-          _ ≅ (Over.pullback P.p).op ⋙ (forget E).op ⋙ coyoneda (C := C) :=
+          _ ≅ (Over.pullback P.p).op ⋙ (Over.forget E).op ⋙ coyoneda (C := C) :=
             isoWhiskerLeft (Over.pullback P.p).op (Adjunction.coyoneda_iso <| forgetAdjStar E).symm;
 
       Functor.Sigma.isoCongrRight (isoWhiskerLeft _ i)
@@ -75,7 +75,6 @@ theorem equiv_app (Γ X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be := by
   dsimp [equiv]
 
--- TODO(WN): Checking the theorem statement takes 5s, and kernel typechecking 10s!
 lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv Δ X (σ ≫ be) =
       let p := P.equiv Γ X be
@@ -84,7 +83,7 @@ lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (X : C) (be : Γ ⟶ P.
   conv_lhs => rw [equiv_app, coyoneda.comp₂_naturality₂_left, ← equiv_app]
   simp
 
--- TODO(WN): Kernel typechecking takes 10s!
+-- NOTE(WN): As of Lean 4.25, kernel typechecking time is down to 1s from 10s?!
 lemma equiv_naturality_right {Γ X Y : C} (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
     equiv P Γ Y (be ≫ P.functor.map f) =
       let p := equiv P Γ X be
