@@ -3,8 +3,9 @@ Copyright (c) 2025 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour, Emily Riehl
 -/
-import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+
+import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 
 /-!
 # Beck-Chevalley natural transformations and natural isomorphisms
@@ -309,12 +310,12 @@ theorem pullbackMapTwoSquare_app :
   aesop
 
 theorem forget_map_pullbackMapTwoSquare :
-    (forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =
+    (Over.forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =
     pullback.map _ _ _ _ (𝟙 _) h k (id_comp _).symm sq.w.symm := by
   simp only [forget_map, pullbackMapTwoSquare_app, homMk_left]
 
 theorem isIso_forgetMappullbackMapTwoSquare_of_isPullback (pb : IsPullback h f g k) :
-    IsIso ((forget Z).map ((pullbackMapTwoSquare h f g k pb.toCommSq).app A)) := by
+    IsIso ((Over.forget Z).map ((pullbackMapTwoSquare h f g k pb.toCommSq).app A)) := by
   rw [forget_map_pullbackMapTwoSquare (sq:= pb.toCommSq)]
   let paste_horiz_pb := paste_horiz (IsPullback.of_hasPullback f A.hom) pb
   apply pullback.map_isIso_of_pullback_right_of_comm_cube
@@ -327,7 +328,7 @@ instance pullbackMapTwoSquare_of_isPullback_isIso (pb : IsPullback h f g k) :
   apply (config := { allowSynthFailures:= true}) NatIso.isIso_of_isIso_app
   intro A
   have := isIso_forgetMappullbackMapTwoSquare_of_isPullback A pb
-  exact ReflectsIsomorphisms.reflects (forget Z)
+  exact ReflectsIsomorphisms.reflects (Over.forget Z)
     ((pullbackMapTwoSquare h f g k pb.toCommSq).app A)
 
 /-- The pullback-map exchange isomorphism. -/

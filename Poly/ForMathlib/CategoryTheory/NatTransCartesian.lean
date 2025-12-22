@@ -43,11 +43,11 @@ theorem cartesian.comp {F G H : J ⥤ C} {α : F ⟶ G} {β : G ⟶ H} (hα : ca
 
 theorem cartesian.whiskerRight {F G : J ⥤ C} {α : F ⟶ G} (hα : cartesian α)
     (H : C ⥤ D) [∀ (i j : J) (f : j ⟶ i), PreservesLimit (cospan (α.app i) (G.map f)) H] :
-    cartesian (whiskerRight α H) :=
+    cartesian (Functor.whiskerRight α H) :=
   fun _ _ f => (hα f).map H
 
 theorem cartesian.whiskerLeft {K : Type*} [Category K]  {F G : J ⥤ C} {α : F ⟶ G}
-    (hα : cartesian α) (H : K ⥤ J) : cartesian (whiskerLeft H α) :=
+    (hα : cartesian α) (H : K ⥤ J) : cartesian (Functor.whiskerLeft H α) :=
   fun _ _ f => hα (H.map f)
 
 theorem cartesian.comp_horizz {M N K : Type*}
@@ -62,7 +62,7 @@ theorem cartesian.comp_horizz {M N K : Type*}
       intros i j f
       specialize hc f
       simp only [Functor.comp_obj, Functor.comp_map, comp_app,
-        whiskerRight_app, whiskerLeft_app,
+        Functor.whiskerRight_app, Functor.whiskerLeft_app,
         naturality] at hc
       exact hc
     }

@@ -4,9 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
 import Mathlib.CategoryTheory.Comma.Over.Pullback
-import Mathlib.CategoryTheory.ChosenFiniteProducts
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Monad.Products
+
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
 
 
@@ -87,7 +88,7 @@ end Reindex
 
 section BinaryProduct
 
-open ChosenFiniteProducts Sigma Reindex
+open CartesianMonoidalCategory Sigma Reindex
 
 variable [HasFiniteWidePullbacks C] {X : C}
 
@@ -106,7 +107,7 @@ def isBinaryProductSigmaReindex (Y Z : Over X) :
     · exact congr_arg CommaMorphism.left (h ⟨ .right⟩)
     · exact congr_arg CommaMorphism.left (h ⟨ .left ⟩)
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 /-- The object `(Sigma Y) (Reindex Y Z)` is isomorphic to the binary product `Y × Z`
 in `Over X`. -/
@@ -137,10 +138,10 @@ end Over
 
 section TensorLeft
 
-open MonoidalCategory Over Functor ChosenFiniteProducts
+open MonoidalCategory Over Functor CartesianMonoidalCategory
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-attribute [local instance] monoidalOfChosenFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofChosenFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 variable [HasFiniteWidePullbacks C] {X : C}
 
@@ -150,7 +151,7 @@ def Over.sigmaReindexNatIsoTensorLeft (Y : Over X) :
     (pullback Y.hom) ⋙ (map Y.hom) ≅ tensorLeft Y := by
   fapply NatIso.ofComponents
   · intro Z
-    simp only [const_obj_obj, Functor.id_obj, comp_obj, tensorLeft_obj, tensorObj, Over.pullback]
+    simp only [const_obj_obj, Functor.id_obj, comp_obj, Over.pullback]
     exact sigmaReindexIsoProd Y Z
   · intro Z Z' f
     simp
@@ -171,6 +172,8 @@ lemma Over.sigmaReindexNatIsoTensorLeft_hom_app
 
 end TensorLeft
 
+open MonoidalCategory
+
 variable (C)
 
 /-- The functor from `C` to `Over (⊤_ C)` which sends `X : C` to `terminal.from X`. -/
@@ -187,8 +190,6 @@ def equivOverTerminal [HasTerminal C] : Over (⊤_ C) ≌ C :=
 
 namespace Over
 
-open MonoidalCategory
-
 variable {C}
 
 lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
@@ -201,15 +202,15 @@ lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
 instance [HasBinaryProducts C]  (X : C) : (forget X).IsLeftAdjoint  :=
   ⟨_, ⟨forgetAdjStar X⟩⟩
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-attribute [local instance] monoidalOfChosenFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofChosenFiniteProducts
 
 lemma whiskerLeftProdMapId [HasFiniteLimits C] {X : C} {A A' : C} {g : A ⟶ A'} :
     X ◁ g = prod.map (𝟙 X) g := by
   ext
-  · simp only [ChosenFiniteProducts.whiskerLeft_fst]
+  · simp only [CartesianMonoidalCategory.whiskerLeft_fst]
     exact (Category.comp_id _).symm.trans (prod.map_fst (𝟙 X) g).symm
-  · simp only [ChosenFiniteProducts.whiskerLeft_snd]
+  · simp only [CartesianMonoidalCategory.whiskerLeft_snd]
     exact (prod.map_snd (𝟙 X) g).symm
 
 def starForgetIsoTensorLeft [HasFiniteLimits C] (X : C) :
@@ -294,11 +295,6 @@ for any morphism `f : X ⟶ Y`. -/
 def starPullbackIsoStar [HasBinaryProducts C] [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
     star Y ⋙ pullback f ≅ star X :=
   conjugateIsoEquiv ((mapPullbackAdj f).comp (forgetAdjStar Y)) (forgetAdjStar X) (mapForget f)
-
--- from Over.Basic
-theorem iteratedSliceBackward_forget {X : C} (A : Over X) :
-    iteratedSliceBackward A ⋙ forget A = Over.map A.hom :=
-  rfl
 
 /-- The functor `Over.pullback f : Over Y ⥤ Over X` is naturally isomorphic to
 `Over.star : Over Y ⥤ Over (Over.mk f)` post-composed with the

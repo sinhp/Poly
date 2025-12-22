@@ -3,8 +3,9 @@ Copyright (c) 2025 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour, Emily Riehl
 -/
-import Poly.ForMathlib.CategoryTheory.Comma.Over.Sections
 import Mathlib.CategoryTheory.MorphismProperty.Composition
+
+import Poly.ForMathlib.CategoryTheory.Comma.Over.Sections
 
 /-!
 # Locally cartesian closed categories
@@ -66,7 +67,7 @@ open CategoryTheory Category MonoidalCategory Limits Functor Adjunction Over
 
 variable {C : Type u} [Category.{v} C]
 
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
 
 /-- A morphism `f : I ⟶ J` is exponentiable if the pullback functor `Over J ⥤ Over I`
 has a right adjoint. -/
@@ -223,7 +224,7 @@ end HasPushforwards
 
 namespace CartesianClosedOver
 
-open Over Reindex IsIso ChosenFiniteProducts CartesianClosed HasPushforwards ExponentiableMorphism
+open Over Reindex IsIso CartesianMonoidalCategory CartesianClosed HasPushforwards ExponentiableMorphism
 
 variable {C} [HasFiniteWidePullbacks C] {I J : C} [CartesianClosed (Over J)]
 

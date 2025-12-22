@@ -3,8 +3,9 @@ Copyright (c) 2025 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
+import Mathlib.CategoryTheory.Monoidal.Closed.Cartesian
+
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Pullback
-import Mathlib.CategoryTheory.Closed.Cartesian
 
 /-!
 # The section functor as a right adjoint to the star functor
@@ -27,8 +28,8 @@ variable {C : Type u₁} [Category.{v₁} C]
 
 attribute [local instance] hasBinaryProducts_of_hasTerminal_and_pullbacks
 attribute [local instance] hasFiniteProducts_of_has_binary_and_terminal
-attribute [local instance] ChosenFiniteProducts.ofFiniteProducts
-attribute [local instance] monoidalOfChosenFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofChosenFiniteProducts
 
 section
 
@@ -42,28 +43,28 @@ def prodIsoTensorObj (X Y : C) : X ⨯ Y ≅ X ⊗ Y := Iso.refl _
 
 @[reassoc (attr := simp)]
 theorem prodIsoTensorObj_inv_fst {X Y : C} :
-    (prodIsoTensorObj X Y).inv ≫ prod.fst = ChosenFiniteProducts.fst X Y :=
+    (prodIsoTensorObj X Y).inv ≫ prod.fst = CartesianMonoidalCategory.fst X Y :=
   Category.id_comp _
 
 @[reassoc (attr := simp)]
 theorem prodIsoTensorObj_inv_snd {X Y : C} :
-    (prodIsoTensorObj X Y).inv ≫ prod.snd = ChosenFiniteProducts.snd X Y :=
+    (prodIsoTensorObj X Y).inv ≫ prod.snd = CartesianMonoidalCategory.snd X Y :=
   Category.id_comp _
 
 @[reassoc (attr := simp)]
 theorem prodIsoTensorObj_hom_fst {X Y : C} :
-    (prodIsoTensorObj X Y).hom ≫ ChosenFiniteProducts.fst X Y = prod.fst :=
+    (prodIsoTensorObj X Y).hom ≫ CartesianMonoidalCategory.fst X Y = prod.fst :=
   Category.id_comp _
 
 @[reassoc (attr := simp)]
 theorem prodIsoTensorObj_hom_snd {X Y : C} :
-    (prodIsoTensorObj X Y).hom ≫ ChosenFiniteProducts.snd X Y = prod.snd :=
+    (prodIsoTensorObj X Y).hom ≫ CartesianMonoidalCategory.snd X Y = prod.snd :=
   Category.id_comp _
 
 @[reassoc (attr := simp)]
 theorem prodMap_comp_prodIsoTensorObj_hom {X Y Z W : C} (f : X ⟶ Y) (g : Z ⟶ W) :
-    prod.map f g ≫ (prodIsoTensorObj _ _).hom = (prodIsoTensorObj _ _).hom ≫ (f ⊗ g) := by
-  apply ChosenFiniteProducts.hom_ext <;> simp
+    prod.map f g ≫ (prodIsoTensorObj _ _).hom = (prodIsoTensorObj _ _).hom ≫ (f ⊗ₘ g) := by
+  apply CartesianMonoidalCategory.hom_ext <;> simp
 
 end
 
@@ -73,7 +74,7 @@ variable (I : C) [Exponentiable I]
 
 /-- The first leg of a cospan constructing a pullback diagram in `C` used to define `sections` . -/
 def curryId : ⊤_ C ⟶ (I ⟹ I) :=
-  CartesianClosed.curry (ChosenFiniteProducts.fst I (⊤_ C))
+  CartesianClosed.curry (CartesianMonoidalCategory.fst I (⊤_ C))
 
 variable {I}
 
