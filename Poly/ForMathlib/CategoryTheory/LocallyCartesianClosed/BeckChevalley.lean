@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour, Emily Riehl
 -/
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 /-!
 # Beck-Chevalley natural transformations and natural isomorphisms

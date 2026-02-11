@@ -9,7 +9,7 @@ import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Monad.Products
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
 import Poly.ForMathlib.CategoryTheory.NatTrans
-import Poly.ForMathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Poly.ForMathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 noncomputable section
 
@@ -19,7 +19,7 @@ namespace CategoryTheory
 
 open Category Limits Comonad MonoidalCategory CartesianMonoidalCategory
 
-attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofHasFiniteProducts
 
 variable {C : Type u₁} [Category.{v₁} C]
 
@@ -211,7 +211,7 @@ lemma star_map [HasBinaryProducts C] {X : C} {Y Z : C} (f : Y ⟶ Z) :
 instance [HasBinaryProducts C]  (X : C) : (forget X).IsLeftAdjoint  :=
   ⟨_, ⟨forgetAdjStar X⟩⟩
 
-attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofHasFiniteProducts
 
 lemma whiskerLeftProdMapId [HasFiniteLimits C] {X : C} {A A' : C} {g : A ⟶ A'} :
     X ◁ g = prod.map (𝟙 X) g := by
@@ -297,12 +297,6 @@ def starIsoToOverTerminal [HasTerminal C] [HasBinaryProducts C] :
     (equivOverTerminal C) (star (⊤_ C)) (forgetAdjStar (⊤_ C))
 
 variable {C}
-
-/-- A natural isomorphism between the functors `star X` and `star Y ⋙ pullback f`
-for any morphism `f : X ⟶ Y`. -/
-def starPullbackIsoStar [HasBinaryProducts C] [HasPullbacks C] {X Y : C} (f : X ⟶ Y) :
-    star Y ⋙ pullback f ≅ star X :=
-  conjugateIsoEquiv ((mapPullbackAdj f).comp (forgetAdjStar Y)) (forgetAdjStar X) (mapForget f)
 
 /-- The functor `Over.pullback f : Over Y ⥤ Over X` is naturally isomorphic to
 `Over.star : Over Y ⥤ Over (Over.mk f)` post-composed with the
