@@ -6,7 +6,9 @@ Authors: Sina Hazratpour
 
 import Mathlib.CategoryTheory.NatTrans
 import Mathlib.CategoryTheory.Functor.TwoSquare
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Discrete.Basic
+import Mathlib.CategoryTheory.Limits.Shapes.Terminal
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 open CategoryTheory Limits IsPullback
 
@@ -78,7 +80,9 @@ theorem hcomp {K : Type*} [Category K] {F G : J ⥤ C} {M N : C ⥤ K} {α : F �
   simp only [Functor.comp_obj, Functor.comp_map, comp_app,
     whiskerRight_app, whiskerLeft_app,
     naturality] at hc
-  exact hc
+  convert hc using 1
+  · exact (β.naturality (α.app i)).symm
+  · exact (β.naturality (α.app j)).symm
 
 open TwoSquare
 

@@ -6,6 +6,9 @@ Authors: Sina Hazratpour, Emily Riehl
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Beck-Chevalley natural transformations and natural isomorphisms
 
@@ -282,9 +285,13 @@ theorem pullback.map_isIso_of_pullback_right_of_comm_cube {W X Y Z S T : C}
     IsIso (pullback.map f₁ f₂ g₁ g₂ i₁ i₂ i₃ sq_bot.w pb_right.w.symm) := by
   let m := pullback.map f₁ f₂ g₁ g₂ i₁ i₂ i₃ sq_bot.w pb_right.w.symm
   have sq_top : CommSq (pullback.snd f₁ f₂) m i₂ (pullback.snd g₁ g₂) := by
-    aesop
+    exact CommSq.mk (by
+      simpa [m, pullback.map] using
+        (pullback.lift_snd (pullback.fst f₁ f₂ ≫ i₁) (pullback.snd f₁ f₂ ≫ i₂) _).symm)
   have sq_left : CommSq m (pullback.fst f₁ f₂) (pullback.fst g₁ g₂) i₁ := by
-    aesop
+    exact CommSq.mk (by
+      simpa [m, pullback.map] using
+        (pullback.lift_fst (pullback.fst f₁ f₂ ≫ i₁) (pullback.snd f₁ f₂ ≫ i₂) _))
   let pb' : IsPullback m (pullback.fst f₁ f₂)  (pullback.fst g₁ g₂) i₁ := by
     apply IsPullback.left_face_of_comm_cube (sq_top := sq_top) (sq_bot := sq_bot)
       (sq_left := sq_left) (pb_back := (IsPullback.of_hasPullback f₁ f₂).flip)
@@ -298,7 +305,7 @@ end IsPullback
 variable [HasPullbacks C]
 
 variable {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
-(sq : CommSq h f g k) (A : Over Y)
+variable (sq : CommSq h f g k) (A : Over Y)
 
 open IsPullback Over
 
@@ -309,10 +316,12 @@ theorem mapPullbackAdj.counit_app_left  :
 @[simp]
 theorem pullbackMapTwoSquare_app :
     (pullbackMapTwoSquare h f g k sq).app A =
-    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
+    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm)
+      (by simpa [Over.pullback_obj_hom, Over.map_obj_hom, pullback.map]) := by
   ext
-  simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare]
-  aesop
+  apply pullback.hom_ext
+  · simp [homMk_left, pullbackMapTwoSquare, mapIsoSquare, pullback.map]
+  · simp [homMk_left, pullbackMapTwoSquare, mapIsoSquare, pullback.map]
 
 theorem forget_map_pullbackMapTwoSquare :
     (Over.forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =

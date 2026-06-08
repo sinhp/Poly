@@ -10,6 +10,8 @@ import Mathlib.CategoryTheory.Functor.TwoSquare
 import Poly.ForMathlib.CategoryTheory.PartialProduct
 import Poly.ForMathlib.CategoryTheory.NatTrans
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Polynomial Functor
@@ -137,7 +139,13 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
   let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
-  simpa using (cellLeftMidPasted ≫ₕ (vId (Over.forget B)))
+  let cell := cellLeftMidPasted ≫ₕ (vId (Over.forget B))
+  let reassoc := whiskerRight
+    (Functor.associator (prodComonad E).cofree (coalgebraToOver E) (pushforward P.p)).inv
+    (Over.forget B)
+  let reassoc' := (Functor.associator (Over.star E) (pushforward P.p) (Over.forget B)).hom
+  simpa [functor, Over.star, Category.assoc] using
+    (Functor.rightUnitor Q.functor).inv ≫ cell ≫ reassoc ≫ reassoc'
 
 /-- A cartesian map of polynomials
 ```

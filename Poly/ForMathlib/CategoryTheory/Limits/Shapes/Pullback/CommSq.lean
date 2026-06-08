@@ -3,7 +3,7 @@ Copyright (c) 2025 Wojciech Nawrocki. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Wojciech Nawrocki
 -/
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 import Poly.ForMathlib.CategoryTheory.CommSq
 
 namespace CategoryTheory.Functor
@@ -25,6 +25,12 @@ theorem reflect_isPullback
       ((Cones.postcompose i.symm.hom).obj pb.cone).pt ≅
       (F.mapCone <| PullbackCone.mk f g sq.w).pt :=
     Iso.refl _
-  apply WalkingCospan.ext j <;> simp +zetaDelta
+  apply WalkingCospan.ext j
+  · simp [PullbackCone.mk, Cones.postcompose, Cone.postcompose, i, j, cospanCompIso_inv_app_left]
+    change F.map f ≫ 𝟙 (F.obj Y) = 𝟙 (F.obj X) ≫ F.map f
+    simp
+  · simp [PullbackCone.mk, Cones.postcompose, Cone.postcompose, i, j, cospanCompIso_inv_app_right]
+    change F.map g ≫ 𝟙 (F.obj Z) = 𝟙 (F.obj X) ≫ F.map g
+    simp
 
 end CategoryTheory.Functor

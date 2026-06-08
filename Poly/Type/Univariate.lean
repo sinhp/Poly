@@ -6,7 +6,7 @@ Authors: Sina Hazratpour
 
 import Mathlib.CategoryTheory.Types.Basic
 
-open CategoryTheory Category Functor
+open CategoryTheory Category Functor TypeCat
 
 /-!
 # Polynomial functors
@@ -177,7 +177,7 @@ theorem map_map (f : X → Y) (g : Y → Z) :
 /-- The associated functor of `P : Poly`. -/
 def functor : Type u ⥤ Type u where
   obj X := P X
-  map {X Y} f := P.map f
+  map {X Y} f := ConcreteCategory.ofHom (Fun.mk (P.map (ConcreteCategory.hom f)))
 
 variable {P}
 
@@ -224,13 +224,21 @@ def comp.mk {X : Type u} (x : P (Q X)) : Q.comp P X :=
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp.functor : Poly.functor (Q.comp P) ≅ Poly.functor Q ⋙ Poly.functor P where
   hom := {
-    app := fun X => fun ⟨b,e⟩ =>
-    ⟨ b.1, fun x' => ⟨ b.2 x', fun b' => e ⟨x',b'⟩ ⟩⟩
-    naturality := by aesop_cat
+    app := fun X => ConcreteCategory.ofHom (Fun.mk fun ⟨b,e⟩ =>
+      ⟨ b.1, fun x' => ⟨ b.2 x', fun b' => e ⟨x',b'⟩ ⟩⟩)
+    naturality := by
+      intro X Y f
+      ext x
+      cases x
+      rfl
   }
   inv := {
-    app X := comp.mk P Q
-    naturality := by aesop_cat
+    app X := ConcreteCategory.ofHom (Fun.mk (comp.mk P Q))
+    naturality := by
+      intro X Y f
+      ext x
+      cases x
+      rfl
   }
 
 example : (Poly.functor Q ⋙ Poly.functor P).obj PUnit = P Q.B := by

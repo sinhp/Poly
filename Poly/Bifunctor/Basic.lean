@@ -8,6 +8,9 @@ import Mathlib.CategoryTheory.Adjunction.Basic
 import Poly.ForMathlib.CategoryTheory.NatIso
 import Poly.ForMathlib.CategoryTheory.Types
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 /-! ## Composition of bifunctors -/
 
 namespace CategoryTheory.Functor
@@ -70,12 +73,12 @@ theorem comp₂_naturality₂_left (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X Y : 𝒞) (Z : 𝒟) (f : X ⟶ Y) (g : Y ⟶ F.obj Z) :
     -- The `op`s really are a pain. Why can't they be definitional like in Lean 3 :(
     (i.app <| .op X).app Z (f ≫ g) = (P.map f.op).app Z ((i.app <| .op Y).app Z g) := by
-  simp [← FunctorToTypes.naturality₂_left]
+  simpa [Functor.comp₂] using (FunctorToTypes.naturality₂_left _ _ i f.op g)
 
 theorem comp₂_naturality₂_right (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v)
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X : 𝒞) (Y Z : 𝒟) (f : X ⟶ F.obj Y) (g : Y ⟶ Z) :
     (i.app <| .op X).app Z (f ≫ F.map g) = (P.obj <| .op X).map g ((i.app <| .op X).app Y f) := by
-  simp [← FunctorToTypes.naturality₂_right]
+  simpa [Functor.comp₂] using (FunctorToTypes.naturality₂_right _ _ i g f)
 
 end coyoneda
 
@@ -87,8 +90,12 @@ variable {𝒟 : Type*} [Category 𝒟]
 def coyoneda_iso {F : 𝒞 ⥤ 𝒟} {G : 𝒟 ⥤ 𝒞} (A : F ⊣ G) :
     F.op ⋙ coyoneda (C := 𝒟) ≅ G ⋙₂ coyoneda (C := 𝒞) :=
   NatIso.ofComponents₂ (fun C D => Equiv.toIso <| A.homEquiv C.unop D)
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_left])
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_right])
+    (fun _ σ => by
+      ext g
+      exact A.homEquiv_naturality_left σ.unop g)
+    (fun _ f => by
+      ext g
+      exact A.homEquiv_naturality_right g f)
 
 end Adjunction
 end CategoryTheory
