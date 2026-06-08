@@ -149,7 +149,7 @@ def sumEquiv : (P.sum Q) X ≃ P X ⊕ Q X where
     | Sum.inl ⟨b, x⟩ => ⟨Sum.inl b, x⟩
     | Sum.inr ⟨b, x⟩ => ⟨Sum.inr b, x⟩
   left_inv := by
-    sorry
+    rintro ⟨(b | b), x⟩ <;> rfl
   right_inv := by
     aesop_cat
 
@@ -177,7 +177,7 @@ theorem map_map (f : X → Y) (g : Y → Z) :
 /-- The associated functor of `P : Poly`. -/
 def functor : Type u ⥤ Type u where
   obj X := P X
-  map {X Y} f := P.map f
+  map {X Y} f := ↾(P.map f)
 
 variable {P}
 
@@ -189,7 +189,7 @@ def Obj.iget [DecidableEq P.B] {X} [Inhabited X] (x : P X) (i : P.Total) : X :=
 @[simp]
 theorem iget_map [DecidableEq P.B] [Inhabited X] [Inhabited Y] (x : P X)
     (f : X → Y) (i : P.Total) (h : i.1 = x.1) : (P.map f x).iget i = f (x.iget i) := by
-  simp only [Obj.iget, fst_map, *, dif_pos, eq_self_iff_true]
+  simp only [Obj.iget, fst_map, *, dif_pos]
   cases x
   rfl
 
@@ -224,12 +224,12 @@ def comp.mk {X : Type u} (x : P (Q X)) : Q.comp P X :=
 /-- Functor composition for polynomial functors in the diagrammatic order. -/
 def comp.functor : Poly.functor (Q.comp P) ≅ Poly.functor Q ⋙ Poly.functor P where
   hom := {
-    app := fun X => fun ⟨b,e⟩ =>
+    app := fun X => ↾fun ⟨b,e⟩ =>
     ⟨ b.1, fun x' => ⟨ b.2 x', fun b' => e ⟨x',b'⟩ ⟩⟩
     naturality := by aesop_cat
   }
   inv := {
-    app X := comp.mk P Q
+    app X := ↾comp.mk P Q
     naturality := by aesop_cat
   }
 

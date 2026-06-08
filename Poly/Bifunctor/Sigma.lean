@@ -45,19 +45,36 @@ a functor `F'` s.t. `F'.Elements ≅ F.Elements × 𝒟`; very awkward.
 - known concrete instances are `𝒟 ∈ {Type, Cat, Grpd}` -/
 def Sigma {F : 𝒞 ⥤ Type w} (G : F.Elements ⥤ 𝒟 ⥤ Type v) : 𝒞 ⥤ 𝒟 ⥤ Type (max w v) := by
   refine curry.obj {
-    obj := fun (C, D) => (a : F.obj C) × (G.obj ⟨C, a⟩).obj D
-    map := fun (f, g) ⟨a, b⟩ =>
-      ⟨F.map f a, (G.map ⟨f, rfl⟩).app _ ((G.obj ⟨_, a⟩).map g b)⟩
+    obj := fun CD => (a : F.obj CD.1) × (G.obj ⟨CD.1, a⟩).obj CD.2
+    map := fun fg => TypeCat.ofHom fun ab =>
+      ⟨F.map fg.1 ab.1, (G.map ⟨fg.1, rfl⟩).app _ ((G.obj ⟨_, ab.1⟩).map fg.2 ab.2)⟩
     map_id := ?_
     map_comp := ?_
-  } <;> {
-    intros
-    ext ⟨a, b⟩ : 1
-    dsimp
-    congr! 1 with h
-    . simp
-    . rw! [h]; simp [FunctorToTypes.naturality]
   }
+  · intro X
+    apply ConcreteCategory.ext_apply
+    rintro ⟨a, b⟩
+    simp only [TypeCat.ofHom_apply, types_id_apply]
+    dsimp
+    refine Sigma.ext (by simp) ?_
+    have hobj : F.elementsMk X.1 a = F.elementsMk X.1 (F.map (𝟙 X.1) a) := by
+      simp [Functor.map_id_apply]
+    have key : (⟨𝟙 X.1, rfl⟩ :
+          F.elementsMk X.1 a ⟶ F.elementsMk X.1 (F.map (𝟙 X.1) a))
+        = eqToHom hobj := by
+      apply (CategoryOfElements.π F).map_injective
+      simp [CategoryOfElements.π, eqToHom_map]
+    rw [key]
+    simp [eqToHom_map, eqToHom_app]
+  · intro X Y Z f g
+    apply ConcreteCategory.ext_apply
+    rintro ⟨a, b⟩
+    simp only [TypeCat.ofHom_apply, types_comp_apply]
+    dsimp
+    refine Sigma.ext (by simp) ?_
+    rw! (castMode := .all)
+      [show F.map (f.1 ≫ g.1) a = F.map g.1 (F.map f.1 a) from by simp]
+    simp [NatTrans.naturality_apply]
 
 def Sigma.isoCongrLeft {F₁ F₂ : 𝒞 ⥤ Type w}
     /- Q: What kind of map `F₂.Elements ⥤ F₁.Elements`
