@@ -8,6 +8,9 @@ import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.Basic
 import Poly.ForMathlib.CategoryTheory.NatTrans
 import Poly.ForMathlib.CategoryTheory.LocallyCartesianClosed.BeckChevalley
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Pentagon distributivity
 

@@ -67,7 +67,7 @@ open CategoryTheory Category MonoidalCategory CartesianMonoidalCategory Limits F
 
 variable {C : Type u} [Category.{v} C]
 
-attribute [local instance] CartesianMonoidalCategory.ofFiniteProducts
+attribute [local instance] CartesianMonoidalCategory.ofHasFiniteProducts
 
 /-- A morphism `f : I ⟶ J` is exponentiable if the pullback functor `Over J ⥤ Over I`
 has a right adjoint. -/
@@ -144,8 +144,7 @@ theorem pushforward_curry_uncurry [ExponentiableMorphism f] {X : Over I} {A : Ov
 
 instance OverMkHom {I J : C} {f : I ⟶ J} [ExponentiableMorphism f] :
     ExponentiableMorphism (Over.mk f).hom := by
-  dsimp only [mk_hom]
-  infer_instance
+  convert (inferInstance : ExponentiableMorphism f) using 1
 
 /-- The identity morphisms `𝟙` are exponentiable. -/
 @[simps]
@@ -179,7 +178,7 @@ instance isMultiplicative : (ExponentiableMorphism (C:= C)).IsMultiplicative whe
 /-- A morphism with a pushforward is an exponentiable object in the slice category. -/
 def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
     [ExponentiableMorphism f] :
-    Exponentiable (Over.mk f) where
+    Closed (Over.mk f) where
   rightAdj := pullback f ⋙ pushforward f
   adj := by
     apply ofNatIsoLeft _ _
@@ -192,7 +191,7 @@ morphism `X.hom`.
 Here the pushforward functor along a morphism `f : I ⟶ J` is defined using the section functor
 `Over (Over.mk f) ⥤ Over J`.
 -/
-def ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Exponentiable X] :
+def ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Closed X] :
     ExponentiableMorphism X.hom :=
   ⟨X.iteratedSliceEquiv.inverse ⋙ sections X, ⟨by
     refine ofNatIsoLeft (Adjunction.comp ?_ ?_) (starIteratedSliceForwardIsoPullback X.hom)
@@ -217,22 +216,22 @@ variable {C} [HasFiniteWidePullbacks C] [HasPushforwards C]
 /-- In a category where pushforwards exists along all morphisms, every slice category `Over I` is
 cartesian closed. -/
 instance cartesianClosedOver (I : C) :
-    CartesianClosed (Over I) where
+    MonoidalClosed (Over I) where
   closed X := @exponentiableOverMk _ _ _ _ _ _ X.hom (HasPushforwards.exponentiable X.hom)
 
 end HasPushforwards
 
 namespace CartesianClosedOver
 
-open Over Reindex IsIso CartesianClosed HasPushforwards ExponentiableMorphism
+open Over Reindex IsIso MonoidalClosed HasPushforwards ExponentiableMorphism
 
-variable {C} [HasFiniteWidePullbacks C] {I J : C} [CartesianClosed (Over J)]
+variable {C} [HasFiniteWidePullbacks C] {I J : C} [MonoidalClosed (Over J)]
 
 instance (f : I ⟶ J) : ExponentiableMorphism f :=
   ExponentiableMorphism.ofOverExponentiable (Over.mk f)
 
 /-- A category with cartesian closed slices has pushforwards along all morphisms. -/
-instance hasPushforwards [Π (I : C), CartesianClosed (Over I)] : HasPushforwards C where
+instance hasPushforwards [∀ (I : C), MonoidalClosed (Over I)] : HasPushforwards C where
   exponentiable f := ExponentiableMorphism.ofOverExponentiable (Over.mk f)
 
 end CartesianClosedOver
@@ -242,7 +241,7 @@ is exponentiable and all the slices are cartesian closed. -/
 class LocallyCartesianClosed [HasFiniteWidePullbacks C] extends
     HasPushforwards C where
   /-- every slice category `Over I` is cartesian closed. This is filled in by default. -/
-  cartesianClosedOver : Π (I : C), CartesianClosed (Over I) := HasPushforwards.cartesianClosedOver
+  cartesianClosedOver : Π (I : C), MonoidalClosed (Over I) := HasPushforwards.cartesianClosedOver
 
 namespace LocallyCartesianClosed
 
@@ -256,10 +255,13 @@ attribute [scoped instance] hasFiniteLimits_of_hasTerminal_and_pullbacks
 instance mkOfHasPushforwards [HasPushforwards C] : LocallyCartesianClosed C where
 
 /-- A category with cartesian closed slices is locally cartesian closed. -/
-instance mkOfCartesianClosedOver [Π (I : C), CartesianClosed (Over I)] :
+instance mkOfCartesianClosedOver [∀ (I : C), MonoidalClosed (Over I)] :
   LocallyCartesianClosed C where
 
 variable [LocallyCartesianClosed C]
+
+instance instMonoidalClosedOver (I : C) : MonoidalClosed (Over I) :=
+  HasPushforwards.cartesianClosedOver I
 
 /-- Every morphism in a locally cartesian closed category is exponentiable. -/
 instance {I J : C} (f : I ⟶ J) : ExponentiableMorphism f := HasPushforwards.exponentiable f
@@ -283,7 +285,7 @@ abbrev ev' {I : C} (X : Over I) (Y : Over X.left) : Reindex X (Pi X Y) ⟶ Y :=
 
 /-- A locally cartesian closed category with a terminal object is cartesian closed. -/
 def cartesianClosed [HasTerminal C] :
-    CartesianClosed C := cartesianClosedOfEquiv <| equivOverTerminal C
+    MonoidalClosed C := cartesianClosedOfEquiv <| equivOverTerminal C
 
 /-- The slices of a locally cartesian closed category are locally cartesian closed. -/
 def overLocallyCartesianClosed (I : C) : LocallyCartesianClosed (Over I) := by
@@ -293,7 +295,7 @@ def overLocallyCartesianClosed (I : C) : LocallyCartesianClosed (Over I) := by
 
 /-- The exponential `X^^A` in the slice category `Over I` is isomorphic to the pushforward of the
 pullback of `X` along `A`. -/
-def expIso {I : C} (A X : Over I) :  Pi A (Reindex A X) ≅ A ⟹ X := Iso.refl _
+def expIso {I : C} (A X : Over I) : Pi A (Reindex A X) ≅ (ihom A).obj X := Iso.refl _
 
 end LocallyCartesianClosed
 

@@ -17,6 +17,9 @@ with morphisms `fst : P —> A` and `snd : pullback fst s —> X`  which is univ
 such data.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 
 namespace CategoryTheory

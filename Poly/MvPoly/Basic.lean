@@ -109,7 +109,6 @@ def idApplyIso (q : X ⟶ I) : (id I).apply (Over.mk q) ≅ Over.mk q where
     simp [apply]
     exact {
       left := by
-        dsimp
         sorry
       right := sorry
       w := sorry
