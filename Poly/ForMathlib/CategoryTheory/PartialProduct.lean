@@ -3,7 +3,7 @@ Copyright (c) 2025 Sina Hazratpour. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Sina Hazratpour
 -/
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 import Mathlib.CategoryTheory.Comma.Over.Pullback
 import Poly.ForMathlib.CategoryTheory.Comma.Over.Pullback
 import Mathlib.CategoryTheory.Monoidal.Closed.Cartesian
@@ -100,6 +100,8 @@ structure Fan.Hom (c c' : Fan s X) where
 
 attribute [reassoc (attr := simp)] Fan.Hom.w_left Fan.Hom.w_right
 
+-- TODO: this is taking ages to check since 4.28.0-rc1.
+set_option maxHeartbeats 0 in
 @[simps]
 instance : Category (Fan s X) where
   Hom := Fan.Hom
