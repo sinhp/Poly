@@ -3,7 +3,7 @@ Copyright (c) 2025 Wojciech Nawrocki. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Wojciech Nawrocki
 -/
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 import Poly.ForMathlib.CategoryTheory.CommSq
 
 namespace CategoryTheory.Functor

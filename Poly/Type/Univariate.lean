@@ -189,7 +189,7 @@ def Obj.iget [DecidableEq P.B] {X} [Inhabited X] (x : P X) (i : P.Total) : X :=
 @[simp]
 theorem iget_map [DecidableEq P.B] [Inhabited X] [Inhabited Y] (x : P X)
     (f : X → Y) (i : P.Total) (h : i.1 = x.1) : (P.map f x).iget i = f (x.iget i) := by
-  simp only [Obj.iget, fst_map, *, dif_pos, eq_self_iff_true]
+  simp only [Obj.iget, fst_map, *, dif_pos]
   cases x
   rfl
 

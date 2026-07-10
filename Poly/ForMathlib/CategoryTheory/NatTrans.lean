@@ -6,7 +6,7 @@ Authors: Sina Hazratpour
 
 import Mathlib.CategoryTheory.NatTrans
 import Mathlib.CategoryTheory.Functor.TwoSquare
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.CommSq
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 open CategoryTheory Limits IsPullback
 
