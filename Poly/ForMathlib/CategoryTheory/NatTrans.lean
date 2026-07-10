@@ -6,6 +6,8 @@ Authors: Sina Hazratpour
 
 import Mathlib.CategoryTheory.NatTrans
 import Mathlib.CategoryTheory.Functor.TwoSquare
+import Mathlib.CategoryTheory.Discrete.Basic
+import Mathlib.CategoryTheory.Limits.Shapes.Terminal
 import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
 open CategoryTheory Limits IsPullback
@@ -69,16 +71,10 @@ theorem hcomp {K : Type*} [Category K] {F G : J ⥤ C} {M N : C ⥤ K} {α : F �
     (hα : IsCartesian α) (hβ : IsCartesian β)
     [∀ (i j : J) (f : j ⟶ i), PreservesLimit (cospan (α.app i) (G.map f)) M] :
     IsCartesian (NatTrans.hcomp α β) := by
-  have ha := hα.whiskerRight M
-  have hb := hβ.whiskerLeft G
-  have hc := ha.comp hb
-  unfold IsCartesian
-  intros i j f
-  specialize hc f
-  simp only [Functor.comp_obj, Functor.comp_map, comp_app,
-    whiskerRight_app, whiskerLeft_app,
-    naturality] at hc
-  exact hc
+  have : NatTrans.hcomp α β = Functor.whiskerRight α M ≫ Functor.whiskerLeft G β := by
+    ext x; exact (β.naturality (α.app x)).symm
+  rw [this]
+  exact (hα.whiskerRight M).comp (hβ.whiskerLeft G)
 
 open TwoSquare
 
