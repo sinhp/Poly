@@ -16,7 +16,7 @@ variable {𝒞 𝒟' 𝒟 ℰ : Type*} [Category 𝒞] [Category 𝒟'] [Categor
 
 /-- Precompose a bifunctor in the second argument.
 Note that `G ⋙₂ F ⋙ P = F ⋙ G ⋙₂ P` definitionally. -/
-@[simps]
+@[implicit_reducible, simps]
 def comp₂ (F : 𝒟' ⥤ 𝒟) (P : 𝒞 ⥤ 𝒟 ⥤ ℰ) : 𝒞 ⥤ 𝒟' ⥤ ℰ where
   obj Γ := F ⋙ P.obj Γ
   map f := whiskerLeft F (P.map f)
@@ -69,13 +69,13 @@ namespace coyoneda
 theorem comp₂_naturality₂_left (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v)
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X Y : 𝒞) (Z : 𝒟) (f : X ⟶ Y) (g : Y ⟶ F.obj Z) :
     -- The `op`s really are a pain. Why can't they be definitional like in Lean 3 :(
-    (i.app <| .op X).app Z (f ≫ g) = (P.map f.op).app Z ((i.app <| .op Y).app Z g) := by
-  simp [← FunctorToTypes.naturality₂_left]
+    (i.app <| .op X).app Z (f ≫ g) = (P.map f.op).app Z ((i.app <| .op Y).app Z g) :=
+  FunctorToTypes.naturality₂_left ..
 
 theorem comp₂_naturality₂_right (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v)
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X : 𝒞) (Y Z : 𝒟) (f : X ⟶ F.obj Y) (g : Y ⟶ Z) :
-    (i.app <| .op X).app Z (f ≫ F.map g) = (P.obj <| .op X).map g ((i.app <| .op X).app Y f) := by
-  simp [← FunctorToTypes.naturality₂_right]
+    (i.app <| .op X).app Z (f ≫ F.map g) = (P.obj <| .op X).map g ((i.app <| .op X).app Y f) :=
+  FunctorToTypes.naturality₂_right ..
 
 end coyoneda
 
@@ -87,8 +87,8 @@ variable {𝒟 : Type*} [Category 𝒟]
 def coyoneda_iso {F : 𝒞 ⥤ 𝒟} {G : 𝒟 ⥤ 𝒞} (A : F ⊣ G) :
     F.op ⋙ coyoneda (C := 𝒟) ≅ G ⋙₂ coyoneda (C := 𝒞) :=
   NatIso.ofComponents₂ (fun C D => Equiv.toIso <| A.homEquiv C.unop D)
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_left])
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_right])
+    (fun _ _ => by ext x; simp [A.homEquiv_naturality_left])
+    (fun _ _ => by ext x; simp [A.homEquiv_naturality_right])
 
 end Adjunction
 end CategoryTheory

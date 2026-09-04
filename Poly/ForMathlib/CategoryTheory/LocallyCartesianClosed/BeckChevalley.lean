@@ -46,6 +46,10 @@ in Mathematical Structures in Computer Science, 2024][Hazratpour_Riehl_2024]
 
 -/
 
+-- Lean 4.34 tightened the transparency `simp`/`rw` use when matching, which breaks goals
+-- stated through reducible wrappers (`pullback.lift`/`pullback.fst`, `Over.Hom`).
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 namespace CategoryTheory
 
@@ -298,7 +302,7 @@ end IsPullback
 variable [HasPullbacks C]
 
 variable {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
-(sq : CommSq h f g k) (A : Over Y)
+    (sq : CommSq h f g k) (A : Over Y)
 
 open IsPullback Over
 
@@ -312,7 +316,10 @@ theorem pullbackMapTwoSquare_app :
     Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
   ext
   simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare]
-  aesop
+  apply pullback.hom_ext <;> simp
+  -- `𝟙` here sits at `((pullback f ⋙ map h).obj A).left`, which `simp` will not match
+  -- against `Limits.pullback A.hom f`; `exact` unifies them at default transparency.
+  exact Category.id_comp _
 
 theorem forget_map_pullbackMapTwoSquare :
     (Over.forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =

@@ -6,6 +6,9 @@ Authors: Wojciech Nawrocki
 import Poly.UvPoly.Basic
 import Poly.Bifunctor.Sigma
 
+-- Lean 4.34 tightened the transparency `simp`/`rw` use when matching.
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 
 namespace CategoryTheory.UvPoly
@@ -25,13 +28,13 @@ def partProdsOver : Cᵒᵖ ⥤ C ⥤ Type v :=
 @[simp]
 theorem partProdsOver_obj_map {X Y : C} (Γ : Cᵒᵖ) (f : X ⟶ Y) (x : (P.partProdsOver.obj Γ).obj X) :
     (P.partProdsOver.obj Γ).map f x = ⟨x.1, x.2 ≫ f⟩ := by
-  dsimp [partProdsOver]
+  dsimp [partProdsOver, Functor.Sigma]
   have : 𝟙 Γ.unop ≫ x.1 = x.1 := by simp
-  ext : 1
+  refine Sigma.ext ?_ ?_
   . simp
   . dsimp
     rw! (castMode := .all) [this]
-    simp
+    simp [equivalence_Elements, pullback.lift_fst_snd]
 
 variable [HasTerminal C]
 
@@ -72,8 +75,8 @@ def equiv (Γ X : C) : (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback 
   Iso.toEquiv <| (P.iso_Sigma.app (.op Γ)).app X
 
 theorem equiv_app (Γ X : C) (be : Γ ⟶ P.functor.obj X) :
-    P.equiv Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be := by
-  dsimp [equiv]
+    P.equiv Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be :=
+  rfl
 
 lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv Δ X (σ ≫ be) =
