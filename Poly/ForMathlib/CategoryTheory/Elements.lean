@@ -15,7 +15,7 @@ variable (F : 𝒞 ⥤ Type*) (G : F.Elements ⥤ 𝒟)
 @[simp]
 theorem map_homMk_id {X : 𝒞} (a : F.obj X) (eq : F.map (𝟙 X) a = a) :
     -- NOTE: without `α := X ⟶ X`, a bad discrimination tree key involving `⟨X, a⟩.1` is generated.
-    G.map (Subtype.mk (α := X ⟶ X) (𝟙 X) eq) = 𝟙 (G.obj ⟨X, a⟩) :=
+    G.map (Subtype.mk (α := X ⟶ X) (𝟙 X) eq) = 𝟙 (G.obj (F.elementsMk X a)) :=
   show G.map (𝟙 _) = 𝟙 _ by simp
 
 @[simp]

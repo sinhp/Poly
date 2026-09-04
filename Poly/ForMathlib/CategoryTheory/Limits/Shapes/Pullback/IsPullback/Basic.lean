@@ -22,9 +22,12 @@ theorem reflect_isPullback
   let i := cospanCompIso F h i
   apply IsLimit.equivOfNatIsoOfIso i.symm pb.cone _ _ pb.isLimit
   let j :
-      ((Cones.postcompose i.symm.hom).obj pb.cone).pt ≅
+      ((Cone.postcompose i.symm.hom).obj pb.cone).pt ≅
       (F.mapCone <| PullbackCone.mk f g sq.w).pt :=
     Iso.refl _
-  apply WalkingCospan.ext j <;> simp +zetaDelta
+  -- `IsPullback.cone`/`CommSq.cone` have no `pt` simp lemmas, so the cone points have to be
+  -- unfolded before `simp` can see through `𝟙 pb.cone.pt`.
+  apply WalkingCospan.ext j <;>
+    simp +zetaDelta [IsPullback.cone, CommSq.cone, PullbackCone.mk]
 
 end CategoryTheory.Functor

@@ -33,6 +33,10 @@ in below.
 `Poly.Exponentiable`.
 -/
 
+-- Lean 4.34 tightened the transparency `simp`/`rw` use when matching, which breaks goals
+-- stated through reducible wrappers (`pullback.lift`/`pullback.fst`, `Over.Hom`).
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 
 namespace CategoryTheory
@@ -137,7 +141,10 @@ def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h
   let cellLeft := (Over.starPullbackIsoStar ρ).hom
   let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
-  simpa using (cellLeftMidPasted ≫ₕ (vId (Over.forget B)))
+  -- `TwoSquare`, `UvPoly.functor` and `Over.star` are plain `def`s, so `simp` has to be told
+  -- to unfold them before the two sides line up.
+  simpa only [TwoSquare, UvPoly.functor, Over.star, Functor.assoc, Functor.comp_id] using
+    (cellLeftMidPasted ≫ₕ (vId (Over.forget B)))
 
 /-- A cartesian map of polynomials
 ```
@@ -309,7 +316,12 @@ def isLimitFan (P : UvPoly E B) (X : C) : PartialProduct.IsLimit (PartialProduct
     rw [← h_right]
     simp [forgetAdjStar, comp_homEquiv, Comonad.adj]
     simp [Equivalence.toAdjunction, homEquiv]
-    simp [coalgebraEquivOver, Equivalence.symm]; rfl
+    simp [coalgebraEquivOver, Equivalence.symm]
+    -- `simp` cannot match `Category.id_comp` here: the identity sits at
+    -- `((prodComonad E).cofree.obj X).A`, which is not syntactically the source of `prod.snd`.
+    rw [show 𝟙 ((prodComonad E).cofree.obj X).A ≫ (prod.snd : ((prodComonad E).cofree.obj X).A ⟶ X)
+        = prod.snd from Category.id_comp _]
+    rfl
 
 end PartialProduct
 
@@ -353,7 +365,7 @@ theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
 @[simp]
 theorem proj_snd {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
     (proj P f).snd = pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by simp) (by simp) ≫ (fan P X).snd := by
-  simp [proj]
+  simp [proj, PartialProduct.Fan.extend]
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=

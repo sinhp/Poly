@@ -16,6 +16,11 @@ of `X` over `I`.
 
 -/
 
+-- Lean 4.34 tightened the transparency `simp`/`rw` use when matching, which breaks goals
+-- stated through reducible wrappers (`pullback.lift`/`pullback.fst`, `Over.Hom`).
+-- Mathlib sets the same option throughout its own `Over`/pullback files.
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 
 universe v₁ v₂ u₁ u₂

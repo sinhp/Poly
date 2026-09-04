@@ -26,6 +26,10 @@ We construct a natural isomorphism
 `Over.map u ⋙ pushforward f ≅ pullback e ⋙ pushforward g ⋙  Over.map v`
 -/
 
+-- Lean 4.34 tightened the transparency `simp`/`rw` use when matching, which breaks goals
+-- stated through reducible wrappers (`pullback.lift`/`pullback.fst`, `Over.Hom`).
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 namespace CategoryTheory
 
@@ -52,6 +56,10 @@ The instance is inferred from the LocallyCartesianClosed structure, but
 we should prove this more generally without assuming the LCCC structure. -/
 def exponentiableMorphism : ExponentiableMorphism (g f u) := by infer_instance
 
+-- `PullbackCone.mk_pt` is not a `simp` lemma in mathlib, so cone points built with
+-- `PullbackCone.mk` do not reduce and `Category.id_comp` fails to match below.
+attribute [local simp] Limits.PullbackCone.mk_pt
+
 namespace ExponentiableMorphism
 
 def mapPullbackAdj_regularMono {C} [Category C] [HasPullbacks C] {A B : C} (F : A ⟶ B)
@@ -62,6 +70,9 @@ def mapPullbackAdj_regularMono {C} [Category C] [HasPullbacks C] {A B : C} (F : 
   refine ⟨_, _, _, this, Fork.IsLimit.mk' _ fun s => ?_⟩
   have hi := (Fork.ι s).w; simp at hi
   have w := congr($(Fork.condition s).left ≫ pullback.fst .. ≫ pullback.snd ..); simp [η] at w
+  replace w : s.ι.left ≫ pullback.fst (X.hom ≫ F) F ≫ X.hom
+      = s.ι.left ≫ pullback.snd (X.hom ≫ F) F :=
+    w.trans (congrArg (fun t => s.ι.left ≫ t) (Category.id_comp _))
   refine ⟨homMk (s.ι.left ≫ pullback.fst ..) (by simp [w, hi]), ?_, ?_⟩
   · ext; simp; ext <;> simp [η]; rw [w]
   · intro m H; ext; simpa [η] using congr(($H).left ≫ pullback.fst ..)

@@ -11,6 +11,11 @@ import Poly.ForMathlib.CategoryTheory.Comma.Over.Basic
 import Poly.ForMathlib.CategoryTheory.NatTrans
 import Poly.ForMathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 
+-- Lean 4.34 tightened the transparency used by `simp`/`rw` when matching, so goals about
+-- `pullback.lift`/`pullback.fst` (reducible wrappers around `limit.lift`/`limit.π`) and about
+-- `Over.Hom` no longer close by `simp`. Mathlib's own `Over/Pullback.lean` sets the same option.
+set_option backward.isDefEq.respectTransparency false
+
 noncomputable section
 
 universe v₁ v₂ u₁ u₂
@@ -237,12 +242,12 @@ variable [HasBinaryProducts C]
 theorem unit_app {I : C} (X : Over I): (forgetAdjStar I).unit.app X =
     Over.homMk (prod.lift X.hom (𝟙 X.left)) := by
   ext
-  simp [forgetAdjStar, Adjunction.comp, Equivalence.symm]
+  simp
 
 @[simp]
 theorem counit_app {I : C} (X : C) :
-    ((forgetAdjStar I).counit.app X) = prod.snd := by
-  simp [Over.forgetAdjStar, Adjunction.comp, Equivalence.symm]
+    ((forgetAdjStar I).counit.app X) = prod.snd :=
+  forgetAdjStar_counit_app I X
 
 @[simp]
 theorem homEquiv_homMk_lift {I : C} {X : Over I} {A : C} {f : X.left ⟶ A} :
