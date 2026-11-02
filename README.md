@@ -1,10 +1,10 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-lightblue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Documentation](https://img.shields.io/badge/Documentation-Passing-green)](https://sinhp.github.io/groupoid_model_in_lean4/docs/Poly/UvPoly.html)
-[![Paper](https://img.shields.io/badge/Paper-WIP-blue)](https://sinhp.github.io/groupoid_model_in_lean4/blueprint/sect0005.html)
+[![Documentation](https://img.shields.io/badge/Documentation-blue)](https://sinhp.github.io/Poly/docs/)
+[![Blueprint](https://img.shields.io/badge/Blueprint-WIP-blue)](https://sinhp.github.io/Poly/blueprint/)
 
-[Built with Lean 4.34.1](https://github.com/sosudo/Poly/blob/master/lean-toolchain)
+[Built with Lean 4.34.1](lean-toolchain)
 
-# Lean4 Formalization Of Polynomial Functors
+# Lean 4 Formalization of Polynomial Functors
 
 This repository is a [Lean 4](https://github.com/leanprover/lean4) formalization of the theory of Polynomial Functors. Polynomial Functors categorify polynomial functions.
 
@@ -12,46 +12,48 @@ We use this repository as a dependency in the [HoTTLean](https://github.com/sinh
 
 ## Content (under development)
 
+Some constructions still contain unfinished proofs.
+
 As part of this formalization, we also formalize locally cartesian closed categories in Lean4.
 
 - [x] Locally cartesian closed categories
   - [x] The Beck-Chevalley condition in LCCC
   - [x] LCCC structure on types
   - [x] LCCC structure on presheaves of types
-  - [x] Isomorphisms of partial-product fans (`PartialProduct.Fan.ext`) (by Unity)
+  - [x] Isomorphisms of partial-product fans (`PartialProduct.Fan.ext`)
 
 - [ ] Univariate Polynomial Functors
   - [x] Definition of univariate polynomial functors
   - [x] The construction of associated polynomial functors
-    - [x] Identity-polynomial evaluation `(id B) @ X ≅ B × X` (`UvPoly.idApplyIso`) (by Unity)
+    - [x] Identity-polynomial evaluation `(id B) @ X ≅ B × X` (`UvPoly.idApplyIso`)
   - [x] Monomials
   - [x] Linear polynomials
-    - [x] Scalar multiplication preserves exponentiability (`UvPoly.smul`) (by Unity)
+    - [x] Scalar multiplication preserves exponentiability (`UvPoly.smul`)
   - [x] Sums of polynomials
-    - [x] Evaluation-of-sums equivalence (`Poly.sumEquiv`) (by Unity)
+    - [x] Evaluation-of-sums equivalence (`Poly.sumEquiv`)
   - [ ] Products of polynomials
   - [x] Composition of polynomials
   - [x] The classifying property of polynomial functors
-    - [x] Universal-property equivalence inverse laws (`UvPoly.equiv`) (by Unity)
+    - [x] Universal-property equivalence inverse laws (`UvPoly.equiv`)
   - [x] The monoidal category `C [X]` of univariate polynomial functors
   - [ ] Cartesian closedness of a category of polynomial functors
 
 - [ ] Multivariate Polynomial Functors
   - [x] Definition of multivariate polynomial functors
   - [x] The construction of associated polynomial functors
-    - [x] Identity-polynomial evaluation in the slice (`MvPoly.idApplyIso`) (by Unity)
+    - [x] Identity-polynomial evaluation in the slice (`MvPoly.idApplyIso`)
   - [x] Monomials
   - [x] Linear polynomials
   - [ ] Symmetric polynomials
   - [ ] Sums of polynomials
-  - [x] Products of polynomials: construction and exponentiability (`MvPoly.prod`) (by Unity)
+  - [x] Products in finitary extensive categories: construction and exponentiability (`MvPoly.prod`)
   - [x] Composition of polynomials
   - [ ] The classifying property of polynomial functors
   - [ ] The bicategory of multivariate polynomial functors
   - [ ] The double category of polynomial functors
   - [ ] Differentiation
 
-- [ ] Induction, Well-foundedtrees, Transfinite Induction
+- [ ] Induction, Well-founded trees, Transfinite Induction
 
 - [ ] Polynomial functors and the semantics of linear logic
   - [ ] A relational presentation of polynomial functors

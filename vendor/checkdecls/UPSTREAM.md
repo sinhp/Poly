@@ -23,5 +23,3 @@ Verification on 2026-10-10 with Lean v4.34.1 on Linux:
 
 The dependency is stored as ordinary source files, rather than an embedded Git
 repository, so Poly's relative `vendor/checkdecls` path dependency is portable.
-The migration logs and original-revision bundle are held in Poly's local
-`.bump-v4.34.1` evidence directory.

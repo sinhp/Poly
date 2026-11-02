@@ -17,7 +17,8 @@ namespace CategoryTheory.Over
 variable {C : Type*} [Category C]
 
 /-- This is useful when `homMk (· ≫ ·)` appears under `Functor.map` or a natural equivalence. -/
-lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left) (fg_comp f_comp g_comp) :
+lemma homMk_comp {B : C} {U V W : Over B} (f : U.left ⟶ V.left) (g : V.left ⟶ W.left)
+    (fg_comp f_comp g_comp) :
     homMk (f ≫ g) fg_comp = homMk (V := V) f f_comp ≫ homMk (U := V) g g_comp := by
   ext; simp
 

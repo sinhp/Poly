@@ -312,11 +312,13 @@ theorem mapPullbackAdj.counit_app_left  :
 @[simp]
 theorem pullbackMapTwoSquare_app :
     (pullbackMapTwoSquare h f g k sq).app A =
-    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by simp [pullback.map, pullback.lift_snd]) := by
+    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm)
+      (by simp [pullback.map, pullback.lift_snd]) := by
   ext
   simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare, mateEquiv_apply]
   apply pullback.hom_ext <;>
-    simp [pullback.map, pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc, Category.assoc]
+    simp [pullback.map, pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc,
+      Category.assoc]
 
 theorem forget_map_pullbackMapTwoSquare :
     (Over.forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =

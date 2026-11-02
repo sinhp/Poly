@@ -92,7 +92,8 @@ variable {C : Type u} [Category.{v} C]
 open IsPullback Over
 
 /-- Calculating the counit components of mapAdjunction. -/
-theorem mapPullbackAdj.counit.app_pullback.fst  [HasPullbacks C] {X Y : C} (f : X ⟶ Y) (y : Over Y) :
+theorem mapPullbackAdj.counit.app_pullback.fst [HasPullbacks C] {X Y : C}
+    (f : X ⟶ Y) (y : Over Y) :
     ((mapPullbackAdj f).counit.app y).left = pullback.fst _ _ := by simp
 
 def pullbackNatTrans.app.map [HasPullbacks C] {W X Y Z : C}

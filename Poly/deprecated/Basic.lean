@@ -161,7 +161,8 @@ namespace baseChange
 
 open Over MonoidalCategory
 
-/-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
+/-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is
+`pullback.snd`. -/
 lemma obj_hom_eq_pullback_snd [HasPullbacks C] {I J : C} (f : J ⟶ I) (X : Over I):
     ((Δ_ f).obj X).hom = pullback.snd X.hom f := rfl
 

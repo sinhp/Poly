@@ -27,7 +27,8 @@ a witness `adj : baseChange f ⊣ functor`.
 
 We prove that if a morphism `f : X ⟶ Y` has pushforwards then `f` is exponentiable in the
 slice category `Over Y`.
-In particular, for a morphism `g : X ⟶ I` the exponential `f^* g` is the functor composition `(baseChange g) ⋙ (Over.map g)`.
+In particular, for a morphism `g : X ⟶ I` the exponential `f^* g` is the functor composition
+`(baseChange g) ⋙ (Over.map g)`.
 
 ## Notation
 
@@ -52,7 +53,8 @@ We provide the following notations:
 
 Using the notation above, we have
 * `hom_eq_pullback_snd` proves that `(Δ_ f Over.mk p).hom` is `pullback.snd`
-* `natIsoTensorLeft` proves that `Δ_ f` ⋙ `Σ_ f` is isomorphic to the product functor `f × _` in the slice category `Over I`. See
+* `natIsoTensorLeft` proves that `Δ_ f` ⋙ `Σ_ f` is isomorphic to the product functor `f × _` in the
+slice category `Over I`. See
 We shall prove that
 
 -/
@@ -82,7 +84,8 @@ example (I J X : C) (f : J ⟶ I) (p : X ⟶ I) :
   exact pullback.fst
 
 
-/-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is `pullback.snd`. -/
+/-- For an arrow `f : J ⟶ I` and an object `X : Over I`, the base-change of `X` along `f` is
+`pullback.snd`. -/
 lemma hom_eq_pullback_snd {I J : C} (f : J ⟶ I) (X : Over I):
     ((Δ_ f).obj X).hom = pullback.snd := rfl
 
@@ -118,7 +121,8 @@ lemma Over.star_eq_Over.mk_prod_fst [HasBinaryProducts C] [HasTerminal C] (I : C
     (Over.star I).obj X = Over.mk (prod.fst : I ⨯ X ⟶ I) := by
   simp [Over.star, Over.mk]
 
-/-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism. Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
+/-- The base-change along `terminal.from` ER: Changed statement from an equality to an isomorphism.
+Proof of commutativity is stuck because of the rewrite. Perhaps I can do this another way? -/
 def terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ C)) :
     (Δ_ (terminal.from I)).obj X ≅ (Over.star I).obj (X.left) := by
   unfold baseChange Over.star
@@ -143,7 +147,8 @@ def terminal_from [HasBinaryProducts C] [HasTerminal C] (I : C) (X : Over (⊤_ 
 --   sorry
 
 def isLimitPullbackConeId {I J : C} (f : J ⟶ I) :
-    IsLimit (PullbackCone.mk (W := J) (fst:= 𝟙 J) (snd := f) (eq:= by simp) : PullbackCone f (𝟙 I)) := by
+    IsLimit (PullbackCone.mk (W := J) (fst:= 𝟙 J) (snd := f) (eq:= by simp) :
+      PullbackCone f (𝟙 I)) := by
   apply PullbackCone.IsLimit.mk
   · aesop
   · intro s
@@ -171,7 +176,8 @@ def swapIso {X Y : Over I} :
 
 @[simp]
 lemma swap_eq_hom {X Y : Over I} :
-    ((Σ_ X.hom).obj ((Δ_ X.hom).obj Y)).hom = (pullbackSymmetry _ _).hom ≫ ((Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)).hom  := by
+    ((Σ_ X.hom).obj ((Δ_ X.hom).obj Y)).hom =
+      (pullbackSymmetry _ _).hom ≫ ((Σ_ Y.hom).obj ((Δ_ Y.hom).obj X)).hom  := by
   simp only [const_obj_obj, id_obj, map_obj_left, baseChange_obj_left, map_obj_hom,
     baseChange_obj_hom, pullbackSymmetry_hom_comp_snd_assoc]
   exact pullback.condition.symm
@@ -212,7 +218,8 @@ def isBinaryProduct (X Y : Over I) :
     · apply congr_arg CommaMorphism.left (h ⟨ .right⟩)
     · apply congr_arg CommaMorphism.left (h ⟨ .left⟩)
 
-/-- The object `(Σ_ X.hom) ((Δ_ X.hom) Y)` is isomorphic to the binary product `X × Y` in the slice category. -/
+/-- The object `(Σ_ X.hom) ((Δ_ X.hom) Y)` is isomorphic to the binary product `X × Y` in the slice
+category. -/
 @[simps!]
 def isoProd (X Y : Over I) :
     (Σ_ X.hom).obj ((Δ_ X.hom).obj Y) ≅ Limits.prod X Y := by
@@ -297,12 +304,14 @@ instance comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
   adj := ofNatIsoLeft (gexp.adj.comp fexp.adj) (pullbackCompIso f g).symm
 
 /-- The conjugate isomorphism between pushforward functors. -/
-def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :
+def pushforwardCompIso [HasPullbacks C] {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
+    [fexp : CartesianExponentiable f] [gexp : CartesianExponentiable g] :
     fexp.functor ⋙ gexp.functor ≅ (comp f g).functor :=
   conjugateIsoEquiv (gexp.adj.comp fexp.adj) ((comp f g).adj) (pullbackCompIso f g)
 
 /-- An arrow with a pushforward is exponentiable in the slice category. -/
-instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I) [CartesianExponentiable f] : Exponentiable (Over.mk f) where
+instance exponentiableOverMk [HasFiniteWidePullbacks C] {I : C} (f : X ⟶ I)
+    [CartesianExponentiable f] : Exponentiable (Over.mk f) where
   rightAdj :=  (Δ_ f) ⋙ (Π_ f)
   adj := by
     fapply ofNatIsoLeft

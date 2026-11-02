@@ -1,2 +1,3 @@
--- (Tambara) The skeleton of the category `T` whose objects are finite sets and whose morphisms are the finite polynomials is the Lawvere theory of commutative semirings.
+-- (Tambara) The skeleton of the category `T` whose objects are finite sets and whose morphisms are
+-- the finite polynomials is the Lawvere theory of commutative semirings.
 -- D. Tambara, On multiplicative transfer, Comm. Alg. 21 (1993), 1393–1420.

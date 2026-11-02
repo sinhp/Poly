@@ -3,6 +3,21 @@ import Mathlib.CategoryTheory.Comma.Over.Pullback
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
 import Mathlib.CategoryTheory.Adjunction.PartialAdjoint
 
+/-!
+# Exponentiable maps and finite coproducts
+
+This file proves that pulling back along the coprojections of a binary coproduct is jointly
+fully faithful in a finitary extensive category. It follows that a coproduct of exponentiable
+maps is exponentiable.
+
+## Main results
+
+* `isLeftAdjoint_of_jointly_fullyFaithful`: construct a right adjoint from jointly fully faithful
+  functors and right adjoints to their composites.
+* `pullback_inl_inr_bijective`: pulling back along coprojections is jointly fully faithful.
+* `coprod_desc_exponentiable`: a coproduct of exponentiable maps is exponentiable.
+-/
+
 open CategoryTheory CategoryTheory.Limits
 
 noncomputable section

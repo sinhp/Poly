@@ -71,7 +71,8 @@ variable {C D : Type u} [Category.{v} C] [Category.{v} D]
 namespace OverBinaryProduct
 
 def pullbackCompositionIsBinaryProduct [HasPullbacks C] {I : C} (f x : Over I) :
-    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f := homMk (pullback.snd ..) rfl
+    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f :=
+      homMk (pullback.snd ..) rfl
     let pbleg2 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ x :=
     Over.homMk (pullback.fst ..) (by simp [pullback.condition])
     IsLimit (BinaryFan.mk (pbleg1) (pbleg2)) := by
@@ -117,7 +118,8 @@ theorem OverProdIsoRightInv [HasFiniteWidePullbacks C] {I : C} (f x : Over I) :
 @[simp]
 theorem Triangle_fst [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
-    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f := homMk (pullback.snd ..) rfl
+    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f :=
+      homMk (pullback.snd ..) rfl
     (OverProdIso f x).hom ≫ prod.fst = pbleg1 :=
   IsLimit.conePointUniqueUpToIso_hom_comp (pullbackCompositionIsBinaryProduct f x)
     (Limits.prodIsProd f x) ⟨ WalkingPair.left⟩
@@ -134,7 +136,8 @@ theorem Triangle_snd [HasFiniteWidePullbacks C] {I : C}
 @[simp]
 theorem Triangle.symm_fst [HasFiniteWidePullbacks C] {I : C}
     (f x : Over I) :
-    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f := homMk (pullback.snd ..) rfl
+    let pbleg1 : (Over.map f.hom).obj ((Over.pullback f.hom).obj x) ⟶ f :=
+      homMk (pullback.snd ..) rfl
     (OverProdIso.symm f x).hom ≫ pbleg1 = prod.fst :=
   IsLimit.conePointUniqueUpToIso_hom_comp (Limits.prodIsProd f x)
   (pullbackCompositionIsBinaryProduct f x) ⟨ WalkingPair.left⟩
@@ -182,7 +185,8 @@ namespace PushforwardAdj
 instance cartesianClosedOfOver
 [HasFiniteWidePullbacks C] [PushforwardAdj C] {I : C} :
     CartesianClosed (Over I) := by
-  refine .mk _ fun f ↦ .mk f (Over.pullback f.hom ⋙ pushforward f.hom) (ofNatIsoLeft (F := ?functor )
+  refine .mk _ fun f ↦ .mk f (Over.pullback f.hom ⋙ pushforward f.hom)
+    (ofNatIsoLeft (F := ?functor )
     ?adj ?iso )
   case functor => exact (Over.pullback f.hom ⋙ Over.map f.hom)
   case adj => exact ((adj f.hom).comp (Over.mapPullbackAdj f.hom))
@@ -269,7 +273,8 @@ def PushforwardObjTo [HasFiniteWidePullbacks C] [OverCC C]
   rw [CartesianClosed.uncurry_natural_right, CartesianClosed.uncurry_curry]
   simp
   have conj : ((Over.map f).map u ≫ (homMk x.hom rfl : (Over.map f).obj x ⟶ Over.mk f)) =
-    (homMk ((Over.pullback f).obj y).hom : (Over.map f).obj ((Over.pullback f).obj y) ⟶ Over.mk f) :=
+    (homMk ((Over.pullback f).obj y).hom :
+      (Over.map f).obj ((Over.pullback f).obj y) ⟶ Over.mk f) :=
       OverMorphism.ext (by aesop_cat)
   exact conj ▸ (Triangle.symm_fst (Over.mk f) y).symm
 
@@ -327,7 +332,8 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y)
           intro v
           refine PushforwardObjUP f x y (v ≫ pullback.snd ..) ?commute
           have w := v ≫= pullback.condition
-          have lem : (v ≫ pullback.fst ..) = mkIdTerminal.from y := IsTerminal.hom_ext mkIdTerminal _ _
+          have lem : (v ≫ pullback.fst ..) = mkIdTerminal.from y :=
+            IsTerminal.hom_ext mkIdTerminal _ _
           rw [← lem, assoc, assoc, w]
         left_inv := by
           intro u
@@ -346,7 +352,8 @@ def pushforwardAdj [HasFiniteWidePullbacks C] [OverCC C] {X Y : C} (f : X ⟶ Y)
           let w : ((mkIdTerminal (X := Y)).from y) ≫ (pushforwardCospanLeg1 f) =
             (v ≫ pullback.snd ..) ≫ (pushforwardCospanLeg2 f x) := by
             have w' := v ≫= pullback.condition
-            rw [assoc, ← (IsTerminal.hom_ext mkIdTerminal (v ≫ pullback.fst ..) (mkIdTerminal.from y)),
+            rw [assoc, ← (IsTerminal.hom_ext mkIdTerminal
+              (v ≫ pullback.fst ..) (mkIdTerminal.from y)),
               assoc, w']
           have close := pushforwardAdjRightInv f x y (v ≫ pullback.snd ..) w
           simp
@@ -397,7 +404,8 @@ namespace PushforwardAdj
 def idPullbackIso [HasFiniteWidePullbacks C] (X : C) : 𝟭 (Over X) ≅ (Over.pullback (𝟙 X)) :=
   asIso ((conjugateEquiv Adjunction.id (mapPullbackAdj (𝟙 X))) (mapId X).hom)
 
-def idIso [HasFiniteWidePullbacks C] [PushforwardAdj C] (X : C) : (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
+def idIso [HasFiniteWidePullbacks C] [PushforwardAdj C] (X : C) :
+    (pushforward (𝟙 X)) ≅ 𝟭 (Over X) :=
   asIso ((conjugateEquiv (adj (𝟙 X)) Adjunction.id) (idPullbackIso X).hom)
 
 

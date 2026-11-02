@@ -32,7 +32,8 @@ theorem partProdsOver_obj_map {X Y : C} (Γ : Cᵒᵖ) (f : X ⟶ Y) (x : (P.par
   . dsimp
     rw! (castMode := .all) [this]
     simp
-    change pullback.lift (f := x.1) (g := P.p) (pullback.fst x.1 P.p ≫ 𝟙 _) (pullback.snd x.1 P.p) _ ≫
+    change pullback.lift (f := x.1) (g := P.p)
+      (pullback.fst x.1 P.p ≫ 𝟙 _) (pullback.snd x.1 P.p) _ ≫
       x.2 ≫ f = x.2 ≫ f
     simp
     rfl

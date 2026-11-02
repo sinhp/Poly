@@ -81,7 +81,8 @@ cartesian closed categories.
 1. A locally cartesian closed category is a category C such that all
 the slices C/I are cartesian closed categories.
 
-2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal object such that each base change functor has a right adjoint, called the pushforward functor.
+2. Equivalently, a locally cartesian closed category `C` is a category with pullbacks and terminal
+object such that each base change functor has a right adjoint, called the pushforward functor.
 
 In this file we prove the equivalence of these conditions.
 -/
@@ -135,7 +136,8 @@ example [HasFiniteWidePullbacks C] {I : C} : HasFiniteLimits (Over I ) := by inf
 
 #check Over.hasFiniteLimits
 
-example [LocallyCartesianClosed C] [HasFiniteWidePullbacks C] : HasFiniteLimits (Over (terminal C)) := by infer_instance
+example [LocallyCartesianClosed C] [HasFiniteWidePullbacks C] :
+    HasFiniteLimits (Over (terminal C)) := by infer_instance
 
 #check Adjunction
 
