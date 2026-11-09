@@ -19,7 +19,7 @@ variable {K : Type*} [Category K] {D : Type*} [Category D]
 
 namespace NatTrans
 
-open Functor
+open CategoryTheory.Functor
 
 /-- A natural transformation is *cartesian*
 if all its naturality squares are pullbacks. -/

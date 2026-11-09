@@ -3,9 +3,10 @@ Copyright (c) 2024 Wojciech Nawrocki. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Wojciech Nawrocki
 -/
-import ProofWidgets.Component.GraphDisplay
+import ProofWidgets.Component.ForceGraphDisplay
 import ProofWidgets.Component.Panel.SelectionPanel
 import ProofWidgets.Component.Panel.GoalTypePanel
+import ProofWidgets.Presentation.Expr
 import Mathlib.CategoryTheory.Category.Basic
 
 /-! ## Definitions copied from Mathlib.Tactic.Widget.CommDiag
@@ -70,9 +71,9 @@ where go (f : Expr) : MetaM (List (Expr × Expr)) := do
 
 structure DiagState where
   /-- vertex id ↦ object -/
-  vertices: Std.HashMap Nat Expr := .empty
+  vertices: Std.HashMap Nat Expr := {}
   /-- morphism `f` ↦ (src, tgt) for every occurrence of `f` -/
-  edges: Std.HashMap Expr (List (Nat × Nat)) := .empty
+  edges: Std.HashMap Expr (List (Nat × Nat)) := {}
   freshVertId : Nat := 0
 
 variable {m : Type → Type} [Monad m] [MonadStateOf DiagState m]
@@ -144,7 +145,7 @@ def addEq [MonadLift MetaM m] (eq : Expr) : m Unit := do
 
 open Jsx in
 def mkLabel (e : Expr) : MetaM (Nat × Nat × Html) := do
-  let fmt ← withOptions (·.setNat `pp.deepTerms.threshold 1)
+  let fmt ← withOptions (·.set `pp.deepTerms.threshold (1 : Nat))
     (toString <$> ppExpr e)
   let w := min (15 + fmt.length * 6) 100
   let h := max 20 (20 * (1 + fmt.length / 15))
@@ -194,7 +195,7 @@ def toHtml [MonadLift MetaM m] : m Html := do
             <br/>
           </span>
       }
-  return <GraphDisplay
+  return <ForceGraphDisplay
     vertices={vertices}
     edges={edges}
     forces={#[

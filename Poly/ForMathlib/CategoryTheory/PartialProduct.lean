@@ -21,7 +21,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open CategoryTheory Category Limits Functor Over
+open CategoryTheory Category Limits CategoryTheory.Functor Over
 
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -66,7 +66,11 @@ def Fan.overPullbackToStar [HasBinaryProducts C] (c : Fan s X)  :
 @[reassoc (attr := simp)]
 theorem Fan.overPullbackToStar_snd {c : Fan s X} [HasBinaryProducts C] :
     (Fan.overPullbackToStar c).left ≫ prod.snd = c.snd := by
-  simp [Fan.overPullbackToStar, Adjunction.homEquiv, forgetAdjStar.unit_app]
+  change ((forgetAdjStar E).homEquiv ((Over.pullback s).obj c.over) X c.snd).left ≫
+    prod.snd = c.snd
+  exact (congrArg (fun k => k ≫ prod.snd)
+    (forgetAdjStar.homEquiv_left_lift (I := E) (X := (Over.pullback s).obj c.over)
+      (f := c.snd))).trans (prod.lift_snd _ _)
 
 -- note: the reason we use `(Over.pullback s).map` instead of `pullback.map` is that
 -- we want to readily use lemmas about the adjunction `pullback s ⊣ pushforward s` in `UvPoly`.
@@ -110,7 +114,8 @@ instance : Category (Fan s X) where
     rw [← f.w_right, ← g.w_right]
     simp_rw [← Category.assoc]
     congr 1
-    ext <;> simp [pullbackMap]
+    ext <;> simp [pullbackMap, pullback.lift_fst, pullback.lift_snd,
+      pullback.lift_fst_assoc, Category.assoc]
   ⟩
   id_comp f := by dsimp; ext; simp
   comp_id f := by dsimp; ext; simp
@@ -165,9 +170,7 @@ def overPullbackToStar [HasBinaryProducts C] {W} (f : W ⟶ B) (g : pullback f s
 theorem overPullbackToStar_prod_snd [HasBinaryProducts C]
     {W} {f : W ⟶ B} {g : pullback f s ⟶ X} :
     (overPullbackToStar f g).left ≫ prod.snd = g := by
-  simp only [overPullbackToStar, Fan.overPullbackToStar, Fan.over]
-  simp only [forgetAdjStar.homEquiv_left_lift]
-  aesop
+  exact Fan.overPullbackToStar_snd (c := Fan.mk f g)
 
 abbrev partialProd (c : LimitFan s X) : C := c.cone.pt
 
@@ -197,7 +200,8 @@ theorem partialProd.lift_snd {W} (c : LimitFan s X) (f : W ⟶ B) (g : pullback 
   conv_rhs => arg 2; exact ((isLimit c).fac_right (Fan.mk f g)).symm
   rw [← pullbackMap_comparison]
   rw [← Category.assoc]; congr 1
-  ext <;> simp [pullbackMap]
+  ext <;> simp [pullbackMap, pullback.lift_fst, pullback.lift_snd,
+    pullback.lift_fst_assoc, pullback.map, Category.assoc]
 
 -- theorem hom_lift (h : IsLimit t) {W : C} (m : W ⟶ t.pt) :
 --     m = h.lift { pt := W, π := { app := fun b => m ≫ t.π.app b } } :=
@@ -211,5 +215,6 @@ theorem partialProd.hom_ext {W : C} (c : LimitFan s X) {f g : W ⟶ partialProd 
   cases c.isLimit.uniq f' g (by simp [h₁, f']) <| by
     refine .trans ?_ h₂.symm
     rw [← Category.assoc]; congr 1
-    ext <;> simp [pullbackMap, comparison, f']
+    ext <;> simp [pullbackMap, comparison, f', pullback.lift_fst, pullback.lift_snd,
+      pullback.lift_fst_assoc, pullback.map, Category.assoc]
   exact c.isLimit.uniq f' f rfl rfl

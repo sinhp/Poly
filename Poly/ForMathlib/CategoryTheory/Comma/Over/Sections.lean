@@ -106,14 +106,14 @@ def sectionsMap {X X' : Over I} (u : X ⟶ X') :
 lemma sectionsMap_id {X : Over I} : sectionsMap (𝟙 X) = 𝟙 _ := by
   apply pullback.hom_ext
   · aesop
-  · simp [sectionsMap]
+  · simp [sectionsMap, pullback.map]
 
 @[simp]
 lemma sectionsMap_comp {X X' X'' : Over I} (u : X ⟶ X') (v : X' ⟶ X'') :
     sectionsMap (u ≫ v) = sectionsMap u ≫ sectionsMap v := by
-  apply pullback.hom_ext
-  · aesop
-  · simp [sectionsMap]
+  unfold sectionsMap
+  rw [pullback.map_comp]
+  simp only [id_comp, Functor.map_comp, Over.comp_left]
 
 variable (I)
 
@@ -140,6 +140,12 @@ def sectionsCurry {X : Over I} {A : C} (u : (star I).obj A ⟶ X) :
     (MonoidalClosed.uncurry_injective _)
   rw [MonoidalClosed.uncurry_natural_left]
   simp [curryId, MonoidalClosed.uncurry_natural_right, MonoidalClosed.uncurry_curry]
+  have hu : u.left ≫ X.hom = prod.fst := (Over.w u).trans (prod.lift_fst ..)
+  calc
+    fst I A = (prodIsoTensorObj I A).inv ≫ prod.fst := prodIsoTensorObj_inv_fst.symm
+    _ = (prodIsoTensorObj I A).inv ≫ (u.left ≫ X.hom) :=
+      congrArg (fun k : I ⨯ A ⟶ I => (prodIsoTensorObj I A).inv ≫ k) hu.symm
+    _ = ((prodIsoTensorObj I A).inv ≫ u.left) ≫ X.hom := (Category.assoc _ _ _).symm
 
 /-- The uncurrying operation `Hom A (section X) → Hom ((star I).obj A) X`. -/
 def sectionsUncurry {X : Over I} {A : C} (v : A ⟶ (sections I).obj X) :
@@ -147,32 +153,53 @@ def sectionsUncurry {X : Over I} {A : C} (v : A ⟶ (sections I).obj X) :
   let v₂ : A ⟶ (I ⟹ X.left) := v ≫ pullback.snd ..
   have w : terminal.from A ≫ (curryId I) = v₂ ≫ (ihom I).map X.hom := by
     rw [IsTerminal.hom_ext terminalIsTerminal (terminal.from A ) (v ≫ (pullback.fst ..))]
-    simp [v₂, pullback.condition]
+    exact (Category.assoc _ _ _).trans
+      ((congrArg (fun k => v ≫ k)
+        (pullback.condition (f := curryId I) (g := (ihom I).map X.hom))).trans
+          (Category.assoc _ _ _).symm)
   dsimp [curryId] at w
   have w' := homEquiv_naturality_right_square (F := MonoidalCategory.tensorLeft I)
     (adj := ihom.adjunction I) _ _ _ _ w
   simp [MonoidalClosed.curry] at w'
   refine Over.homMk ((prodIsoTensorObj I A).hom ≫ MonoidalClosed.uncurry v₂) ?_
   · dsimp [MonoidalClosed.uncurry] at *
-    rw [Category.assoc, ← w']
-    simp [star_obj_hom]
+    change ((prodIsoTensorObj I A).hom ≫ ((ihom.adjunction I).homEquiv A X.left).symm v₂) ≫
+      X.hom = prod.lift prod.fst (𝟙 (I ⨯ A)) ≫ prod.fst
+    rw [Category.assoc, ← w', prodIsoTensorObj_hom_fst, prod.lift_fst]
+
+private theorem sectionsCurry_snd {X : Over I} {A : C} (u : (star I).obj A ⟶ X) :
+    sectionsCurry u ≫ pullback.snd (curryId I) ((ihom I).map X.hom) =
+      MonoidalClosed.curry ((prodIsoTensorObj I A).inv ≫ u.left) :=
+  pullback.lift_snd ..
+
+private theorem sectionsMap_snd {X X' : Over I} (u : X ⟶ X') :
+    sectionsMap u ≫ pullback.snd (curryId I) ((ihom I).map X'.hom) =
+      pullback.snd (curryId I) ((ihom I).map X.hom) ≫ (ihom I).map u.left :=
+  pullback.lift_snd ..
 
 @[simp]
 theorem sections_curry_uncurry {X : Over I} {A : C} {v : A ⟶ (sections I).obj X} :
     sectionsCurry (sectionsUncurry v) = v := by
-  dsimp [sectionsCurry, sectionsUncurry]
-  let v₂ : A ⟶ (I ⟹ X.left) := v ≫ pullback.snd _ _
   apply pullback.hom_ext
-  · simp
-    rw [IsTerminal.hom_ext terminalIsTerminal (terminal.from A ) (v ≫ (pullback.fst ..))]
-  · simp
+  · exact terminalIsTerminal.hom_ext _ _
+  · calc
+      sectionsCurry (sectionsUncurry v) ≫ pullback.snd _ _ =
+          MonoidalClosed.curry ((prodIsoTensorObj I A).inv ≫ (sectionsUncurry v).left) :=
+        sectionsCurry_snd _
+      _ = MonoidalClosed.curry ((prodIsoTensorObj I A).inv ≫ (prodIsoTensorObj I A).hom ≫
+          MonoidalClosed.uncurry (v ≫ pullback.snd _ _)) := rfl
+      _ = v ≫ pullback.snd _ _ :=
+        (congrArg MonoidalClosed.curry (Iso.inv_hom_id_assoc _ _)).trans
+          (MonoidalClosed.curry_uncurry _)
 
 @[simp]
 theorem sections_uncurry_curry {X : Over I} {A : C} {u : (star I).obj A ⟶ X} :
     sectionsUncurry (sectionsCurry u) = u := by
-  dsimp [sectionsCurry, sectionsUncurry]
-  ext
-  simp
+  apply Over.OverMorphism.ext
+  exact (congrArg (fun k => (prodIsoTensorObj I A).hom ≫ MonoidalClosed.uncurry k)
+    (sectionsCurry_snd u)).trans
+      ((congrArg (fun k => (prodIsoTensorObj I A).hom ≫ k)
+        (MonoidalClosed.uncurry_curry _)).trans (Iso.hom_inv_id_assoc _ _))
 
 /-- An auxiliary definition which is used to define the adjunction between the star functor
 and the sections functor. See starSectionsAdjunction`. -/
@@ -185,17 +212,31 @@ def coreHomEquiv : CoreHomEquiv (star I) (sections I) where
   }
   homEquiv_naturality_left_symm := by
     intro A' A X g v
-    dsimp [sectionsCurry, sectionsUncurry, curryId]
-    simp only [star_map]
-    rw [← Over.homMk_comp]  -- note: in a newer version of mathlib this is `Over.homMk_eta`
-    congr 1
-    simp [MonoidalClosed.uncurry_natural_left]
+    let v₂ : A ⟶ I ⟹ X.left := v ≫ pullback.snd _ _
+    have h : (prodIsoTensorObj I A').hom ≫ MonoidalClosed.uncurry (g ≫ v₂) =
+        prod.map (𝟙 I) g ≫ (prodIsoTensorObj I A).hom ≫ MonoidalClosed.uncurry v₂ := by
+      rw [MonoidalClosed.uncurry_natural_left, ← Category.assoc, ← id_tensorHom,
+        ← prodMap_comp_prodIsoTensorObj_hom, Category.assoc]
+    apply Over.OverMorphism.ext
+    exact (congrArg (fun k => (prodIsoTensorObj I A').hom ≫ MonoidalClosed.uncurry k)
+      (Category.assoc g v (pullback.snd _ _))).trans h
   homEquiv_naturality_right := by
     intro A X' X u g
-    dsimp [sectionsCurry, sectionsUncurry, curryId]
     apply pullback.hom_ext (IsTerminal.hom_ext terminalIsTerminal _ _)
-    simp [sectionsMap, curryId]
-    rw [← MonoidalClosed.curry_natural_right, Category.assoc]
+    calc
+      sectionsCurry (u ≫ g) ≫ pullback.snd _ _ =
+          MonoidalClosed.curry ((prodIsoTensorObj I A).inv ≫ (u ≫ g).left) :=
+        sectionsCurry_snd _
+      _ = MonoidalClosed.curry (((prodIsoTensorObj I A).inv ≫ u.left) ≫ g.left) :=
+        congrArg MonoidalClosed.curry (Category.assoc _ _ _).symm
+      _ = MonoidalClosed.curry ((prodIsoTensorObj I A).inv ≫ u.left) ≫ (ihom I).map g.left :=
+        MonoidalClosed.curry_natural_right _ _
+      _ = (sectionsCurry u ≫ pullback.snd _ _) ≫ (ihom I).map g.left :=
+        congrArg (fun k => k ≫ (ihom I).map g.left) (sectionsCurry_snd u).symm
+      _ = sectionsCurry u ≫ (pullback.snd _ _ ≫ (ihom I).map g.left) := Category.assoc _ _ _
+      _ = sectionsCurry u ≫ (sectionsMap g ≫ pullback.snd _ _) :=
+        congrArg (fun k => sectionsCurry u ≫ k) (sectionsMap_snd g).symm
+      _ = (sectionsCurry u ≫ sectionsMap g) ≫ pullback.snd _ _ := (Category.assoc _ _ _).symm
 
 variable (I)
 

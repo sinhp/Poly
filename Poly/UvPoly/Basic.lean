@@ -37,7 +37,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open Category Limits Functor Adjunction Over ExponentiableMorphism
+open Category Limits CategoryTheory.Functor Adjunction Over ExponentiableMorphism
   LocallyCartesianClosed
 
 variable {C : Type*} [Category C] [HasPullbacks C]
@@ -134,10 +134,11 @@ C --- >  C/E ---->  C/B ----> C
 def verticalNatTrans {F : C} (P : UvPoly E B) (Q : UvPoly F B) (ρ : E ⟶ F) (h : P.p = ρ ≫ Q.p) :
     Q.functor ⟶ P.functor := by
   have sq : CommSq ρ P.p Q.p (𝟙 _) := by simp [h]
-  let cellLeft := (Over.starPullbackIsoStar ρ).hom
+  let cellLeft : TwoSquare (star F) (𝟭 C) (Over.pullback ρ) (star E) :=
+    (Over.starPullbackIsoStar ρ).hom
   let cellMid := (pushforwardPullbackTwoSquare ρ P.p Q.p (𝟙 _) sq)
   let cellLeftMidPasted := TwoSquare.whiskerRight (cellLeft ≫ₕ cellMid) (Over.pullbackId).inv
-  simpa using (cellLeftMidPasted ≫ₕ (vId (Over.forget B)))
+  exact (cellLeftMidPasted ≫ₕ (vId (Over.forget B))).natTrans
 
 /-- A cartesian map of polynomials
 ```
@@ -269,7 +270,7 @@ variable {E B : C}
 
 namespace PartialProduct
 
-open PartialProduct
+open CategoryTheory.PartialProduct
 
 /-- The counit of the adjunction `pullback P.p ⊣ pushforward P.p` evaluated `(star E).obj X`. -/
 def ε (P : UvPoly E B) (X : C) : pullback (P.fstProj X) P.p ⟶ E ⨯ X :=
@@ -284,13 +285,16 @@ def fan (P : UvPoly E B) (X : C) : PartialProduct.Fan P.p X where
 
 attribute [simp] fan_pt fan_fst
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 `P.PartialProduct.fan` is in fact a limit fan; this provides the univeral mapping property of the
 polynomial functor.
 -/
 def isLimitFan (P : UvPoly E B) (X : C) : PartialProduct.IsLimit (PartialProduct.fan P X) where
   lift c := (pushforwardCurry <| overPullbackToStar c.fst c.snd).left
-  fac_left := by aesop_cat (add norm fstProj)
+  fac_left := by
+    intro c
+    exact Over.w (pushforwardCurry (overPullbackToStar c.fst c.snd))
   fac_right := by
     intro c
     simp only [fan_snd, PartialProduct.pullbackMap, ε, ev, ← assoc, ← comp_left]
@@ -307,13 +311,13 @@ def isLimitFan (P : UvPoly E B) (X : C) : PartialProduct.IsLimit (PartialProduct
     simp [overPullbackToStar, PartialProduct.Fan.overPullbackToStar, PartialProduct.Fan.over]
     apply (Adjunction.homEquiv_apply_eq _ _ _).mpr
     rw [← h_right]
-    simp [forgetAdjStar, comp_homEquiv, Comonad.adj]
-    simp [Equivalence.toAdjunction, homEquiv]
-    simp [coalgebraEquivOver, Equivalence.symm]; rfl
+    rw [Adjunction.homEquiv_counit (forgetAdjStar E)]
+    simp [homEquiv_counit, PartialProduct.pullbackMap, fan_snd, ε, ev, Category.assoc]
+    rfl
 
 end PartialProduct
 
-open PartialProduct
+open CategoryTheory.UvPoly.PartialProduct
 
 /-- Morphisms `b : Γ ⟶ B` and `e : pullback b P.p ⟶ X` induce a morphism `Γ ⟶ P @ X` which is the
 lift of the partial product fan. -/
@@ -353,28 +357,31 @@ theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
 @[simp]
 theorem proj_snd {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
     (proj P f).snd = pullback.map _ _ _ _ f (𝟙 E) (𝟙 B) (by simp) (by simp) ≫ (fan P X).snd := by
-  simp [proj]
+  rfl
 
 /-- The domain of the composition of two polynomials. See `UvPoly.comp`. -/
 def compDom {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) :=
   Limits.pullback Q.p (fan P A).snd
 
 @[simps!]
-def comp [HasPullbacks C] [HasTerminal C]
+def comp
     {E B D A : C} (P : UvPoly E B) (Q : UvPoly D A) : UvPoly (compDom P Q) (P @ A) where
   p := pullback.snd Q.p (fan P A).snd ≫ pullback.fst (fan P A).fst P.p
-  exp :=
-    haveI := ExponentiableMorphism.of_isPullback (.flip <| .of_hasPullback Q.p (fan P A).snd)
-    haveI := ExponentiableMorphism.of_isPullback (.of_hasPullback (fan P A).fst P.p)
-    inferInstance
+  exp := by
+    have : ExponentiableMorphism (pullback.snd Q.p (fan P A).snd) :=
+      ExponentiableMorphism.of_isPullback (.flip <| .of_hasPullback Q.p (fan P A).snd)
+    have : ExponentiableMorphism (pullback.fst (fan P A).fst P.p) :=
+      ExponentiableMorphism.of_isPullback (.of_hasPullback (fan P A).fst P.p)
+    exact ExponentiableMorphism.comp
+      (pullback.snd Q.p (fan P A).snd) (pullback.fst (fan P A).fst P.p)
 
 /-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
-def compFunctorIso [HasPullbacks C] [HasTerminal C]
+def compFunctorIso
     {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) :
     P.functor ⋙ Q.functor ≅ (comp P Q).functor := by
   sorry
 
-instance monoidal [HasPullbacks C] [HasTerminal C] : MonoidalCategory (UvPoly.Total C) where
+instance monoidal : MonoidalCategory (UvPoly.Total C) where
   tensorObj X Y := ⟨comp X.poly Y.poly⟩
   whiskerLeft X Y₁ Y₂ := sorry
   whiskerRight := sorry

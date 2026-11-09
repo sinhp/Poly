@@ -49,7 +49,7 @@ in Mathematical Structures in Computer Science, 2024][Hazratpour_Riehl_2024]
 noncomputable section
 namespace CategoryTheory
 
-open Category Functor Adjunction Limits NatTrans ExponentiableMorphism
+open Category CategoryTheory.Functor Adjunction Limits NatTrans ExponentiableMorphism
 
 universe v u
 
@@ -97,7 +97,8 @@ map k |          ↙          | map h
 -/
 --pullbackBeckChevalleySquare
 def pullbackMapTwoSquare : TwoSquare (pullback f) (map k) (map h) (pullback g) :=
-  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g) (mapIsoSquare sq).hom
+  mateEquiv (mapPullbackAdj f) (mapPullbackAdj g)
+    (TwoSquare.mk _ _ _ _ (mapIsoSquare sq).hom)
 
 /--
 The natural transformation `pullback f ⋙ forget X ⟶ forget Y ⋙ 𝟭 C`
@@ -111,8 +112,10 @@ forget Y |          ↙          | forget X
 ```
 -/
 def pullbackForgetTwoSquare : TwoSquare (pullback f) (forget Y) (forget X) (𝟭 C) :=
-  mateEquiv (mapPullbackAdj f) Adjunction.id (mapForget f).inv
+  mateEquiv (mapPullbackAdj f) Adjunction.id
+    (TwoSquare.mk _ _ _ _ (mapForget f).inv)
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem isCartesian_pullbackForgetTwoSquare {X Y : C} (f : X ⟶ Y) :
     NatTrans.IsCartesian (pullbackForgetTwoSquare f) := by
   unfold pullbackForgetTwoSquare
@@ -282,9 +285,9 @@ theorem pullback.map_isIso_of_pullback_right_of_comm_cube {W X Y Z S T : C}
     IsIso (pullback.map f₁ f₂ g₁ g₂ i₁ i₂ i₃ sq_bot.w pb_right.w.symm) := by
   let m := pullback.map f₁ f₂ g₁ g₂ i₁ i₂ i₃ sq_bot.w pb_right.w.symm
   have sq_top : CommSq (pullback.snd f₁ f₂) m i₂ (pullback.snd g₁ g₂) := by
-    aesop
+    exact ⟨by simp [m, pullback.map, pullback.lift_snd]⟩
   have sq_left : CommSq m (pullback.fst f₁ f₂) (pullback.fst g₁ g₂) i₁ := by
-    aesop
+    exact ⟨by simp [m, pullback.map, pullback.lift_fst]⟩
   let pb' : IsPullback m (pullback.fst f₁ f₂)  (pullback.fst g₁ g₂) i₁ := by
     apply IsPullback.left_face_of_comm_cube (sq_top := sq_top) (sq_bot := sq_bot)
       (sq_left := sq_left) (pb_back := (IsPullback.of_hasPullback f₁ f₂).flip)
@@ -298,7 +301,7 @@ end IsPullback
 variable [HasPullbacks C]
 
 variable {X Y Z W : C} {h : X ⟶ Z} {f : X ⟶ Y}  {g : Z ⟶ W} {k : Y ⟶ W}
-(sq : CommSq h f g k) (A : Over Y)
+  (sq : CommSq h f g k) (A : Over Y)
 
 open IsPullback Over
 
@@ -309,10 +312,11 @@ theorem mapPullbackAdj.counit_app_left  :
 @[simp]
 theorem pullbackMapTwoSquare_app :
     (pullbackMapTwoSquare h f g k sq).app A =
-    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by aesop) := by
+    Over.homMk (pullback.map _ _ (A.hom ≫ k) _ _ h k (id_comp _).symm sq.w.symm) (by simp [pullback.map, pullback.lift_snd]) := by
   ext
-  simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare]
-  aesop
+  simp only [homMk_left, pullbackMapTwoSquare, mapIsoSquare, mateEquiv_apply]
+  apply pullback.hom_ext <;>
+    simp [pullback.map, pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc, Category.assoc]
 
 theorem forget_map_pullbackMapTwoSquare :
     (Over.forget Z).map ((pullbackMapTwoSquare h f g k sq).app A) =
