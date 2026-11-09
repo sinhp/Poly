@@ -91,9 +91,7 @@ def prod {I O : C} [HasBinaryProducts C] [FinitaryExtensive C] (P Q : MvPoly I O
   E := (pullback (P.p ≫ P.o) Q.o) ⨿ (pullback P.o (Q.p ≫ Q.o))
   B := pullback P.o Q.o
   i := coprod.desc (pullback.fst _ _ ≫ P.i) (pullback.snd _ _ ≫ Q.i)
-  p := coprod.desc
-    (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _) (by aesop) (by aesop))
-    (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _) (by aesop) (by aesop))
+  p := coprod.desc (pullback.map _ _ _ _ P.p (𝟙 _) (𝟙 _) (by aesop) (by aesop)) (pullback.map _ _ _ _ (𝟙 _) Q.p (𝟙 _) (by aesop) (by aesop))
   exp := by
     letI : HasFiniteLimits C := hasFiniteLimits_of_hasTerminal_and_pullbacks
     haveI : ExponentiableMorphism P.p := P.exp
@@ -123,8 +121,7 @@ protected def functor {I O : C} (P : MvPoly I O) :
 
 variable (I O : C) (P : MvPoly I O)
 
-def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] : Over I → Over O :=
-  (P.functor).obj
+def apply {I O : C} (P : MvPoly I O) [ExponentiableMorphism P.p] : Over I → Over O := (P.functor).obj
 
 /-TODO: write a coercion from `MvPoly` to a functor for evaluation of polynomials at a given
 object.-/
@@ -187,8 +184,7 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by
        _ ≅ Over.pullback P.i ⋙ (Over.pullback (P.m Q) ⋙ pushforward (r P Q)) ⋙
            (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o := ?_
        (Over.pullback P.i ⋙ (Over.pullback (P.m Q) ⋙ pushforward (r P Q)) ⋙
-           (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙
-             Over.map Q.o) ≅ _ := ?_
+           (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o) ≅ _ := ?_
        (Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q))
    ⋙ (pushforward (P.p' Q) ⋙ pushforward (P.q Q)) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o ≅ _ := ?_
        (Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q))
@@ -198,11 +194,9 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by
     apply Iso.symm
     letI := pullbackMapTwoSquare_of_isPullback_isIso hA'
     let this := asIso (pullbackMapTwoSquare (P.k Q) (P.h Q) Q.i P.o hA'.toCommSq)
-    exact isoWhiskerLeft (Over.pullback P.i) <| isoWhiskerLeft (pushforward P.p) <|
-      isoWhiskerRight this <| _
+    exact isoWhiskerLeft (Over.pullback P.i) <| isoWhiskerLeft (pushforward P.p) <| isoWhiskerRight this <| _
   · exact isoWhiskerLeft (Over.pullback P.i) <| isoWhiskerLeft (pushforward P.p)
-      <| isoWhiskerLeft (Over.pullback (P.h Q))
-      <| isoWhiskerRight (pentagonIso Q.p (P.k Q)) <| (Over.map Q.o)
+      <| isoWhiskerLeft (Over.pullback (P.h Q)) <| isoWhiskerRight (pentagonIso Q.p (P.k Q)) <| (Over.map Q.o)
 
   · let hpb := (IsPullback.of_hasPullback P.p (pullback.fst P.o Q.i))
     have (hpb : IsPullback (P.m Q) (P.r Q) P.p (P.h Q)) :
@@ -212,8 +206,7 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by
        (Over.pullback (P.ε Q) ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q)) ⋙ Over.map Q.o := by
        {exact isoWhiskerLeft _ <| isoWhiskerRight (pushforwardPullbackIsoSquare hpb) <| _}
     exact this hpb
-  · let hpb : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q) :=
-      (IsPullback.of_hasPullback (r P Q) (ε P Q))
+  · let hpb : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q) := (IsPullback.of_hasPullback (r P Q) (ε P Q))
     have (hpb : IsPullback (P.n Q) (P.p' Q) (P.r Q) (P.ε Q)) :
        Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ (pushforward (r P Q) ⋙ Over.pullback (P.ε Q))
         ⋙ pushforward (P.q Q) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o ≅
@@ -229,8 +222,7 @@ def comp.functor : P.functor ⋙ Q.functor ≅ (P.comp Q).functor := by
        Over.pullback P.i ⋙ Over.pullback (P.m Q) ⋙ Over.pullback (P.n Q) := by
       apply Iso.trans (pullbackComp ((P.n Q) ≫ (P.m Q)) P.i)
       apply isoWhiskerLeft _ <| (pullbackComp (P.n Q) (P.m Q))
-    exact isoWhiskerRight (this).symm
-      ((pushforward (P.p' Q ≫ P.q Q)) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o)
+    exact isoWhiskerRight (this).symm ((pushforward (P.p' Q ≫ P.q Q)) ⋙ Over.map (P.w Q) ⋙ Over.map Q.o)
   simp only [assoc]
   exact isoWhiskerLeft _ <| isoWhiskerLeft _ (mapComp (P.w Q) Q.o).symm
 
@@ -260,8 +252,7 @@ def auxFunctor (P : UvPoly E B) : Over (⊤_ C)  ⥤ Over (⊤_ C) := MvPoly.fun
 
 /-- We use the equivalence between `Over (⊤_ C)` and `C` to get `functor : C ⥤ C`.
 Alternatively we can give a direct definition of `functor` in terms of exponentials. -/
-def functor' (P : UvPoly E B) : C ⥤ C :=
-  equivOverTerminal.functor ⋙ P.auxFunctor ⋙ equivOverTerminal.inverse
+def functor' (P : UvPoly E B) : C ⥤ C :=  equivOverTerminal.functor ⋙ P.auxFunctor ⋙ equivOverTerminal.inverse
 
 def functorIsoFunctor' [HasBinaryProducts C] (P : UvPoly E B) : P.functor ≅ P.functor' := by
   unfold functor' auxFunctor functor MvPoly.functor toMvPoly

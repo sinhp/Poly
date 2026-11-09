@@ -322,8 +322,7 @@ def isLimitFan (P : UvPoly E B) (X : C) : PartialProduct.IsLimit (PartialProduct
     symm
     rw [← homMk_left m (U := Over.mk c.fst) (V := Over.mk (P.fstProj X))]
     congr 1
-    apply (Adjunction.homEquiv_apply_eq (adj P.p)
-      (overPullbackToStar c.fst c.snd) (Over.homMk m)).mpr
+    apply (Adjunction.homEquiv_apply_eq (adj P.p) (overPullbackToStar c.fst c.snd) (Over.homMk m)).mpr
     simp [overPullbackToStar, PartialProduct.Fan.overPullbackToStar, PartialProduct.Fan.over]
     apply (Adjunction.homEquiv_apply_eq _ _ _).mpr
     rw [← h_right]
@@ -368,8 +367,7 @@ def proj {Γ X : C} (P : UvPoly E B) (f : Γ ⟶ P @ X) :
 theorem proj_fst {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
     (proj P f).fst = f ≫ P.fstProj X := rfl
 
-/-- The second component of `proj` is a comparison map of pullbacks composed with `ε P X ≫ prod.snd`
--/
+/-- The second component of `proj` is a comparison map of pullbacks composed with `ε P X ≫ prod.snd` -/
 -- formerly `polyPair_snd_eq_comp_u₂'`
 @[simp]
 theorem proj_snd {Γ X : C} {P : UvPoly E B} {f : Γ ⟶ P @ X} :
@@ -392,8 +390,7 @@ def comp
     exact ExponentiableMorphism.comp
       (pullback.snd Q.p (fan P A).snd) (pullback.fst (fan P A).fst P.p)
 
-/-- The associated functor of the composition of two polynomials is isomorphic to the composition of
-the associated functors. -/
+/-- The associated functor of the composition of two polynomials is isomorphic to the composition of the associated functors. -/
 def compFunctorIso
     {E B D C : C} (P : UvPoly E B) (Q : UvPoly D C) :
     P.functor ⋙ Q.functor ≅ (comp P Q).functor := by

@@ -43,7 +43,7 @@ abbrev v := Pi' f u
 
 abbrev P := Limits.pullback f (v f u)  -- not really needed
 
-def g := pullback.fst (v f u) f
+def g := pullback.fst (v f u) f -- (μ_ (Over.mk f) (Over.mk (v f u))).left  --pullback.fst (@v _ _ _ _ _ _ _ f u) f
 
 /-- This should not be an instance because it's not usually how we want to construct
 exponentiable morphisms, we'll usually prove all morphims are exponential uniformly

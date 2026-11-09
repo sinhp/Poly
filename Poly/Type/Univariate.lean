@@ -11,8 +11,7 @@ open CategoryTheory Category Functor
 /-!
 # Polynomial functors
 
-We define the notion of one-variable polynomial functors on the category of sets. The locally
-cartesian closed structure of sets is implicit in all the constructions.
+We define the notion of one-variable polynomial functors on the category of sets. The locally cartesian closed structure of sets is implicit in all the constructions.
 
 The bundle corresponding to a `P : Poly` is the projection
 `fst : Σ b : P.B, P.E b → P.B`.
@@ -108,8 +107,7 @@ def bundle : Total P → P.B := Sigma.fst
 
 -- TODO: universe issue debugging.
 /- The bundle of the `sum P Q` is the sum of the bundles. -/
--- theorem sum_bundle_eq : bundle (P.sum Q) = (Sum.map P.bundle Q.bundle) ∘ (sumTotalEquiv P Q) :=
--- by
+-- theorem sum_bundle_eq : bundle (P.sum Q) = (Sum.map P.bundle Q.bundle) ∘ (sumTotalEquiv P Q) := by
 --   rfl
 
 /-- Applying `P` to an object of `Type` -/
