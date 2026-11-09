@@ -62,8 +62,8 @@ universe v u
 
 namespace CategoryTheory
 
-open CategoryTheory Category MonoidalCategory CartesianMonoidalCategory Limits Functor Adjunction
-  Over
+open CategoryTheory Category MonoidalCategory CartesianMonoidalCategory Limits
+  CategoryTheory.Functor Adjunction Over
 
 variable {C : Type u} [Category.{v} C]
 
@@ -177,6 +177,7 @@ instance isMultiplicative : (ExponentiableMorphism (C:= C)).IsMultiplicative whe
   comp_mem f g fexp gexp := by infer_instance
 
 /-- A morphism with a pushforward is an exponentiable object in the slice category. -/
+@[instance_reducible]
 def exponentiableOverMk [HasFiniteWidePullbacks C] {X I : C} (f : X ⟶ I)
     [ExponentiableMorphism f] :
     Closed (Over.mk f) where
@@ -192,7 +193,7 @@ morphism `X.hom`.
 Here the pushforward functor along a morphism `f : I ⟶ J` is defined using the section functor
 `Over (Over.mk f) ⥤ Over J`.
 -/
-def ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Closed X] :
+theorem ofOverExponentiable [HasFiniteWidePullbacks C] {I : C} (X : Over I) [Closed X] :
     ExponentiableMorphism X.hom :=
   ⟨X.iteratedSliceEquiv.inverse ⋙ sections X, ⟨by
     refine ofNatIsoLeft (Adjunction.comp ?_ ?_) (starIteratedSliceForwardIsoPullback X.hom)
@@ -282,10 +283,12 @@ abbrev ev' {I : C} (X : Over I) (Y : Over X.left) : Reindex X (Pi X Y) ⟶ Y :=
   adj X.hom |>.counit.app Y
 
 /-- A locally cartesian closed category with a terminal object is cartesian closed. -/
+@[instance_reducible]
 def monoidalClosed [HasTerminal C] :
     MonoidalClosed C := cartesianClosedOfEquiv <| equivOverTerminal C
 
 /-- The slices of a locally cartesian closed category are locally cartesian closed. -/
+@[instance_reducible]
 def overLocallyCartesianClosed (I : C) : LocallyCartesianClosed (Over I) := by
   apply (config := { allowSynthFailures:= true}) mkOfCartesianClosedOver
   intro X

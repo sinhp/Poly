@@ -39,8 +39,11 @@ theorem comp₂_comp {𝒞' : Type*} [Category 𝒞']
 def comp₂_iso {F₁ F₂ : 𝒟' ⥤ 𝒟} {P₁ P₂ : 𝒞 ⥤ 𝒟 ⥤ ℰ}
     (i : F₁ ≅ F₂) (j : P₁ ≅ P₂) : F₁ ⋙₂ P₁ ≅ F₂ ⋙₂ P₂ :=
   NatIso.ofComponents₂ (fun C D => (j.app C).app (F₁.obj D) ≪≫ (P₂.obj C).mapIso (i.app D))
-    (fun _ _ => by simp [NatTrans.naturality_app_assoc])
+    (fun _ _ => by
+      dsimp [comp₂]
+      simp [NatTrans.naturality_app_assoc])
     (fun C f => by
+      dsimp [comp₂]
       have := congr_arg (P₂.obj C).map (i.hom.naturality f)
       simp only [map_comp] at this
       simp [this])
@@ -70,12 +73,12 @@ theorem comp₂_naturality₂_left (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X Y : 𝒞) (Z : 𝒟) (f : X ⟶ Y) (g : Y ⟶ F.obj Z) :
     -- The `op`s really are a pain. Why can't they be definitional like in Lean 3 :(
     (i.app <| .op X).app Z (f ≫ g) = (P.map f.op).app Z ((i.app <| .op Y).app Z g) := by
-  simp [← FunctorToTypes.naturality₂_left]
+  exact FunctorToTypes.naturality₂_left _ _ i f.op g
 
 theorem comp₂_naturality₂_right (F : 𝒟 ⥤ 𝒞) (P : 𝒞ᵒᵖ ⥤ 𝒟 ⥤ Type v)
     (i : F ⋙₂ coyoneda (C := 𝒞) ⟶ P) (X : 𝒞) (Y Z : 𝒟) (f : X ⟶ F.obj Y) (g : Y ⟶ Z) :
     (i.app <| .op X).app Z (f ≫ F.map g) = (P.obj <| .op X).map g ((i.app <| .op X).app Y f) := by
-  simp [← FunctorToTypes.naturality₂_right]
+  exact FunctorToTypes.naturality₂_right _ _ i g f
 
 end coyoneda
 
@@ -87,8 +90,14 @@ variable {𝒟 : Type*} [Category 𝒟]
 def coyoneda_iso {F : 𝒞 ⥤ 𝒟} {G : 𝒟 ⥤ 𝒞} (A : F ⊣ G) :
     F.op ⋙ coyoneda (C := 𝒟) ≅ G ⋙₂ coyoneda (C := 𝒞) :=
   NatIso.ofComponents₂ (fun C D => Equiv.toIso <| A.homEquiv C.unop D)
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_left])
-    (fun _ _ => by ext : 1; simp [A.homEquiv_naturality_right])
+    (fun _ f => by
+      apply ConcreteCategory.hom_ext
+      intro g
+      exact A.homEquiv_naturality_left f.unop g)
+    (fun _ f => by
+      apply ConcreteCategory.hom_ext
+      intro g
+      exact A.homEquiv_naturality_right g f)
 
 end Adjunction
 end CategoryTheory

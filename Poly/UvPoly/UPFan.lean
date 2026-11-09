@@ -8,7 +8,7 @@ import Poly.UvPoly.Basic
 noncomputable section
 
 namespace CategoryTheory.UvPoly
-open Limits PartialProduct
+open Limits CategoryTheory.UvPoly.PartialProduct
 
 universe v u
 variable {C : Type u} [Category.{v} C] [HasPullbacks C] [HasTerminal C] {E B : C}

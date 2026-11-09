@@ -40,6 +40,7 @@ docs/_includes/sorries.md
 *.synctex.gz(busy)
 *.pdfsync
 *.json
+!vendor/checkdecls/lake-manifest.json
 *.auctex-auto
 
 build/

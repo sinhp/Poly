@@ -29,7 +29,7 @@ We construct a natural isomorphism
 noncomputable section
 namespace CategoryTheory
 
-open Category Functor Adjunction Limits NatTrans Over ExponentiableMorphism Reindex
+open Category CategoryTheory.Functor Adjunction Limits NatTrans Over ExponentiableMorphism Reindex
   LocallyCartesianClosed
 
 universe v u
@@ -50,7 +50,7 @@ exponentiable morphisms, we'll usually prove all morphims are exponential unifor
 from LocallyCartesianClosed structure.
 The instance is inferred from the LocallyCartesianClosed structure, but
 we should prove this more generally without assuming the LCCC structure. -/
-def exponentiableMorphism : ExponentiableMorphism (g f u) := by infer_instance
+theorem exponentiableMorphism : ExponentiableMorphism (g f u) := by infer_instance
 
 namespace ExponentiableMorphism
 
@@ -61,10 +61,14 @@ def mapPullbackAdj_regularMono {C} [Category C] [HasPullbacks C] {A B : C} (F : 
   have := congr($((whiskerLeft_comp_whiskerRight η η)).app X)
   refine ⟨_, _, _, this, Fork.IsLimit.mk' _ fun s => ?_⟩
   have hi := (Fork.ι s).w; simp at hi
-  have w := congr($(Fork.condition s).left ≫ pullback.fst .. ≫ pullback.snd ..); simp [η] at w
+  have w := congr($(Fork.condition s).left ≫ pullback.fst .. ≫ pullback.snd ..)
+  simp [η, pullback.lift_snd, pullback.lift_fst_assoc] at w
   refine ⟨homMk (s.ι.left ≫ pullback.fst ..) (by simp [w, hi]), ?_, ?_⟩
-  · ext; simp; ext <;> simp [η]; rw [w]
-  · intro m H; ext; simpa [η] using congr(($H).left ≫ pullback.fst ..)
+  · ext; simp; ext <;> simp [η, pullback.lift_fst, pullback.lift_snd]; rw [w]
+  · intro m H
+    ext
+    simpa [η, pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc] using
+      congr(($H).left ≫ pullback.fst ..)
 
 /-- The pullback of exponentiable morphisms is exponentiable. -/
 theorem of_isPullback {C' : Type u} [Category.{v} C'] [HasPullbacks C'] [HasTerminal C']
@@ -99,7 +103,7 @@ We show that the pasting of the 2-cells in below is an isomorphism.
   so the 2-cell is an iso.
 -/
 
-def cellLeftTriangle : e f u ≫ u = w f u := by
+theorem cellLeftTriangle : e f u ≫ u = w f u := by
   unfold e w v
   have := ((ev f).app (Over.mk u)).w
   aesop_cat
@@ -116,7 +120,7 @@ lemma isCartesian_cellLeft : IsCartesian (cellLeft f u) := by
   simp only [id_obj, mk_left] at α u
   sorry
 
-def cellRightCommSq : CommSq (g f u) (w f u) (v f u) f :=
+theorem cellRightCommSq : CommSq (g f u) (w f u) (v f u) f :=
   IsPullback.toCommSq (IsPullback.of_hasPullback _ _)
 
 def cellRight' : pushforward (g f u) ⋙ map (v f u)
@@ -137,7 +141,7 @@ def pasteCell2 : (pullback (e f u) ⋙ map (w f u)) ⋙ pushforward f
 
 def pasteCell := pasteCell1 f u ≫ pasteCell2 f u
 
-def paste : IsCartesian (pasteCell f u) := by
+theorem paste : IsCartesian (pasteCell f u) := by
   apply IsCartesian.comp
   · unfold pasteCell1
     apply (isCartesian_cellRight' f u).whiskerLeft

@@ -9,7 +9,7 @@ import Poly.Bifunctor.Sigma
 noncomputable section
 
 namespace CategoryTheory.UvPoly
-open Limits Over ExponentiableMorphism Functor
+open Limits Over ExponentiableMorphism CategoryTheory.Functor
 
 universe v u
 variable {C : Type u} [Category.{v} C] [HasPullbacks C] {E B : C} (P : UvPoly E B)
@@ -25,13 +25,17 @@ def partProdsOver : Cᵒᵖ ⥤ C ⥤ Type v :=
 @[simp]
 theorem partProdsOver_obj_map {X Y : C} (Γ : Cᵒᵖ) (f : X ⟶ Y) (x : (P.partProdsOver.obj Γ).obj X) :
     (P.partProdsOver.obj Γ).map f x = ⟨x.1, x.2 ≫ f⟩ := by
-  dsimp [partProdsOver]
+  dsimp +instances [partProdsOver, Functor.Sigma]
   have : 𝟙 Γ.unop ≫ x.1 = x.1 := by simp
   ext : 1
   . simp
   . dsimp
     rw! (castMode := .all) [this]
     simp
+    change pullback.lift (f := x.1) (g := P.p) (pullback.fst x.1 P.p ≫ 𝟙 _) (pullback.snd x.1 P.p) _ ≫
+      x.2 ≫ f = x.2 ≫ f
+    simp
+    rfl
 
 variable [HasTerminal C]
 
@@ -73,7 +77,7 @@ def equiv (Γ X : C) : (Γ ⟶ P.functor.obj X) ≃ (b : Γ ⟶ B) × (pullback 
 
 theorem equiv_app (Γ X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv Γ X be = (P.iso_Sigma.hom.app <| .op Γ).app X be := by
-  dsimp [equiv]
+  rfl
 
 lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (X : C) (be : Γ ⟶ P.functor.obj X) :
     P.equiv Δ X (σ ≫ be) =
@@ -82,6 +86,7 @@ lemma equiv_naturality_left {Δ Γ : C} (σ : Δ ⟶ Γ) (X : C) (be : Γ ⟶ P.
         (Category.assoc (obj := C) .. ▸ pullback.condition) ≫ p.2⟩ := by
   conv_lhs => rw [equiv_app, coyoneda.comp₂_naturality₂_left, ← equiv_app]
   simp
+  rfl
 
 -- NOTE(WN): As of Lean 4.25, kernel typechecking time is down to 1s from 10s?!
 lemma equiv_naturality_right {Γ X Y : C} (be : Γ ⟶ P.functor.obj X) (f : X ⟶ Y) :
@@ -89,6 +94,6 @@ lemma equiv_naturality_right {Γ X Y : C} (be : Γ ⟶ P.functor.obj X) (f : X �
       let p := equiv P Γ X be
       ⟨p.1, p.2 ≫ f⟩ := by
   conv_lhs => rw [equiv_app, coyoneda.comp₂_naturality₂_right, ← equiv_app]
-  simp
+  exact P.partProdsOver_obj_map (.op Γ) f (P.equiv Γ X be)
 
 end CategoryTheory.UvPoly

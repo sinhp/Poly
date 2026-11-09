@@ -22,9 +22,13 @@ theorem reflect_isPullback
   let i := cospanCompIso F h i
   apply IsLimit.equivOfNatIsoOfIso i.symm pb.cone _ _ pb.isLimit
   let j :
-      ((Cones.postcompose i.symm.hom).obj pb.cone).pt ≅
+      ((Cone.postcompose i.symm.hom).obj pb.cone).pt ≅
       (F.mapCone <| PullbackCone.mk f g sq.w).pt :=
     Iso.refl _
-  apply WalkingCospan.ext j <;> simp +zetaDelta
+  apply WalkingCospan.ext j
+  · change F.map f ≫ 𝟙 _ = 𝟙 _ ≫ F.map f
+    simp
+  · change F.map g ≫ 𝟙 _ = 𝟙 _ ≫ F.map g
+    simp
 
 end CategoryTheory.Functor

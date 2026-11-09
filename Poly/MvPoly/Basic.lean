@@ -26,7 +26,7 @@ noncomputable section
 
 namespace CategoryTheory
 
-open CategoryTheory Category Limits Functor Adjunction ExponentiableMorphism
+open CategoryTheory Category Limits CategoryTheory.Functor Adjunction ExponentiableMorphism
 
 variable {C : Type*} [Category C] [HasPullbacks C] [HasTerminal C] [HasFiniteWidePullbacks C]
 
